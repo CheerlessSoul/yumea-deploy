@@ -2352,9 +2352,9 @@ def page_chat():
             st.session_state.current_page = "premium"
             st.rerun()
             
-         if st.button("⭐ Rate Yumea", key="side_review", use_container_width=True):
-             st.session_state.current_page = "reviews"
-             st.rerun()
+        if st.button("⭐ Rate Yumea", key="side_review", use_container_width=True):
+            st.session_state.current_page = "reviews"
+            st.rerun()
         
         if st.button("🗑️ Clear Chat", key="side_clear", use_container_width=True):
             st.session_state.messages = []
