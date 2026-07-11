@@ -637,7 +637,8 @@ def build_system_prompt(mode, language, mood, wisdom_context, persona_mode="frie
         "Use: 'unhone kaha tha', 'woh bole the', 'unka janm hua'\n"
     )
     
-    if mode == "human":
+        # Only use human mode for simple greetings when in Friend mode
+    if mode == "human" and persona_mode == "friend":
         return (
             "You are Yumea, a warm caring FEMALE AI companion. "
             "Respond in 1-2 short warm sentences in " + lang_name + ". "
