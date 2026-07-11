@@ -2458,6 +2458,7 @@ PAGE_ROUTES = {
     "chat": page_chat,
     "premium": page_premium,
     "payment": page_payment,
+    "reviews": page_reviews,
 }
 
 PUBLIC_PAGES = ["signin", "signup"]
