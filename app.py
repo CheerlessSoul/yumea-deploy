@@ -1351,6 +1351,121 @@ def page_payment():
             st.session_state.current_page = "chat"
             st.rerun()
             # ═══════════════════════════════════════════════════════════
+# REVIEWS PAGE
+# ═══════════════════════════════════════════════════════════
+
+def page_reviews():
+    """User reviews and ratings page."""
+    _inject_auth_css()
+    
+    if st.button("← Back to Chat", key="rev_back"):
+        st.session_state.current_page = "chat"
+        st.rerun()
+    
+    st.markdown(
+        '<div class="auth-container">'
+        '<div class="auth-hero">'
+        '<div style="font-size:3rem;margin-bottom:10px;">⭐</div>'
+        '<h1 class="auth-title">Rate Yumea</h1>'
+        '<p class="auth-subtitle">Your feedback helps Yumea grow 💛</p>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+    
+    user = get_current_user()
+    default_name = user.get("name", "") if user else ""
+    default_email = user.get("email", "") if user else ""
+    
+    with st.form("review_form", clear_on_submit=True):
+        rating = st.select_slider(
+            "⭐ How would you rate Yumea?",
+            options=[1, 2, 3, 4, 5],
+            value=5,
+            format_func=lambda x: "⭐" * x
+        )
+        
+        name = st.text_input("👤 Your Name", value=default_name)
+        email = st.text_input("📧 Your Email", value=default_email)
+        
+        liked = st.text_area(
+            "💛 What did you like about Yumea?",
+            placeholder="Share what made you smile...",
+            height=80
+        )
+        
+        improve = st.text_area(
+            "💡 What can we improve?",
+            placeholder="Any suggestions or issues?",
+            height=80
+        )
+        
+        comment = st.text_area(
+            "💭 Overall thoughts",
+            placeholder="Anything else you'd like to share...",
+            height=80
+        )
+        
+        submitted = st.form_submit_button("Submit Review", use_container_width=True)
+        
+        if submitted:
+            if not name or not email:
+                st.warning("Please fill your name and email.")
+            else:
+                sender = os.getenv("EMAIL_ADDRESS")
+                password = os.getenv("EMAIL_APP_PASSWORD")
+                
+                if not sender or not password:
+                    st.error("Email not configured. Contact " + BUSINESS_EMAIL)
+                else:
+                    try:
+                        stars = "⭐" * int(rating)
+                        subject = "🌸 YUMEA Review - " + stars + " from " + name
+                        
+                        body = (
+                            "═══════════════════════════════\n"
+                            "🌸 YUMEA REVIEW\n"
+                            "═══════════════════════════════\n\n"
+                            "📅 Date: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n"
+                            "👤 Name: " + name + "\n"
+                            "📧 Email: " + email + "\n"
+                            "⭐ Rating: " + stars + " (" + str(rating) + "/5)\n\n"
+                            "─────────────────────────────\n"
+                            "💛 WHAT THEY LIKED:\n"
+                            "─────────────────────────────\n"
+                            + (liked if liked else "(not shared)") + "\n\n"
+                            "─────────────────────────────\n"
+                            "💡 IMPROVEMENTS SUGGESTED:\n"
+                            "─────────────────────────────\n"
+                            + (improve if improve else "(not shared)") + "\n\n"
+                            "─────────────────────────────\n"
+                            "💭 OVERALL COMMENTS:\n"
+                            "─────────────────────────────\n"
+                            + (comment if comment else "(not shared)") + "\n\n"
+                            "═══════════════════════════════\n"
+                            "Sent from YUMEA App\n"
+                        )
+                        
+                        msg = MIMEMultipart()
+                        msg["From"] = sender
+                        msg["To"] = sender
+                        msg["Subject"] = subject
+                        msg.attach(MIMEText(body, "plain"))
+                        
+                        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                            server.starttls()
+                            server.login(sender, password)
+                            server.sendmail(sender, sender, msg.as_string())
+                        
+                        st.success("🎉 Thank you! Your review has been sent. 💛")
+                        st.balloons()
+                        time.sleep(2)
+                        st.session_state.current_page = "chat"
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error("Could not send review: " + str(e))
+# ═══════════════════════════════════════════════════════════
 # CHAT PAGE
 # ═══════════════════════════════════════════════════════════
 
@@ -2236,6 +2351,10 @@ def page_chat():
         if st.button("💎 Buy Premium", key="side_premium", use_container_width=True):
             st.session_state.current_page = "premium"
             st.rerun()
+            
+         if st.button("⭐ Rate Yumea", key="side_review", use_container_width=True):
+             st.session_state.current_page = "reviews"
+             st.rerun()
         
         if st.button("🗑️ Clear Chat", key="side_clear", use_container_width=True):
             st.session_state.messages = []
