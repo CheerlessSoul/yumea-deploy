@@ -1,6 +1,6 @@
-streamlit==1.31.0
-python-dotenv==1.0.0
-groq==0.4.2
-edge-tts==6.1.9
-Pillow==10.2.0
-streamlit-mic-recorder==0.0.8
+streamlit
+python-dotenv
+groq
+edge-tts
+Pillow
+streamlit-mic-recorder
