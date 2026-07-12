@@ -129,8 +129,24 @@ body {
     background: #0a0a14 !important;
 }
 
-#MainMenu, footer, [data-testid="stToolbar"] {
+#MainMenu, footer {
     visibility: hidden;
+}
+
+/* Sidebar toggle button — always visible */
+[data-testid="stSidebarCollapsedControl"] {
+    display: block !important;
+    visibility: visible !important;
+    background: rgba(139, 92, 246, 0.2) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    z-index: 999 !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg {
+    color: #a78bfa !important;
+    fill: #a78bfa !important;
 }
 
 section[data-testid="stSidebar"] {
