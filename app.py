@@ -117,98 +117,58 @@ LISTEN_THEMES = [
 # Global CSS
 # ─────────────────────────────────────────────────────────
 GLOBAL_CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Spectral:ital,wght@0,400;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Spectral:ital,wght@0,400;1,400&display=swap');
 
-html, body, [class*="stApp"] {
-    height: 100vh !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
+body {
     background: #0a0a14 !important;
+    color: #e2e8f0 !important;
     font-family: 'Inter', sans-serif !important;
 }
 
-#MainMenu, header, footer, [data-testid="stToolbar"],
-[data-testid="stDecoration"], [data-testid="stStatusWidget"],
-[data-testid="stTopBar"] {
-    visibility: hidden !important;
-    height: 0 !important;
-    position: absolute !important;
-    top: -9999px !important;
-}
-
-section[data-testid="stSidebar"] {
-    width: 272px !important;
-    min-width: 272px !important;
-    max-width: 272px !important;
-    height: 100vh !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
-    padding: 16px 12px !important;
-}
-
-section[data-testid="stSidebar"]::-webkit-scrollbar { width: 4px !important; }
-section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3) !important;
-    border-radius: 4px !important;
-}
-
-.main, .block-container {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
-    padding: 0 !important;
-    margin: 0 !important;
+.stApp {
     background: #0a0a14 !important;
 }
 
-.yumea-chat-layout {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0a0a14, #12122a, #0a0a14);
+#MainMenu, footer, [data-testid="stToolbar"] {
+    visibility: hidden;
 }
 
-.yumea-chat-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important;
+    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
 }
 
+section[data-testid="stSidebar"] * {
+    color: #e2e8f0 !important;
+}
+
+/* Chat header */
 .yumea-chat-header {
-    height: 68px;
     background: linear-gradient(180deg, #12122a, #0f0f1e);
     border-bottom: 1px solid rgba(139, 92, 246, 0.15);
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 12px 20px;
     gap: 12px;
-    flex-shrink: 0;
+    border-radius: 12px;
+    margin-bottom: 16px;
 }
 
 .yumea-messages-area {
-    flex: 1;
+    padding: 16px;
+    background: rgba(15, 15, 30, 0.3);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    min-height: 400px;
+    max-height: 600px;
     overflow-y: auto;
-    overflow-x: hidden;
-    padding: 20px;
-    scroll-behavior: smooth;
-}
-.yumea-messages-area::-webkit-scrollbar { width: 5px; }
-.yumea-messages-area::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.25);
-    border-radius: 4px;
 }
 
+/* Message bubbles */
 .yumea-msg-row {
     display: flex;
     margin-bottom: 12px;
     align-items: flex-end;
-    animation: yumeaFadeIn 0.3s ease;
 }
 .yumea-msg-row.user { justify-content: flex-end; }
 .yumea-msg-row.ai { justify-content: flex-start; }
@@ -217,10 +177,10 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    flex-shrink: 0;
     margin-right: 8px;
     object-fit: cover;
     border: 2px solid rgba(139, 92, 246, 0.3);
+    flex-shrink: 0;
 }
 
 .yumea-msg-bubble {
@@ -237,15 +197,14 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     border-bottom-right-radius: 6px;
 }
 .yumea-msg-bubble.ai {
-    background: linear-gradient(135deg, rgba(30,27,75,0.95), rgba(49,46,129,0.85));
+    background: rgba(30, 27, 75, 0.95);
     color: #e2e8f0;
     border-bottom-left-radius: 6px;
     border: 1px solid rgba(139, 92, 246, 0.15);
 }
 .yumea-msg-bubble.ai p { margin: 0 0 8px 0; }
-.yumea-msg-bubble.ai p:last-child { margin-bottom: 0; }
 .yumea-msg-bubble.ai strong { color: #d4b3ff; }
-.yumea-msg-bubble.ai em { color: #a0c4ff; font-style: italic; }
+.yumea-msg-bubble.ai em { color: #a0c4ff; }
 
 .yumea-msg-meta {
     font-size: 11px;
@@ -253,15 +212,10 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     margin-top: 4px;
     padding: 0 4px;
 }
-.yumea-msg-meta.ai-meta { padding-left: 40px; }
 .yumea-source-tag { color: #8b5cf6; font-weight: 500; }
 
+/* Empty state */
 .yumea-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
     text-align: center;
     padding: 40px 20px;
 }
@@ -269,11 +223,8 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    object-fit: cover;
     border: 3px solid rgba(139, 92, 246, 0.4);
     margin-bottom: 20px;
-    animation: yumeaFloat 3s ease-in-out infinite;
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.2);
 }
 .yumea-empty-title {
     font-size: 28px;
@@ -285,63 +236,33 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     font-size: 15px;
     color: #94a3b8;
     margin-bottom: 32px;
-    max-width: 360px;
 }
 
-.yumea-sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 4px 16px;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
-    margin-bottom: 16px;
-}
-.yumea-sidebar-logo {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(139, 92, 246, 0.4);
-}
-.yumea-sidebar-name {
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: 1px;
-}
-.yumea-sidebar-tagline {
-    font-size: 11px;
-    color: #8b5cf6;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
+/* Sidebar cards */
 .yumea-user-card {
     background: rgba(139, 92, 246, 0.08);
     border: 1px solid rgba(139, 92, 246, 0.15);
     border-radius: 12px;
     padding: 12px;
-    margin-bottom: 12px;
+    margin: 12px 0;
 }
 .yumea-user-card-name {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
-    margin-bottom: 4px;
+    color: #fff !important;
 }
 .yumea-user-card-plan {
     font-size: 11px;
-    color: #a78bfa;
-    font-weight: 500;
+    color: #a78bfa !important;
     display: inline-block;
     padding: 2px 8px;
     background: rgba(139, 92, 246, 0.15);
     border-radius: 10px;
-    margin-bottom: 6px;
+    margin: 4px 0;
 }
 .yumea-user-card-counter {
     font-size: 12px;
-    color: #94a3b8;
+    color: #94a3b8 !important;
 }
 
 .yumea-daily-quote {
@@ -349,22 +270,21 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     border: 1px solid rgba(139, 92, 246, 0.1);
     border-radius: 12px;
     padding: 12px;
-    margin-bottom: 16px;
+    margin: 12px 0;
     font-family: 'Spectral', serif;
     font-style: italic;
     font-size: 13px;
-    color: #c4b5fd;
+    color: #c4b5fd !important;
     line-height: 1.5;
 }
 
 .yumea-sidebar-label {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
+    color: #64748b !important;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 8px;
-    margin-top: 12px;
+    margin: 12px 0 6px 0;
 }
 
 .yumea-header-btn {
@@ -378,7 +298,6 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    cursor: default;
     position: relative;
 }
 .yumea-header-btn .yumea-tooltip {
@@ -393,75 +312,11 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     padding: 4px 10px;
     border-radius: 6px;
     white-space: nowrap;
-    border: 1px solid rgba(139, 92, 246, 0.2);
     z-index: 100;
 }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
-.yumea-auth-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 40px);
-    padding: 20px;
-}
-.yumea-auth-card {
-    background: linear-gradient(180deg, #12122a, #0d0d1f);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    border-radius: 20px;
-    padding: 40px 36px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-.yumea-auth-logo {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid rgba(139, 92, 246, 0.4);
-    margin: 0 auto 16px;
-    display: block;
-}
-.yumea-auth-title {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 4px;
-}
-.yumea-auth-sub {
-    text-align: center;
-    font-size: 13px;
-    color: #64748b;
-    margin-bottom: 28px;
-}
-
-.yumea-page-container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    height: 100vh;
-    overflow-y: auto;
-}
-.yumea-page-container::-webkit-scrollbar { width: 5px; }
-.yumea-page-container::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.25);
-    border-radius: 4px;
-}
-
-.yumea-page-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 8px;
-}
-.yumea-page-desc {
-    font-size: 14px;
-    color: #64748b;
-    margin-bottom: 28px;
-}
-
+/* Plan cards */
 .yumea-plan-card {
     background: linear-gradient(180deg, #12122a, #0d0d1f);
     border: 1px solid rgba(139, 92, 246, 0.15);
@@ -471,15 +326,6 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
 }
 .yumea-plan-card.pro {
     border-color: rgba(251, 191, 36, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-.yumea-plan-card.pro::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
 }
 .yumea-plan-price {
     font-size: 36px;
@@ -493,9 +339,6 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     color: #64748b;
 }
 .yumea-plan-feature {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     font-size: 13.5px;
     color: #94a3b8;
     margin-bottom: 8px;
@@ -505,12 +348,13 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     font-weight: 700;
 }
 
+/* Source card */
 .yumea-source-card {
     background: linear-gradient(180deg, #12122a, #0d0d1f);
     border: 1px solid rgba(139, 92, 246, 0.15);
     border-radius: 16px;
     padding: 24px;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 .yumea-source-text {
     font-size: 16px;
@@ -526,63 +370,25 @@ section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
     font-weight: 600;
 }
 
-@keyframes yumeaFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Page container */
+.yumea-page-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
 }
-@keyframes yumeaFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+.yumea-page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
 }
-
-/* Streamlit widget overrides for dark theme */
-div[data-testid="stTextInput"] input,
-div[data-testid="stSelectbox"] > div > div {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    border-radius: 10px !important;
-    color: #fff !important;
-}
-div[data-testid="stTextInput"] input:focus {
-    border-color: #8b5cf6 !important;
-}
-div[data-testid="stTextInput"] label,
-div[data-testid="stSelectbox"] label,
-div[data-testid="stTextArea"] label,
-div[data-testid="stSlider"] label {
-    color: #94a3b8 !important;
-    font-size: 13px !important;
-}
-div[data-testid="stTextArea"] textarea {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    border-radius: 10px !important;
-    color: #fff !important;
+.yumea-page-desc {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 28px;
 }
 
-.stButton > button {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 10px 16px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s !important;
-}
-.stButton > button:hover {
-    background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
-    transform: translateY(-1px);
-}
-
-/* Chat input */
-div[data-testid="stChatInput"] textarea {
-    background: rgba(255, 255, 255, 0.04) !important;
-    color: #fff !important;
-    border: 1px solid rgba(139, 92, 246, 0.25) !important;
-    border-radius: 20px !important;
-}
-
-/* Success/Error messages */
+/* Success/Error */
 .yumea-success {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
@@ -590,7 +396,7 @@ div[data-testid="stChatInput"] textarea {
     padding: 14px 18px;
     border-radius: 12px;
     font-size: 14px;
-    margin-top: 16px;
+    margin: 16px 0;
 }
 .yumea-auth-error {
     background: rgba(239, 68, 68, 0.1);
@@ -602,8 +408,25 @@ div[data-testid="stChatInput"] textarea {
     margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
-    .yumea-msg-bubble { max-width: 85%; }
+/* Button style */
+.stButton > button {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    font-weight: 600 !important;
+}
+.stButton > button:hover {
+    background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
+    transform: translateY(-1px);
+}
+
+/* Inputs */
+.stTextInput input, .stTextArea textarea {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #fff !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
 }
 """
 
