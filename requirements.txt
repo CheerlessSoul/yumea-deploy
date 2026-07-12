@@ -4,3 +4,4 @@ groq
 edge-tts
 Pillow
 streamlit-mic-recorder
+streamlit-analytics2
