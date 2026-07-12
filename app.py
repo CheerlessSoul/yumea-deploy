@@ -1695,11 +1695,11 @@ def main():
         render_payment()
     elif page == "reviews":
         render_reviews()
-    elif page == "listen":
-        render_listen()
+            elif page == "listen":
+            render_listen()
         else:
-        st.session_state.current_page = "chat"
-        st.rerun()
+            st.session_state.current_page = "chat"
+            st.rerun()
     
     # Stop analytics tracking (must be at end)
     if ANALYTICS_AVAILABLE:
