@@ -1682,20 +1682,20 @@ def main():
         st.session_state.current_page = "chat"
         page = "chat"
 
-    # Render page
-    if page == "signin":
-        render_signin()
-    elif page == "signup":
-        render_signup()
-    elif page == "chat":
-        render_chat()
-    elif page == "premium":
-        render_premium()
-    elif page == "payment":
-        render_payment()
-    elif page == "reviews":
-        render_reviews()
-            elif page == "listen":
+            # Render page
+        if page == "signin":
+            render_signin()
+        elif page == "signup":
+            render_signup()
+        elif page == "chat":
+            render_chat()
+        elif page == "premium":
+            render_premium()
+        elif page == "payment":
+            render_payment()
+        elif page == "reviews":
+            render_reviews()
+        elif page == "listen":
             render_listen()
         else:
             st.session_state.current_page = "chat"
