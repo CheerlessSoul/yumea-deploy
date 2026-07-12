@@ -1597,7 +1597,7 @@ def render_listen():
             else:
                 st.error("Failed to generate wisdom. Please try again.")
     
-        if st.session_state.listen_text:
+    if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
         st.markdown(
             '<div class="yumea-source-card">'
@@ -1615,6 +1615,7 @@ def render_listen():
                 pass
         
         col1, col2 = st.columns(2)
+        
         with col1:
             if st.button("➡️ Next Wisdom", use_container_width=True, key="listen_next"):
                 with st.spinner("Channeling new wisdom from " + source + "..."):
@@ -1634,6 +1635,7 @@ def render_listen():
                         st.rerun()
                     else:
                         st.error("Failed to generate new wisdom. Please try again.")
+        
         with col2:
             if st.button("🔊 Replay Audio", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
