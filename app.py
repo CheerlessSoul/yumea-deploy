@@ -1597,7 +1597,7 @@ def render_listen():
             else:
                 st.error("Failed to generate wisdom. Please try again.")
     
-    if st.session_state.listen_text:
+        if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
         st.markdown(
             '<div class="yumea-source-card">'
@@ -1614,10 +1614,9 @@ def render_listen():
             except Exception:
                 pass
         
-                col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
         with col1:
             if st.button("➡️ Next Wisdom", use_container_width=True, key="listen_next"):
-                # Generate new wisdom immediately
                 with st.spinner("Channeling new wisdom from " + source + "..."):
                     insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
                     if insight:
