@@ -1655,6 +1655,18 @@ def render_listen():
 # ══════════════════════════════════════════════════════════
 def main():
     init_session_state()
+    
+    # Google Analytics
+    st.markdown("""
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-3DK8F5YPDE');
+    </script>
+    """, unsafe_allow_html=True)
 
     # Inject global CSS
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
