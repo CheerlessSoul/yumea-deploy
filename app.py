@@ -629,12 +629,19 @@ def detect_emotion_mode(text):
         if w in text_lower:
             return "wisdom"
 
-    vague_patterns = [
+     vague_patterns = [
         r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
         r'^(kya|what|how|why)\s*[?]?\s*$',
         r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
         r'^\s*[.!?]+\s*$',
         r'^(haan|nhi|nahi|no|yes|yeah|yep|nope)\s*[.]?\s*$',
+        # Common greetings
+        r'^(how are you|how r u|how are u|how r you|hru|kaise ho|kaisi ho|kaise hai|kya haal|kya hal)\s*[?!.]*\s*$',
+        r'^(good morning|good evening|good night|good afternoon|gm|gn|ga|ge)\s*[?!.]*\s*$',
+        r'^(whats up|what\'s up|whatsup|sup|wassup|kya chal raha|kya kar rahe)\s*[?!.]*\s*$',
+        r'^(fine|thik|theek|accha|good|okay|bas|bas aise hi)\s*[.!]*\s*$',
+        r'^(thanks|thank you|thnx|thx|shukriya|dhanyawad)\s*[.!]*\s*$',
+        r'^(bye|goodbye|tata|alvida|see you|cya)\s*[.!]*\s*$',
     ]
     for p in vague_patterns:
         if re.match(p, text_lower.strip()):
