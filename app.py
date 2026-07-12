@@ -19,6 +19,11 @@ from datetime import datetime, date
 
 import streamlit as st
 from dotenv import load_dotenv
+try:
+    import streamlit_analytics2 as streamlit_analytics
+    ANALYTICS_AVAILABLE = True
+except ImportError:
+    ANALYTICS_AVAILABLE = False
 
 # ─────────────────────────────────────────────────────────
 # Load Environment
@@ -1654,19 +1659,11 @@ def render_listen():
 # MAIN APP
 # ══════════════════════════════════════════════════════════
 def main():
-    init_session_state()
+    # Start analytics tracking
+    if ANALYTICS_AVAILABLE:
+        streamlit_analytics.start_tracking()
     
-    # Google Analytics
-    st.markdown("""
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3DK8F5YPDE"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-3DK8F5YPDE');
-    </script>
-    """, unsafe_allow_html=True)
+    init_session_state()
 
     # Inject global CSS
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
@@ -1700,9 +1697,13 @@ def main():
         render_reviews()
     elif page == "listen":
         render_listen()
-    else:
+        else:
         st.session_state.current_page = "chat"
         st.rerun()
+    
+    # Stop analytics tracking (must be at end)
+    if ANALYTICS_AVAILABLE:
+        streamlit_analytics.stop_tracking()
 
 
 if __name__ == "__main__":
