@@ -629,7 +629,7 @@ def detect_emotion_mode(text):
         if w in text_lower:
             return "wisdom"
 
-     vague_patterns = [
+    vague_patterns = [
         r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
         r'^(kya|what|how|why)\s*[?]?\s*$',
         r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
