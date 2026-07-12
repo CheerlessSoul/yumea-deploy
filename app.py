@@ -1614,12 +1614,27 @@ def render_listen():
             except Exception:
                 pass
         
-        col1, col2 = st.columns(2)
+                col1, col2 = st.columns(2)
         with col1:
             if st.button("➡️ Next Wisdom", use_container_width=True, key="listen_next"):
-                st.session_state.listen_text = None
-                st.session_state.listen_audio = None
-                st.rerun()
+                # Generate new wisdom immediately
+                with st.spinner("Channeling new wisdom from " + source + "..."):
+                    insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
+                    if insight:
+                        st.session_state.listen_text = insight
+                        st.session_state.listen_source_name = source
+                        if EDGE_TTS_AVAILABLE:
+                            voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
+                            try:
+                                audio_path = asyncio.run(generate_audio(insight, voice))
+                                st.session_state.listen_audio = audio_path
+                            except Exception:
+                                st.session_state.listen_audio = None
+                        else:
+                            st.session_state.listen_audio = None
+                        st.rerun()
+                    else:
+                        st.error("Failed to generate new wisdom. Please try again.")
         with col2:
             if st.button("🔊 Replay Audio", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
