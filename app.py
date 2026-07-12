@@ -621,9 +621,9 @@ def load_image_b64(filename):
 
 
 def get_avatar_html(size, cls=""):
-    img_b64 = load_image_b64("yumea-user.jpg")
+    img_b64 = load_image_b64("yumea-new-user.png")
     if img_b64:
-        return ('<img src="data:image/jpeg;base64,' + img_b64 + '" class="' + cls +
+        return ('<img src="data:image/png;base64,' + img_b64 + '" class="' + cls +
                 '" style="width:' + str(size) + 'px;height:' + str(size) + 
                 'px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);flex-shrink:0;" alt="Yumea">')
     return ('<div class="' + cls + '" style="width:' + str(size) + 'px;height:' + str(size) +
@@ -1204,7 +1204,7 @@ def process_user_message(user_input):
 
 def render_signin():
     """Sign In page using Streamlit widgets."""
-    img_b64 = load_image_b64("yumea-user.jpg")
+    img_b64 = load_image_b64("yumea-new-user.png")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -1213,7 +1213,7 @@ def render_signin():
         if img_b64:
             st.markdown(
                 '<div style="text-align:center;margin-top:40px;">'
-                '<img src="data:image/jpeg;base64,' + img_b64 + '" '
+                '<img src="data:image/png;base64,' + img_b64 + '" '
                 'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
                 'border:3px solid rgba(139,92,246,0.4);">'
                 '</div>',
@@ -1267,14 +1267,14 @@ def render_signin():
 
 def render_signup():
     """Sign Up page using Streamlit widgets."""
-    img_b64 = load_image_b64("yumea-user.jpg")
+    img_b64 = load_image_b64("yumea-new-user.png")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if img_b64:
             st.markdown(
                 '<div style="text-align:center;margin-top:40px;">'
-                '<img src="data:image/jpeg;base64,' + img_b64 + '" '
+                '<img src="data:image/png;base64,' + img_b64 + '" '
                 'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
                 'border:3px solid rgba(139,92,246,0.4);">'
                 '</div>',
@@ -1344,12 +1344,12 @@ def render_chat():
 
     # ═══ SIDEBAR ═══
     with st.sidebar:
-        img_b64 = load_image_b64("yumea-user.jpg")
+        img_b64 = load_image_b64("yumea-new-user.png")
         col1, col2 = st.columns([1, 3])
         with col1:
             if img_b64:
                 st.markdown(
-                    '<img src="data:image/jpeg;base64,' + img_b64 + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);">',
+                    '<img src="data:image/png;base64,' + img_b64 + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);">',
                     unsafe_allow_html=True
                 )
             else:
