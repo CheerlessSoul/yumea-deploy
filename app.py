@@ -1854,7 +1854,7 @@ def render_reviews():
 
 
 def render_listen():
-    """Listen to Source page."""
+    """Listen to Source page with Previous/Next navigation."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="listen_back_top"):
@@ -1869,7 +1869,8 @@ def render_listen():
     source = st.selectbox("Wisdom Source", WISDOM_SOURCES, key="listen_source_sel")
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
-        if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
+    # Get Wisdom button (first time or new source)
+    if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
         with st.spinner("Channeling wisdom from " + source + "..."):
             insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
             if insight:
@@ -1882,6 +1883,10 @@ def render_listen():
                     "text": insight,
                     "source": source
                 })
+                # Keep last 20
+                if len(st.session_state.listen_history) > 20:
+                    st.session_state.listen_history = st.session_state.listen_history[-20:]
+                
                 if EDGE_TTS_AVAILABLE:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
@@ -1895,6 +1900,7 @@ def render_listen():
             else:
                 st.error("Failed to generate wisdom. Please try again.")
     
+    # Show current wisdom + navigation buttons
     if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
         st.markdown(
@@ -1905,6 +1911,7 @@ def render_listen():
             unsafe_allow_html=True
         )
         
+        # Audio player
         if st.session_state.listen_audio:
             try:
                 with open(st.session_state.listen_audio, "rb") as f:
@@ -1912,13 +1919,13 @@ def render_listen():
             except Exception:
                 pass
         
-                col1, col2, col3 = st.columns(3)
+        # Navigation buttons: Previous | Next | Replay
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             if st.button("⬅️ Previous", use_container_width=True, key="listen_prev"):
-                # Go to previous wisdom from history
                 if "listen_history" in st.session_state and len(st.session_state.listen_history) > 1:
-                    st.session_state.listen_history.pop()  # Remove current
+                    st.session_state.listen_history.pop()
                     previous = st.session_state.listen_history[-1]
                     st.session_state.listen_text = previous["text"]
                     st.session_state.listen_source_name = previous["source"]
@@ -1940,14 +1947,12 @@ def render_listen():
                     if insight:
                         st.session_state.listen_text = insight
                         st.session_state.listen_source_name = source
-                        # Save to history
                         if "listen_history" not in st.session_state:
                             st.session_state.listen_history = []
                         st.session_state.listen_history.append({
                             "text": insight,
                             "source": source
                         })
-                        # Keep only last 20
                         if len(st.session_state.listen_history) > 20:
                             st.session_state.listen_history = st.session_state.listen_history[-20:]
                         
