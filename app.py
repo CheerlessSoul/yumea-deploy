@@ -679,7 +679,7 @@ def detect_emotion_mode(text):
             return "human"
     
     # ── Wisdom keywords ──
-        wisdom_words = [
+            wisdom_words = [
         # Sources
         'buddha', 'osho', 'krishna', 'gita', 'bhagavad',
         'bible', 'jesus', 'quran', 'allah',
@@ -692,7 +692,20 @@ def detect_emotion_mode(text):
         'atma', 'brahman', 'samadhi',
         'meaning of life', 'purpose of life', 'inner peace',
         'ethics', 'morality', 'virtue', 'truth', 'reality',
-        'existence', 'metaphysics', 'reason', 'logic'
+        'existence', 'metaphysics', 'reason', 'logic',
+        # God, religion, existential
+        'god', 'bhagwan', 'ishwar', 'khuda', 'rab', 'divine',
+        'soul', 'aatma', 'afterlife', 'heaven', 'hell', 'swarg', 'narak',
+        'religion', 'faith', 'belief', 'prayer', 'namaz', 'puja',
+        'love', 'happiness', 'peace', 'sadness', 'suffering',
+        'fear', 'anger', 'jealousy', 'ego', 'desire', 'attachment',
+        'life', 'death', 'birth', 'destiny', 'fate', 'kismat',
+        'good', 'evil', 'right', 'wrong', 'sin', 'punya',
+        'universe', 'nature', 'creation', 'srishti',
+        'is there', 'does exist', 'real', 'illusion', 'maya',
+        # Question starters that need wisdom
+        'why do', 'why are', 'why is', 'what happens',
+        'why we', 'why humans', 'purpose of'
     ]
     for w in wisdom_words:
         if w in text_lower:
