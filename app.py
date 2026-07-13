@@ -678,10 +678,11 @@ def detect_emotion_mode(text):
         if re.match(p, text_lower.strip()):
             return "human"
 
-    force_answer = [
-        'tell me', 'batao', 'explain', 'samjhao', 'describe',
+        force_answer = [
+        'explain', 'samjhao', 'describe',
         'what is', 'define', 'meaning of', 'kya hota hai',
-        'how does', 'why does', 'difference between'
+        'how does', 'why does', 'difference between',
+        'why', 'because', 'kyunki'
     ]
     for f in force_answer:
         if f in text_lower:
