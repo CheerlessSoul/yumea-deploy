@@ -663,9 +663,10 @@ def detect_language(text):
 
 
 def detect_emotion_mode(text):
+    """Detect what mode Yumea should respond in."""
     text_lower = text.lower().strip()
     
-    # ── Crisis check first (highest priority) ──
+    # ═══ 1. CRISIS CHECK (highest priority) ═══
     crisis_words = [
         'suicide', 'kill myself', 'end my life', 'want to die',
         'self harm', 'self-harm', 'cut myself', 'no reason to live',
@@ -676,7 +677,7 @@ def detect_emotion_mode(text):
         if w in text_lower:
             return "crisis"
     
-    # ── Self-introduction / about Yumea questions ──
+    # ═══ 2. ABOUT YUMEA / SELF-INTRO ═══
     about_yumea_keywords = [
         'about you', 'about u', 'about yourself', 'about urself',
         'who are you', 'who r u', 'who are u',
@@ -694,7 +695,7 @@ def detect_emotion_mode(text):
         if kw in text_lower:
             return "human"
     
-    # ── Casual greetings ──
+    # ═══ 3. CASUAL GREETINGS ═══
     greeting_patterns = [
         r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
         r'^(good morning|good evening|good night|good afternoon|gm|gn|ga|ge)\s*[?!.]*\s*$',
@@ -712,8 +713,8 @@ def detect_emotion_mode(text):
         if re.match(p, text_lower):
             return "human"
     
-    # ── Wisdom keywords ──
-            wisdom_words = [
+    # ═══ 4. WISDOM KEYWORDS ═══
+    wisdom_words = [
         # Sources
         'buddha', 'osho', 'krishna', 'gita', 'bhagavad',
         'bible', 'jesus', 'quran', 'allah',
@@ -737,7 +738,7 @@ def detect_emotion_mode(text):
         'good', 'evil', 'right', 'wrong', 'sin', 'punya',
         'universe', 'nature', 'creation', 'srishti',
         'is there', 'does exist', 'real', 'illusion', 'maya',
-        # Question starters that need wisdom
+        # Question starters
         'why do', 'why are', 'why is', 'what happens',
         'why we', 'why humans', 'purpose of'
     ]
@@ -745,7 +746,7 @@ def detect_emotion_mode(text):
         if w in text_lower:
             return "wisdom"
     
-    # ── Direct questions (force answer) ──
+    # ═══ 5. DIRECT QUESTIONS (force wisdom) ═══
     force_answer = [
         'explain', 'samjhao', 'describe',
         'what is', 'define', 'meaning of', 'kya hota hai',
@@ -755,11 +756,11 @@ def detect_emotion_mode(text):
         if f in text_lower:
             return "wisdom"
     
-    # ── Very short messages = human ──
+    # ═══ 6. VERY SHORT MESSAGES → HUMAN ═══
     if len(text_lower.strip()) < 8:
         return "human"
     
-    # ── Emotional/vague longer messages = clarify ──
+    # ═══ 7. ELSE → CLARIFY ═══
     return "clarify"
 
 
