@@ -1037,6 +1037,12 @@ def process_user_message(user_input):
 
     emotion_mode = detect_emotion_mode(user_input)
 
+        # Override: If professional mode is on with sources, force wisdom mode
+    # (unless it's a greeting or crisis)
+    if st.session_state.chat_mode == "professional" and st.session_state.selected_sources:
+        if emotion_mode not in ("crisis", "human"):
+            emotion_mode = "wisdom"
+
     if emotion_mode == "crisis":
         crisis_response = (
             "Main yahan hoon. Tum safe ho. 🤍\n\n"
@@ -1863,12 +1869,19 @@ def render_listen():
     source = st.selectbox("Wisdom Source", WISDOM_SOURCES, key="listen_source_sel")
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
-    if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
+        if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
         with st.spinner("Channeling wisdom from " + source + "..."):
             insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
             if insight:
                 st.session_state.listen_text = insight
                 st.session_state.listen_source_name = source
+                # Initialize/save to history
+                if "listen_history" not in st.session_state:
+                    st.session_state.listen_history = []
+                st.session_state.listen_history.append({
+                    "text": insight,
+                    "source": source
+                })
                 if EDGE_TTS_AVAILABLE:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
@@ -1899,15 +1912,45 @@ def render_listen():
             except Exception:
                 pass
         
-        col1, col2 = st.columns(2)
+                col1, col2, col3 = st.columns(3)
         
         with col1:
+            if st.button("⬅️ Previous", use_container_width=True, key="listen_prev"):
+                # Go to previous wisdom from history
+                if "listen_history" in st.session_state and len(st.session_state.listen_history) > 1:
+                    st.session_state.listen_history.pop()  # Remove current
+                    previous = st.session_state.listen_history[-1]
+                    st.session_state.listen_text = previous["text"]
+                    st.session_state.listen_source_name = previous["source"]
+                    if EDGE_TTS_AVAILABLE:
+                        voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
+                        try:
+                            audio_path = asyncio.run(generate_audio(previous["text"], voice))
+                            st.session_state.listen_audio = audio_path
+                        except Exception:
+                            st.session_state.listen_audio = None
+                    st.rerun()
+                else:
+                    st.warning("No previous wisdom available.")
+        
+        with col2:
             if st.button("➡️ Next Wisdom", use_container_width=True, key="listen_next"):
                 with st.spinner("Channeling new wisdom from " + source + "..."):
                     insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
                     if insight:
                         st.session_state.listen_text = insight
                         st.session_state.listen_source_name = source
+                        # Save to history
+                        if "listen_history" not in st.session_state:
+                            st.session_state.listen_history = []
+                        st.session_state.listen_history.append({
+                            "text": insight,
+                            "source": source
+                        })
+                        # Keep only last 20
+                        if len(st.session_state.listen_history) > 20:
+                            st.session_state.listen_history = st.session_state.listen_history[-20:]
+                        
                         if EDGE_TTS_AVAILABLE:
                             voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                             try:
@@ -1921,7 +1964,7 @@ def render_listen():
                     else:
                         st.error("Failed to generate new wisdom. Please try again.")
         
-        with col2:
+        with col3:
             if st.button("🔊 Replay Audio", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
