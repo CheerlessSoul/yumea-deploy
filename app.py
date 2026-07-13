@@ -1054,29 +1054,262 @@ def process_user_message(user_input):
 # ══════════════════════════════════════════════════════════
 
 def render_signin():
-    """Sign In page using Streamlit widgets."""
-    img_b64 = load_image_b64("yumea-new-user.png")
+    """Premium Sign In page with Yumea image + logo."""
     
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown('<div class="yumea-auth-container">', unsafe_allow_html=True)
+    # Load images
+    yumea_img = load_image_b64("yumea-login-pic.jpg")
+    logo_img = load_image_b64("yumea-logo.jpeg")
+    
+    yumea_img_src = "data:image/jpeg;base64," + yumea_img if yumea_img else ""
+    logo_img_src = "data:image/jpeg;base64," + logo_img if logo_img else ""
+    
+    # Custom CSS for this page
+    st.markdown("""
+    <style>
+    .signin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .signin-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+        pointer-events: none;
+    }
+    
+    .signin-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .signin-yumea-img {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+        margin-bottom: 30px;
+    }
+    
+    .signin-tagline {
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        text-align: left;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .signin-tagline-quote {
+        color: #a78bfa;
+        font-size: 40px;
+        line-height: 1;
+        font-family: serif;
+    }
+    
+    .signin-divider {
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #8b5cf6, transparent);
+        margin: 20px 0 30px;
+    }
+    
+    .signin-features {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 350px;
+    }
+    
+    .signin-feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    
+    .signin-feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(139, 92, 246, 0.15);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .signin-feature-text-title {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .signin-feature-text-desc {
+        color: #94a3b8;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    
+    .signin-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .signin-card {
+        background: rgba(20, 15, 40, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        border-radius: 24px;
+        padding: 40px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    
+    .signin-logo {
+        display: block;
+        margin: 0 auto 20px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+    }
+    
+    .signin-title {
+        text-align: center;
+        color: #fff;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .signin-subtitle {
+        text-align: center;
+        color: #a78bfa;
+        font-size: 15px;
+        margin-bottom: 32px;
+    }
+    
+    .signin-footer-note {
+        text-align: center;
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 24px;
+    }
+    
+    .signin-footer-note .lock {
+        color: #10b981;
+    }
+    
+    @media (max-width: 900px) {
+        .signin-wrapper { flex-direction: column; }
+        .signin-left { padding: 20px; min-height: auto; }
+        .signin-yumea-img { max-height: 300px; }
+        .signin-right { padding: 20px; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Build left column HTML (image + features)
+    left_html = '<div class="signin-left">'
+    
+    if yumea_img:
+        left_html += '<img src="' + yumea_img_src + '" class="signin-yumea-img" alt="Yumea">'
+    
+    left_html += (
+        '<div style="width:100%;max-width:350px;">'
+        '<div class="signin-tagline"><span class="signin-tagline-quote">"</span></div>'
+        '<div class="signin-tagline">AI that feels.</div>'
+        '<div class="signin-tagline" style="color:#a78bfa;">Answers that matter.</div>'
+        '<div class="signin-divider"></div>'
+        '<div class="signin-features">'
         
-        if img_b64:
+        '<div class="signin-feature-item">'
+        '<div class="signin-feature-icon">✨</div>'
+        '<div>'
+        '<div class="signin-feature-text-title">11 Wisdom Traditions</div>'
+        '<div class="signin-feature-text-desc">Osho, Buddha, Rumi & more spiritual masters.</div>'
+        '</div>'
+        '</div>'
+        
+        '<div class="signin-feature-item">'
+        '<div class="signin-feature-icon">🔒</div>'
+        '<div>'
+        '<div class="signin-feature-text-title">Emotional Support</div>'
+        '<div class="signin-feature-text-desc">Deep conversations with genuine care.</div>'
+        '</div>'
+        '</div>'
+        
+        '<div class="signin-feature-item">'
+        '<div class="signin-feature-icon">⚡</div>'
+        '<div>'
+        '<div class="signin-feature-text-title">Voice Enabled</div>'
+        '<div class="signin-feature-text-desc">Talk naturally with Yumea in Hindi/English.</div>'
+        '</div>'
+        '</div>'
+        
+        '<div class="signin-feature-item">'
+        '<div class="signin-feature-icon">🌙</div>'
+        '<div>'
+        '<div class="signin-feature-text-title">Available 24/7</div>'
+        '<div class="signin-feature-text-desc">Your companion, anytime you need to talk.</div>'
+        '</div>'
+        '</div>'
+        
+        '</div>'
+        '</div>'
+    )
+    left_html += '</div>'
+    
+    # Start layout
+    st.markdown('<div class="signin-wrapper">', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown(left_html, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="signin-right">', unsafe_allow_html=True)
+        st.markdown('<div class="signin-card">', unsafe_allow_html=True)
+        
+        # Logo
+        if logo_img:
             st.markdown(
-                '<div style="text-align:center;margin-top:40px;">'
-                '<img src="data:image/png;base64,' + img_b64 + '" '
-                'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
-                'border:3px solid rgba(139,92,246,0.4);">'
-                '</div>',
+                '<img src="' + logo_img_src + '" class="signin-logo" alt="YUMEA Logo">',
                 unsafe_allow_html=True
             )
         
-        st.markdown(
-            '<h1 style="text-align:center;color:#fff;font-size:28px;margin:16px 0 4px;">Welcome Back</h1>'
-            '<p style="text-align:center;color:#64748b;font-size:14px;margin-bottom:24px;">Sign in to continue to YUMEA</p>',
-            unsafe_allow_html=True
-        )
+        # Title
+        st.markdown('<h1 class="signin-title">Welcome Back</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="signin-subtitle">Sign in to continue to YUMEA</p>', unsafe_allow_html=True)
         
+        # Error/Success messages
         if st.session_state.get("auth_error"):
             st.markdown('<div class="yumea-auth-error">' + st.session_state.auth_error + '</div>', unsafe_allow_html=True)
             st.session_state.auth_error = ""
@@ -1085,10 +1318,33 @@ def render_signin():
             st.markdown('<div class="yumea-success">' + st.session_state.auth_success + '</div>', unsafe_allow_html=True)
             st.session_state.auth_success = ""
         
+        # Sign In Form
         with st.form("signin_form", clear_on_submit=False):
-            email = st.text_input("Email or Admin Username", placeholder="your@email.com", key="si_email")
-            password = st.text_input("Password", type="password", placeholder="Your password", key="si_pass")
-            submitted = st.form_submit_button("Sign In", use_container_width=True, type="primary")
+            email = st.text_input(
+                "📧 Email or Admin Username",
+                placeholder="your@email.com",
+                key="si_email"
+            )
+            
+            password = st.text_input(
+                "🔒 Password",
+                type="password",
+                placeholder="Your password",
+                key="si_pass"
+            )
+            
+            col_rm, col_fp = st.columns([1, 1])
+            with col_rm:
+                remember = st.checkbox("Remember me", key="si_remember")
+            with col_fp:
+                st.markdown(
+                    '<div style="text-align:right;padding-top:8px;">'
+                    '<a href="#" style="color:#a78bfa;font-size:13px;text-decoration:none;">Forgot password?</a>'
+                    '</div>',
+                    unsafe_allow_html=True
+                )
+            
+            submitted = st.form_submit_button("Sign In →", use_container_width=True, type="primary")
             
             if submitted:
                 if not email or not password:
@@ -1107,13 +1363,30 @@ def render_signin():
                         st.session_state.auth_error = "Invalid email or password."
                         st.rerun()
         
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Divider
         st.markdown(
-            '<p style="text-align:center;color:#64748b;font-size:13px;">Don\'t have an account?</p>',
+            '<div style="text-align:center;color:#64748b;font-size:13px;margin:20px 0 12px;">'
+            'Don\'t have an account?'
+            '</div>',
             unsafe_allow_html=True
         )
-        if st.button("Create New Account", use_container_width=True, key="go_signup_btn"):
+        
+        # Sign Up button
+        if st.button("👤 Create New Account", use_container_width=True, key="go_signup_btn"):
             navigate_to("signup")
+        
+        # Footer note
+        st.markdown(
+            '<div class="signin-footer-note">'
+            '<span class="lock">🔒</span> Your data is protected with enterprise-grade encryption.'
+            '</div>',
+            unsafe_allow_html=True
+        )
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # close signin-card
+        st.markdown('</div>', unsafe_allow_html=True)  # close signin-right
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # close signin-wrapper
 
 
 def render_signup():
