@@ -679,7 +679,7 @@ def detect_emotion_mode(text):
             return "human"
     
     # ── Wisdom keywords ──
-    wisdom_words = [
+     wisdom_words = [
         # Sources
         'buddha', 'osho', 'krishna', 'gita', 'bhagavad',
         'bible', 'jesus', 'quran', 'allah',
