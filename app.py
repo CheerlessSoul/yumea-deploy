@@ -1269,7 +1269,7 @@ def render_signin():
         # Sign In Form
         with st.form("signin_form", clear_on_submit=False):
             email = st.text_input(
-                "📧 Email or Admin Username",
+                "📧 Email or Username",
                 placeholder="your@email.com",
                 key="si_email"
             )
