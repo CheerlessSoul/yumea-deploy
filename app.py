@@ -88,9 +88,9 @@ PLANS = {
 }
 
 WISDOM_SOURCES = [
-    "Osho", "Buddha", "Krishna (Bhagavad Gita)", "Rumi",
-    "Eckhart Tolle", "J. Krishnamurti", "Lao Tzu (Tao Te Ching)",
-    "Sri Aurobindo", "Ramana Maharshi", "Thich Nhat Hanh", "Swami Vivekananda"
+    "Osho", "Buddha", "Krishna (Bhagavad Gita)", "Bible", "Quran",
+    "Socrates", "Plato", "Aristotle", "Confucius",
+    "René Descartes", "Immanuel Kant"
 ]
 
 DAILY_QUOTES = [
@@ -680,13 +680,19 @@ def detect_emotion_mode(text):
     
     # ── Wisdom keywords ──
     wisdom_words = [
+        # Sources
+        'buddha', 'osho', 'krishna', 'gita', 'bhagavad',
+        'bible', 'jesus', 'quran', 'allah',
+        'socrates', 'plato', 'aristotle', 'confucius',
+        'descartes', 'kant',
+        # Concepts
         'wisdom', 'philosophy', 'spiritual', 'meditation', 'enlightenment',
-        'consciousness', 'buddha', 'osho', 'krishna', 'rumi', 'tao',
-        'gita', 'vedanta', 'yoga', 'mindfulness', 'awakening', 'nirvana',
-        'moksha', 'satori', 'zen', 'sufi', 'advaita', 'dharma',
-        'gyan', 'dhyan', 'sadhna', 'moksh', 'paramatma', 'atma',
-        'brahman', 'kundalini', 'chakra', 'prana', 'samadhi',
-        'meaning of life', 'purpose of life', 'inner peace'
+        'consciousness', 'vedanta', 'yoga', 'mindfulness',
+        'moksha', 'dharma', 'karma', 'gyan', 'dhyan', 'sadhna',
+        'atma', 'brahman', 'samadhi',
+        'meaning of life', 'purpose of life', 'inner peace',
+        'ethics', 'morality', 'virtue', 'truth', 'reality',
+        'existence', 'metaphysics', 'reason', 'logic'
     ]
     for w in wisdom_words:
         if w in text_lower:
@@ -757,18 +763,36 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     )
 
     mode_instructions = ""
-    if chat_mode == "professional":
-        sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Rumi, Krishna, Eckhart Tolle"
+        if chat_mode == "professional":
+        sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna (Bhagavad Gita), Bible, Socrates"
         mode_instructions = (
-            "\n\n## PROFESSIONAL MODE ACTIVE\n"
+            "\n\n## PROFESSIONAL MODE ACTIVE\n\n"
+            "🚨 CRITICAL RULE — READ CAREFULLY:\n"
+            "You MUST ONLY quote or reference what these thinkers ACTUALLY said or wrote in their real works:\n"
+            "" + sources_str + "\n\n"
+            "STRICT ANTI-HALLUCINATION RULES:\n"
+            "1. ✅ ONLY use REAL, VERIFIED quotes from these sources' actual writings/teachings.\n"
+            "2. ❌ NEVER invent, fabricate, or make up quotes.\n"
+            "3. ❌ NEVER attribute a quote to someone if you're not 100% sure they said it.\n"
+            "4. ✅ If you're not sure about an exact quote, paraphrase the CORE TEACHING instead of fake quoting.\n"
+            "5. ✅ You can share the general philosophy/teaching of these thinkers without quotes.\n"
+            "6. ❌ NEVER mix up teachings — don't attribute Buddha's ideas to Socrates, etc.\n"
+            "7. ❌ NEVER cite books/works that don't exist.\n"
+            "8. ✅ For religious texts (Bible, Quran, Bhagavad Gita) — only cite well-known, verifiable passages.\n"
+            "9. ❌ If you cannot recall a real quote/teaching, say 'As the wisdom of [source] suggests...' and paraphrase generally.\n"
+            "10. ✅ Better to give a shorter, accurate answer than a longer fabricated one.\n\n"
             "Format EVERY response exactly as:\n"
             "### 🤍 I hear you\n"
             "[Brief empathetic acknowledgment of their feeling — 2-3 sentences]\n\n"
             "### 📖 Wisdom\n"
-            "[Profound insight drawing from " + sources_str + " — 3-5 sentences with a direct quote if possible]\n\n"
+            "[Draw ONLY from verified teachings of " + sources_str + ". "
+            "Use real quotes only if you're certain. Otherwise paraphrase their known philosophy. "
+            "3-5 sentences.]\n\n"
             "### 🌱 For you\n"
-            "[A gentle, actionable reflection or practice — 2-3 sentences]\n\n"
-            "Always cite the specific source. Use quotes when possible. Be authentic, not preachy."
+            "[A gentle, actionable reflection based on the wisdom shared — 2-3 sentences]\n\n"
+            "Remember: ACCURACY over eloquence. Real teachings over fabricated quotes. "
+            "If a user asks something the selected sources genuinely don't address, be honest: "
+            "'The [source] tradition may not directly address this, but based on their broader teaching about [related topic]...'"
         )
     else:
         mode_instructions = (
@@ -907,7 +931,7 @@ def init_session_state():
         "user_name": "",
         "user_plan": "free",
         "chat_mode": "friend",
-        "selected_sources": ["Osho", "Buddha", "Rumi", "Krishna (Bhagavad Gita)", "Eckhart Tolle"],
+        "selected_sources": ["Osho", "Buddha"],
         "ai_model": "llama-3.3-70b-versatile",
         "debate_mode": False,
         "user_is_female": False,
