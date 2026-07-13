@@ -652,7 +652,7 @@ def detect_emotion_mode(text):
         if w in text_lower:
             return "wisdom"
 
-    vague_patterns = [
+        vague_patterns = [
         r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
         r'^(kya|what|how|why)\s*[?]?\s*$',
         r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
@@ -665,6 +665,14 @@ def detect_emotion_mode(text):
         r'^(fine|thik|theek|accha|good|okay|bas|bas aise hi)\s*[.!]*\s*$',
         r'^(thanks|thank you|thnx|thx|shukriya|dhanyawad)\s*[.!]*\s*$',
         r'^(bye|goodbye|tata|alvida|see you|cya)\s*[.!]*\s*$',
+        # "What are you doing" style questions
+        r'^(what are you doing|what r u doing|what you doing|kya kar rahi ho|kya kar rahi hai|kya kar rahe ho|kya kar rahe hai|kya kar rhi|kya kar rha)\s*[?!.]*\s*$',
+        r'^(tell me about yourself|who are you|apne bare mein batao|apna intro do|introduce yourself|about you|about yourself)\s*[?!.]*\s*$',
+        r'^(where are you|where r u|kaha ho|kahan ho|kahaan ho)\s*[?!.]*\s*$',
+        r'^(nice to meet you|nice meeting you|acha laga|mila kar acha laga)\s*[?!.]*\s*$',
+        r'^(lol|lmao|haha|hehe|hihi|xd|:d|:\))\s*[.!]*\s*$',
+        r'^(cool|nice|great|awesome|wow|omg)\s*[.!]*\s*$',
+        r'^(sorry|excuse me|maaf karo|sry)\s*[.!]*\s*$',
     ]
     for p in vague_patterns:
         if re.match(p, text_lower.strip()):
