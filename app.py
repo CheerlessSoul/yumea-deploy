@@ -629,9 +629,11 @@ def detect_language(text):
 
 
 def detect_emotion_mode(text):
-    text_lower = text.lower()
+    text_lower = text.lower().strip()
+    
+    # ── Crisis check first (highest priority) ──
     crisis_words = [
-        'suicide', 'kill myself', 'end my life', 'want to die', 'die',
+        'suicide', 'kill myself', 'end my life', 'want to die',
         'self harm', 'self-harm', 'cut myself', 'no reason to live',
         'khatam karna', 'mar jana', 'mar jao', 'zindagi khatam',
         'suicide karna', 'jaan dena', 'marna chahta', 'marna chahti'
@@ -639,58 +641,72 @@ def detect_emotion_mode(text):
     for w in crisis_words:
         if w in text_lower:
             return "crisis"
-
+    
+    # ── Self-introduction / about Yumea questions ──
+    about_yumea_keywords = [
+        'about you', 'about u', 'about yourself', 'about urself',
+        'who are you', 'who r u', 'who are u',
+        'tell me about', 'tell about', 'tell abt',
+        'introduce yourself', 'introduce urself',
+        'apne bare mein', 'apne baare mein', 'apna intro',
+        'kya kar rahi', 'kya kar rhi', 'kya kar rahe', 'kya kar rhe',
+        'what are you doing', 'what r u doing', 'what you doing',
+        'what do you do', 'what u do',
+        'kaisi ho', 'kaise ho', 'kaisi hai', 'kaise hai',
+        'how are you', 'how r u', 'how are u',
+        'tumhara naam', 'tera naam', 'your name'
+    ]
+    for kw in about_yumea_keywords:
+        if kw in text_lower:
+            return "human"
+    
+    # ── Casual greetings ──
+    greeting_patterns = [
+        r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
+        r'^(good morning|good evening|good night|good afternoon|gm|gn|ga|ge)\s*[?!.]*\s*$',
+        r'^(whats up|what\'s up|whatsup|sup|wassup)\s*[?!.]*\s*$',
+        r'^(fine|thik|theek|accha|good|okay|bas|bas aise hi)\s*[.!]*\s*$',
+        r'^(thanks|thank you|thnx|thx|shukriya|dhanyawad)\s*[.!]*\s*$',
+        r'^(bye|goodbye|tata|alvida|see you|cya)\s*[.!]*\s*$',
+        r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
+        r'^\s*[.!?]+\s*$',
+        r'^(haan|nhi|nahi|no|yes|yeah|yep|nope)\s*[.]?\s*$',
+        r'^(lol|lmao|haha|hehe|hihi|xd|cool|nice|great|awesome|wow|omg)\s*[.!]*\s*$',
+        r'^(sorry|excuse me|maaf karo|sry)\s*[.!]*\s*$',
+    ]
+    for p in greeting_patterns:
+        if re.match(p, text_lower):
+            return "human"
+    
+    # ── Wisdom keywords ──
     wisdom_words = [
         'wisdom', 'philosophy', 'spiritual', 'meditation', 'enlightenment',
         'consciousness', 'buddha', 'osho', 'krishna', 'rumi', 'tao',
         'gita', 'vedanta', 'yoga', 'mindfulness', 'awakening', 'nirvana',
         'moksha', 'satori', 'zen', 'sufi', 'advaita', 'dharma',
         'gyan', 'dhyan', 'sadhna', 'moksh', 'paramatma', 'atma',
-        'brahman', 'kundalini', 'chakra', 'prana', 'samadhi'
+        'brahman', 'kundalini', 'chakra', 'prana', 'samadhi',
+        'meaning of life', 'purpose of life', 'inner peace'
     ]
     for w in wisdom_words:
         if w in text_lower:
             return "wisdom"
-
-        vague_patterns = [
-        r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
-        r'^(kya|what|how|why)\s*[?]?\s*$',
-        r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
-        r'^\s*[.!?]+\s*$',
-        r'^(haan|nhi|nahi|no|yes|yeah|yep|nope)\s*[.]?\s*$',
-        # Common greetings
-        r'^(how are you|how r u|how are u|how r you|hru|kaise ho|kaisi ho|kaise hai|kya haal|kya hal)\s*[?!.]*\s*$',
-        r'^(good morning|good evening|good night|good afternoon|gm|gn|ga|ge)\s*[?!.]*\s*$',
-        r'^(whats up|what\'s up|whatsup|sup|wassup|kya chal raha|kya kar rahe)\s*[?!.]*\s*$',
-        r'^(fine|thik|theek|accha|good|okay|bas|bas aise hi)\s*[.!]*\s*$',
-        r'^(thanks|thank you|thnx|thx|shukriya|dhanyawad)\s*[.!]*\s*$',
-        r'^(bye|goodbye|tata|alvida|see you|cya)\s*[.!]*\s*$',
-        # "What are you doing" style questions
-        r'^(what are you doing|what r u doing|what you doing|kya kar rahi ho|kya kar rahi hai|kya kar rahe ho|kya kar rahe hai|kya kar rhi|kya kar rha)\s*[?!.]*\s*$',
-        r'^(tell me about yourself|who are you|apne bare mein batao|apna intro do|introduce yourself|about you|about yourself)\s*[?!.]*\s*$',
-        r'^(where are you|where r u|kaha ho|kahan ho|kahaan ho)\s*[?!.]*\s*$',
-        r'^(nice to meet you|nice meeting you|acha laga|mila kar acha laga)\s*[?!.]*\s*$',
-        r'^(lol|lmao|haha|hehe|hihi|xd|:d|:\))\s*[.!]*\s*$',
-        r'^(cool|nice|great|awesome|wow|omg)\s*[.!]*\s*$',
-        r'^(sorry|excuse me|maaf karo|sry)\s*[.!]*\s*$',
-    ]
-    for p in vague_patterns:
-        if re.match(p, text_lower.strip()):
-            return "human"
-
-        force_answer = [
+    
+    # ── Direct questions (force answer) ──
+    force_answer = [
         'explain', 'samjhao', 'describe',
         'what is', 'define', 'meaning of', 'kya hota hai',
-        'how does', 'why does', 'difference between',
-        'why', 'because', 'kyunki'
+        'how does', 'why does', 'difference between'
     ]
     for f in force_answer:
         if f in text_lower:
             return "wisdom"
-
+    
+    # ── Very short messages = human ──
     if len(text_lower.strip()) < 8:
         return "human"
-
+    
+    # ── Emotional/vague longer messages = clarify ──
     return "clarify"
 
 
