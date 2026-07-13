@@ -160,6 +160,25 @@ body {
 
 .stApp > header {
     display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Hide Streamlit Cloud top bar */
+[data-testid="stHeader"],
+[data-testid="stDecoration"],
+[data-testid="stToolbar"],
+.stDeployButton,
+header[data-testid="stHeader"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+/* Adjust body top padding */
+.stApp {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 [data-testid="stSidebarCollapsedControl"] {
@@ -452,8 +471,8 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 16px;
 }
 
-/* Button style */
-.stButton > button {
+.stButton > button,
+.stFormSubmitButton > button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
     color: #fff !important;
     border: none !important;
@@ -461,9 +480,24 @@ section[data-testid="stSidebar"] * {
     padding: 10px 16px !important;
     font-weight: 600 !important;
 }
-.stButton > button:hover {
+
+.stButton > button:hover,
+.stFormSubmitButton > button:hover {
     background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
     transform: translateY(-1px);
+}
+
+/* Primary buttons (type="primary") should also be purple */
+button[kind="primary"],
+button[kind="primaryFormSubmit"] {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+button[kind="primary"]:hover,
+button[kind="primaryFormSubmit"]:hover {
+    background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
 }
 
 /* Inputs */
