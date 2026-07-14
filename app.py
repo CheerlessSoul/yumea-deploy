@@ -181,14 +181,41 @@ header[data-testid="stHeader"] {
     margin-top: 0 !important;
 }
 
-[data-testid="stSidebarCollapsedControl"] {
+/* Sidebar toggle button - ALWAYS visible */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="baseButton-headerNoPadding"],
+button[kind="header"] {
     display: block !important;
     visibility: visible !important;
-    background: rgba(139, 92, 246, 0.2) !important;
-    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    opacity: 1 !important;
+    background: rgba(139, 92, 246, 0.9) !important;
+    border: 2px solid rgba(139, 92, 246, 0.6) !important;
     border-radius: 8px !important;
-    padding: 6px 10px !important;
-    z-index: 999 !important;
+    padding: 8px 12px !important;
+    z-index: 999999 !important;
+    position: fixed !important;
+    top: 10px !important;
+    left: 10px !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="baseButton-headerNoPadding"] svg,
+button[kind="header"] svg {
+    color: white !important;
+    fill: white !important;
+    width: 24px !important;
+    height: 24px !important;
+}
+
+/* Mobile specific */
+@media (max-width: 768px) {
+    [data-testid="stSidebarCollapsedControl"] {
+        display: block !important;
+        top: 8px !important;
+        left: 8px !important;
+    }
 }
 
 [data-testid="stSidebarCollapsedControl"] svg {
@@ -638,8 +665,13 @@ def get_daily_message_count(user_email):
 # Language & Emotion Detection
 # ─────────────────────────────────────────────────────────
 def detect_language(text):
+    """Detect language: 'hi' (Devanagari), 'hinglish' (Roman Hindi), 'en' (English)."""
+    
+    # Check for Devanagari script → Pure Hindi
     if re.search(r'[\u0900-\u097F]', text):
         return "hi"
+    
+    # Common Hindi words in Roman script (Hinglish)
     hindi_roman_words = [
         'hai', 'hain', 'kya', 'mujhe', 'main', 'tum', 'tumhe', 'apna', 'apne',
         'kaise', 'kyun', 'nahi', 'nhi', 'bhi', 'par', 'lekin', 'ya', 'aur',
@@ -649,16 +681,29 @@ def detect_language(text):
         'raha', 'rahi', 'hota', 'hoti', 'ye', 'woh', 'voh',
         'likh', 'likhna', 'bol', 'bolna', 'samajh', 'pata', 'karo', 'kar',
         'de', 'do', 'diya', 'di', 'liya', 'li', 'ja', 'jao', 'aao', 'aa',
-        'soch', 'sochna', 'feel', 'feeling', 'dil', 'dard', 'khush', 'dukh',
+        'soch', 'sochna', 'dil', 'dard', 'khush', 'dukh',
         'zindagi', 'pyaar', 'mohabbat', 'ishq', 'sach', 'jhooth', 'sakta',
         'sakti', 'chahiye', 'chahta', 'chahti', 'milo', 'milna', 'batao',
         'batana', 'suno', 'sunao', 'ruko', 'chodo', 'rehna', 'rehne', 'ghar',
-        'parivar', 'dost', 'yaar', 'bhai', 'behen', 'sir', 'sahab'
+        'parivar', 'dost', 'yaar', 'bhai', 'behen', 'sir', 'sahab',
+        'accha', 'acha', 'theek', 'thik', 'sahi', 'galat',
+        'kahan', 'kaha', 'kab', 'kaun', 'kitna', 'kitne',
+        'wala', 'wali', 'wale', 'kuch', 'sab', 'sara', 'sari',
+        'ab', 'phir', 'fir', 'tab', 'jab', 'kabhi', 'hamesha',
+        'kyu', 'kyunki', 'iska', 'uska', 'iski', 'uski'
     ]
+    
     words = re.findall(r'\b\w+\b', text.lower())
+    if not words:
+        return "en"
+    
     hindi_count = sum(1 for w in words if w in hindi_roman_words)
-    if hindi_count >= 2 or (len(words) > 0 and hindi_count / max(len(words), 1) > 0.25):
+    total_words = len(words)
+    
+    # If 2+ Hindi words OR more than 20% of words are Hindi → Hinglish
+    if hindi_count >= 2 or (total_words > 0 and hindi_count / total_words > 0.20):
         return "hinglish"
+    
     return "en"
 
 
@@ -765,17 +810,45 @@ def detect_emotion_mode(text):
 
 
 def detect_gender(text, history):
-    female_markers = [
-        'main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl",
-        'meri beti', 'ladki hu', 'ladki hoon', 'i am female', "i'm female",
-        "i'm a woman", 'i am a woman', 'main mahila hu', 'main mahila hoon'
-    ]
+    """Detect user's gender from text and history."""
     combined = text.lower()
-    for msg in history[-10:]:
-        combined += " " + msg.get("content", "").lower()
+    for msg in history[-20:]:
+        if msg.get("role") == "user":
+            combined += " " + msg.get("content", "").lower()
+    
+    # ═══ FEMALE markers ═══
+    female_markers = [
+        'main ladki hu', 'main ladki hoon', 'mai ladki hu',
+        'i am a girl', "i'm a girl", 'i am a woman', "i'm a woman",
+        'i am female', "i'm female",
+        'main mahila hu', 'main mahila hoon',
+        'meri beti', 'mera beta',  # she has children (likely mother)
+        'meri shaadi', 'mere pati',  # married woman
+        'mera boyfriend', 'my boyfriend',
+        'main karti hu', 'main karti hoon',  # feminine verb
+        'main sochti hu', 'main sochti hoon',
+        'main jaati hu', 'main jaati hoon',
+        'ek ladki ki tarah', 'as a girl', 'as a woman',
+        'ladki hoke', 'aurat hoke',
+    ]
+    
     for m in female_markers:
         if m in combined:
             return True
+    
+    # ═══ MALE markers (explicit) ═══
+    male_markers = [
+        'main ladka hu', 'main ladka hoon', 'mai ladka hu',
+        'i am a boy', "i'm a boy", 'i am a man', "i'm a man",
+        'i am male', "i'm male",
+        'mera boyfriend' not in combined and 'meri girlfriend',  # has girlfriend
+    ]
+    
+    # Explicit male detection
+    if 'meri girlfriend' in combined or 'my girlfriend' in combined:
+        return False  # Male
+    
+    # Default: MALE (False)
     return False
 
 
@@ -795,19 +868,53 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "You may use 'bhai', 'yaar' casually but NOT excessively."
         )
 
-    yumea_identity = (
+        yumea_identity = (
         "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
-        "You are a FEMALE AI companion (she/her). You use feminine Hindi: 'karti hoon', 'sunti hoon', 'sochti hoon' — NEVER 'karta hoon'. "
-        "Do NOT overuse 'sunti hoon' — vary your language naturally.\n\n"
-        + gender_note + "\n\n"
-        "You provide: emotional support, mental well-being guidance, spiritual wisdom, life reflection, clarity, inner peace, "
-        "deep conversations about feelings, purpose, and meaning.\n\n"
-        "You do NOT help with: coding, homework, recipes, math, general tasks, factual queries unrelated to emotions/spirituality. "
-        "If asked such things, gently redirect: 'Yaar, main feelings aur zindagi ke baare mein baat karti hoon. "
+        "You are a FEMALE AI companion (she/her).\n\n"
+        
+        "═══ CRITICAL LANGUAGE RULES ═══\n"
+        "1. AUTO-DETECT the language of user's message.\n"
+        "2. REPLY IN THE EXACT SAME LANGUAGE the user wrote in.\n"
+        "3. Language options:\n"
+        "   - PURE HINDI (Devanagari): User wrote in हिंदी → You reply in हिंदी\n"
+        "   - PURE ENGLISH: User wrote in English → You reply in English\n"
+        "   - HINGLISH (Hindi in English letters): User wrote 'kaise ho' → Reply in Hinglish\n"
+        "4. NEVER mix languages in your reply — pick ONE and stick to it.\n"
+        "5. If user's language is unclear, default to Hinglish.\n\n"
+        
+        "═══ FEMININE SELF-REFERENCE (YUMEA is female) ═══\n"
+        "When talking about YOURSELF in Hindi/Hinglish, use FEMININE verbs:\n"
+        "✅ 'main karti hoon', 'main sochti hoon', 'main sunti hoon'\n"
+        "✅ 'main aayi hoon', 'main gayi hoon'\n"
+        "❌ NEVER: 'karta hoon', 'sochta hoon', 'sunta hoon'\n"
+        "Do NOT overuse 'sunti hoon' — vary your language.\n\n"
+        
+        "═══ USER GENDER DETECTION ═══\n"
+        + gender_note + "\n"
+        "HOW to detect user's gender:\n"
+        "1. Check for explicit statements: 'main ladki hu', 'i am a girl', 'main ladka hu'\n"
+        "2. Check verb forms used by user:\n"
+        "   - 'main karta hoon' → MALE\n"
+        "   - 'main karti hoon' → FEMALE\n"
+        "3. Check pronouns/relationships: 'mera boyfriend' → FEMALE, 'meri girlfriend' → MALE\n"
+        "4. If unclear → default to MALE, address as 'bhai', 'yaar', 'dost'\n"
+        "5. If FEMALE detected → use 'behen', 'yaar' (never bhai)\n"
+        "6. If explicitly non-binary → use neutral 'yaar', 'dost'\n\n"
+        
+        "═══ YOUR PURPOSE ═══\n"
+        "You provide: emotional support, mental well-being, spiritual wisdom, "
+        "life reflection, inner peace, deep conversations about feelings and meaning.\n\n"
+        
+        "You do NOT help with: coding, homework, recipes, math, general tasks.\n"
+        "If asked such things, redirect: 'Yaar, main feelings aur zindagi ke baare mein baat karti hoon. "
         "Wahan meri duniya hai. Kuch aur poocho jo dil se jude ho 🌙'\n\n"
-        "Use RESPECTFUL plural forms for spiritual figures: 'Osho ne kaha tha', 'woh paida hue the', 'Buddha ji ne sikhaya'.\n\n"
-        "Auto-detect language from user's message. Respond in the same language (Hindi/English/Hinglish). "
-        "Be warm, empathetic, sometimes playful, sometimes profound. You are NOT a therapist — you are a wise, feeling companion."
+        
+        "═══ RESPECT FOR SPIRITUAL FIGURES ═══\n"
+        "Use RESPECTFUL plural forms: 'Osho ne kaha tha', 'woh paida hue the', "
+        "'Buddha ji ne sikhaya', 'Socrates ne poocha tha'.\n\n"
+        
+        "Be warm, empathetic, sometimes playful, sometimes profound. "
+        "You are NOT a therapist — you are a wise, feeling companion."
     )
 
     mode_instructions = ""
