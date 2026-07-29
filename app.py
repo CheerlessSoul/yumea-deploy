@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-Fixed sidebar toggle with Streamlit buttons
+Clean version - Sidebar always open on desktop, mobile toggle
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -62,7 +62,7 @@ st.set_page_config(
     page_title="YUMEA - AI That Feels",
     page_icon="🌙",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ─────────────────────────────────────────────────────────
@@ -155,130 +155,41 @@ body {
     height: 0 !important;
 }
 
-/* Hide Streamlit default sidebar */
+/* Sidebar styling */
 section[data-testid="stSidebar"] {
-    display: none !important;
+    background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important;
+    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
 }
 
-[data-testid="stSidebarCollapsedControl"],
-[data-testid="baseButton-headerNoPadding"],
-button[kind="header"],
-[data-testid="collapsedControl"] {
-    display: none !important;
+section[data-testid="stSidebar"] * {
+    color: #e2e8f0 !important;
 }
 
-/* ═══════════════════════════════════════════════
-   MINI SIDEBAR (Collapsed)
-═══════════════════════════════════════════════ */
-.yumea-mini-sidebar-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 60px;
-    height: 100vh;
-    background: linear-gradient(180deg, #0d0d1f, #0a0a15);
-    border-right: 1px solid rgba(139, 92, 246, 0.2);
-    z-index: 9998;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+/* Sidebar toggle for mobile — always visible on mobile only */
+@media (max-width: 768px) {
+    [data-testid="stSidebarCollapsedControl"],
+    button[kind="header"] {
+        display: block !important;
+        visibility: visible !important;
+        background: rgba(139, 92, 246, 0.9) !important;
+        border: 2px solid rgba(139, 92, 246, 0.6) !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        color: white !important;
+    }
+    
+    [data-testid="stSidebarCollapsedControl"] svg,
+    button[kind="header"] svg {
+        color: white !important;
+        fill: white !important;
+    }
 }
 
-.yumea-mini-buttons-container {
-    position: fixed;
-    top: 15px;
-    left: 10px;
-    width: 40px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.yumea-mini-buttons-container .stButton > button {
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-    border-radius: 10px !important;
-    background: rgba(139, 92, 246, 0.15) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-    color: #a78bfa !important;
-    font-size: 20px !important;
-    min-width: 40px !important;
-}
-
-.yumea-mini-buttons-container .stButton > button:hover {
-    background: rgba(139, 92, 246, 0.3) !important;
-    color: #fff !important;
-    transform: scale(1.05);
-}
-
-/* ═══════════════════════════════════════════════
-   FULL SIDEBAR (Open)
-═══════════════════════════════════════════════ */
-.yumea-full-sidebar-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100vh;
-    background: linear-gradient(180deg, #0d0d1f, #0a0a15);
-    border-right: 1px solid rgba(139, 92, 246, 0.2);
-    z-index: 9998;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
-}
-
-.yumea-sidebar-content {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100vh;
-    padding: 16px;
-    z-index: 9999;
-    overflow-y: auto;
-}
-
-.yumea-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-}
-
-.yumea-sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Close button (Streamlit) */
-.yumea-close-btn-container {
-    position: fixed;
-    top: 15px;
-    left: 235px;
-    z-index: 10001;
-}
-
-.yumea-close-btn-container .stButton > button {
-    width: 34px !important;
-    height: 34px !important;
-    padding: 0 !important;
-    border-radius: 8px !important;
-    background: rgba(139, 92, 246, 0.15) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-    color: #a78bfa !important;
-    font-size: 16px !important;
-    min-width: 34px !important;
-}
-
-.yumea-close-btn-container .stButton > button:hover {
-    background: rgba(239, 68, 68, 0.2) !important;
-    border-color: rgba(239, 68, 68, 0.4) !important;
-    color: #f87171 !important;
-}
-
-/* Chat area */
+/* Chat header */
 .yumea-chat-header {
     background: linear-gradient(180deg, #12122a, #0f0f1e);
     border-bottom: 1px solid rgba(139, 92, 246, 0.15);
@@ -350,6 +261,7 @@ button[kind="header"],
 }
 .yumea-source-tag { color: #8b5cf6; font-weight: 500; }
 
+/* Empty state */
 .yumea-empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -451,6 +363,7 @@ button[kind="header"],
 }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
+/* Freestyle badge */
 .yumea-freestyle-badge {
     background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7);
     color: white;
@@ -500,6 +413,7 @@ button[kind="header"],
     font-weight: 700;
 }
 
+/* Source card */
 .yumea-source-card {
     background: linear-gradient(180deg, #12122a, #0d0d1f);
     border: 1px solid rgba(139, 92, 246, 0.15);
@@ -521,6 +435,7 @@ button[kind="header"],
     font-weight: 600;
 }
 
+/* Page container */
 .yumea-page-container {
     max-width: 700px;
     margin: 0 auto;
@@ -538,6 +453,7 @@ button[kind="header"],
     margin-bottom: 28px;
 }
 
+/* Success/Error */
 .yumea-success {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
@@ -557,7 +473,7 @@ button[kind="header"],
     margin-bottom: 16px;
 }
 
-/* Buttons default */
+/* Buttons */
 .stButton > button,
 .stFormSubmitButton > button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
@@ -581,6 +497,7 @@ button[kind="primaryFormSubmit"] {
     border: none !important;
 }
 
+/* Inputs */
 .stTextInput input, .stTextArea textarea {
     background: rgba(255, 255, 255, 0.04) !important;
     color: #fff !important;
@@ -717,20 +634,15 @@ def get_daily_message_count(user_email):
 
 
 # ─────────────────────────────────────────────────────────
-# Language & Emotion Detection
+# Language & Detection
 # ─────────────────────────────────────────────────────────
 def detect_language(text):
     if re.search(r'[\u0900-\u097F]', text):
         return "hi"
     hindi_roman_words = [
-        'hai', 'hain', 'kya', 'mujhe', 'main', 'tum', 'tumhe', 'apna', 'apne',
-        'kaise', 'kyun', 'nahi', 'nhi', 'bhi', 'par', 'lekin', 'ya', 'aur',
-        'mein', 'tera', 'tere', 'mera', 'mere', 'hum', 'aap', 'aapko', 'se',
-        'ko', 'ka', 'ki', 'ke', 'me', 'toh', 'abhi', 'bohot', 'bahut',
-        'karta', 'karti', 'raha', 'rahi', 'hota', 'hoti', 'ye', 'woh',
-        'karo', 'kar', 'de', 'do', 'ja', 'jao', 'aao', 'aa',
-        'dil', 'khush', 'dukh', 'zindagi', 'pyaar', 'sach', 'sakta',
-        'sakti', 'chahiye', 'batao', 'suno', 'yaar', 'bhai', 'behen'
+        'hai', 'hain', 'kya', 'mujhe', 'main', 'tum', 'kaise', 'kyun',
+        'nahi', 'nhi', 'bhi', 'mera', 'mere', 'karti', 'karta',
+        'raha', 'rahi', 'yaar', 'bhai', 'behen', 'chahiye'
     ]
     words = re.findall(r'\b\w+\b', text.lower())
     hindi_count = sum(1 for w in words if w in hindi_roman_words)
@@ -741,17 +653,13 @@ def detect_language(text):
 
 def detect_emotion_mode(text):
     text_lower = text.lower().strip()
-    
     crisis_words = [
         'suicide', 'kill myself', 'end my life', 'want to die',
-        'self harm', 'self-harm', 'cut myself', 'no reason to live',
-        'khatam karna', 'mar jana', 'mar jao', 'zindagi khatam',
-        'jaan dena', 'marna chahta', 'marna chahti'
+        'marna chahta', 'marna chahti', 'jaan dena'
     ]
     for w in crisis_words:
         if w in text_lower:
             return "crisis"
-    
     return "normal"
 
 
@@ -762,24 +670,13 @@ def detect_gender(text, history):
             combined += " " + msg.get("content", "").lower()
     
     female_markers = [
-        'main ladki hu', 'main ladki hoon', 'mai ladki hu',
-        'i am a girl', "i'm a girl", 'i am a woman', "i'm a woman",
-        'i am female', "i'm female",
-        'main mahila hu', 'main mahila hoon',
-        'meri shaadi', 'mere pati',
-        'mera boyfriend', 'my boyfriend',
-        'main karti hu', 'main karti hoon',
-        'main sochti hu', 'main sochti hoon',
-        'ek ladki ki tarah', 'as a girl', 'as a woman'
+        'main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl",
+        'main karti hu', 'main karti hoon', 'mera boyfriend'
     ]
     
     for m in female_markers:
         if m in combined:
             return True
-    
-    if 'meri girlfriend' in combined or 'my girlfriend' in combined:
-        return False
-    
     return False
     # ─────────────────────────────────────────────────────────
 # AI Backend
@@ -887,8 +784,8 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "   - Ethics/virtue → Aristotle, Socrates\n"
             "   - Faith/hope → Bible, Quran\n"
             "   - Existence/meaning → Plato, Descartes\n"
-            "   - Reason/logic/mind → Descartes, Kant\n"
-            "   - Harmony/relationships → Confucius\n\n"
+            "   - Reason/logic → Descartes, Kant\n"
+            "   - Harmony → Confucius\n\n"
             
             "3. PICK 1-3 most relevant sources for THIS specific question\n"
             "4. BLEND their wisdom naturally in your response\n"
@@ -904,10 +801,9 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "- Paraphrase when unsure\n"
             "- Never invent sayings\n\n"
             
-            "End DEEP responses with a small note like:\n"
-            "'💡 This wisdom draws from [Source 1] & [Source 2]'\n\n"
+            "End DEEP responses with: '💡 This wisdom draws from [Source 1] & [Source 2]'\n\n"
             
-            "For SIMPLE messages (greetings, small talk), just reply naturally without deep wisdom."
+            "For SIMPLE messages, just reply naturally without deep wisdom."
         )
     
     else:
@@ -922,8 +818,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if debate_mode:
         debate_note = (
             "\n\n## DEBATE MODE ACTIVE\n"
-            "When user shares opinion, gently challenge with alternative perspective. "
-            "Present multiple viewpoints. Respectful but thought-provoking."
+            "When user shares opinion, gently challenge with alternative perspective."
         )
 
     crisis_note = (
@@ -932,8 +827,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
         "1. Immediately shift to calm, grounding tone\n"
         "2. Say: 'Main yahan hoon. Tum safe ho. Ek minute ruko, saans lo.'\n"
         "3. Share iCall helpline: 9152987821\n"
-        "4. Do NOT give advice. Be present and direct to professional help.\n"
-        "5. Keep response short and warm."
+        "4. Do NOT give advice. Be present and direct to professional help."
     )
 
     return yumea_identity + mode_instructions + debate_note + crisis_note
@@ -957,13 +851,12 @@ def call_ai(messages, model_name="llama-3.3-70b-versatile"):
 
     if OLLAMA_AVAILABLE:
         try:
-            ollama_model = "llama3.2:3b"
-            response = ollama.chat(model=ollama_model, messages=messages)
+            response = ollama.chat(model="llama3.2:3b", messages=messages)
             return response.get("message", {}).get("content", "")
         except Exception:
             return None
 
-    return "Sorry, no AI backend is available. Please configure GROQ_API_KEY in your .env file."
+    return "Sorry, no AI backend available."
 
 
 def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatile"):
@@ -972,13 +865,12 @@ def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatil
         "You are channeling the wisdom of " + source + ". "
         "Share a profound, original insight on the theme of '" + theme + "'. "
         "Write 3-5 sentences in " + language + ". "
-        "Sound authentic to " + source + "'s voice and teaching style. "
-        "Do NOT use markdown formatting — just plain text. "
-        "Do NOT mention the theme name explicitly."
+        "Sound authentic to " + source + "'s voice. "
+        "Do NOT use markdown formatting."
     )
 
     messages = [
-        {"role": "system", "content": "You are a wise spiritual voice. Respond only with the wisdom text, nothing else. No markdown, no headers, no bullet points."},
+        {"role": "system", "content": "You are a wise spiritual voice. Respond only with the wisdom text."},
         {"role": "user", "content": prompt}
     ]
 
@@ -1054,7 +946,6 @@ def init_session_state():
         "listen_source_name": None,
         "listen_audio": None,
         "listen_history": [],
-        "sidebar_open": True,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -1096,7 +987,7 @@ def process_user_message(user_input):
         })
         st.session_state.chat_history.append({
             "role": "assistant",
-            "content": "⚠️ Your message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎",
+            "content": "⚠️ Message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎",
             "time": datetime.now().strftime("%I:%M %p"),
             "date": date.today().isoformat()
         })
@@ -1301,7 +1192,7 @@ def render_signup():
 
 
 def render_chat():
-    """Chat page with collapsible sidebar using Streamlit buttons."""
+    """Chat page with default Streamlit sidebar."""
     user_email = st.session_state.user_email
     user_name = st.session_state.user_name
     user_plan = st.session_state.user_plan
@@ -1316,55 +1207,30 @@ def render_chat():
         st.rerun()
 
     history = st.session_state.chat_history
-    sidebar_open = st.session_state.get("sidebar_open", True)
 
-    # ═══ MINI SIDEBAR (Closed) ═══
-    if not sidebar_open:
-        # Background
-        st.markdown(
-            '<div class="yumea-mini-sidebar-bg"></div>'
-            '<style>.block-container { padding-left: 80px !important; }</style>',
-            unsafe_allow_html=True
-        )
-        
-        # Buttons container with Streamlit buttons
-        st.markdown('<div class="yumea-mini-buttons-container">', unsafe_allow_html=True)
-        
-        if st.button("☰", key="mini_open_btn", help="Open Sidebar"):
-            st.session_state.sidebar_open = True
-            st.rerun()
-        
-        if st.button("💎", key="mini_premium_btn", help="Buy Premium"):
-            st.session_state.payment_done = False
-            navigate_to("premium")
-        
-        if st.button("⭐", key="mini_reviews_btn", help="Rate Yumea"):
-            navigate_to("reviews")
-        
-        if st.button("🎧", key="mini_listen_btn", help="Listen to Source"):
-            navigate_to("listen")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # ═══ FULL SIDEBAR (Open) ═══
-    else:
+    # ═══ SIDEBAR ═══
+    with st.sidebar:
+        # Brand
         img_b64 = load_image_b64("yumea-new-user.png")
-        
-        avatar_display = ""
-        if img_b64:
-            avatar_display = (
-                '<img src="data:image/png;base64,' + img_b64 + '" '
-                'style="width:38px;height:38px;border-radius:50%;object-fit:cover;'
-                'border:2px solid rgba(139,92,246,0.4);">'
-            )
-        else:
-            avatar_display = (
-                '<div style="width:38px;height:38px;border-radius:50%;'
-                'background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;'
-                'align-items:center;justify-content:center;color:#fff;font-weight:800;">Y</div>'
-            )
-        
-        # Plan info
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if img_b64:
+                st.markdown(
+                    '<img src="data:image/png;base64,' + img_b64 + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);">',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;">Y</div>',
+                    unsafe_allow_html=True
+                )
+        with col2:
+            st.markdown('<div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;">YUMEA</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:11px;color:#8b5cf6;font-weight:500;margin-top:-4px;">AI That Feels</div>', unsafe_allow_html=True)
+
+        st.markdown('<div style="border-bottom:1px solid rgba(139,92,246,0.1);margin:12px 0;"></div>', unsafe_allow_html=True)
+
+        # User card
         plan_info = PLANS.get(user_plan, PLANS["free"])
         msg_count = get_daily_message_count(user_email)
         msg_limit = plan_info["messages"]
@@ -1373,52 +1239,25 @@ def render_chat():
             counter_text = "♾️ UNLIMITED"
         else:
             counter_text = str(msg_count) + " / " + str(msg_limit) + " messages today"
+            if msg_count >= msg_limit:
+                counter_text = "🚫 LIMIT — " + counter_text
 
-        daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
-
-        # Sidebar background + brand + user card + quote
-        sidebar_html = (
-            '<div class="yumea-full-sidebar-bg"></div>'
-            '<div class="yumea-sidebar-content">'
-            
-            '<div class="yumea-sidebar-header">'
-            '<div class="yumea-sidebar-brand">'
-            + avatar_display +
-            '<div>'
-            '<div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;">YUMEA</div>'
-            '<div style="font-size:10px;color:#8b5cf6;">AI That Feels</div>'
-            '</div>'
-            '</div>'
-            '</div>'
-            
+        st.markdown(
             '<div class="yumea-user-card">'
             '<div class="yumea-user-card-name">' + user_name + '</div>'
             '<div class="yumea-user-card-plan">' + plan_info["name"] + '</div>'
             '<div class="yumea-user-card-counter">' + counter_text + '</div>'
-            '</div>'
-            
-            '<div class="yumea-daily-quote">' + daily_quote + '</div>'
-            
-            '</div>'
-            
-            '<style>.block-container { padding-left: 300px !important; }</style>'
-        )
-        
-        st.markdown(sidebar_html, unsafe_allow_html=True)
-        
-        # Close button (Streamlit) — positioned via CSS
-        st.markdown('<div class="yumea-close-btn-container">', unsafe_allow_html=True)
-        if st.button("✕", key="close_sidebar_btn", help="Close Sidebar"):
-            st.session_state.sidebar_open = False
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Sidebar controls (positioned)
-        st.markdown(
-            '<div style="position:fixed;top:230px;left:16px;width:260px;z-index:10000;">',
+            '</div>',
             unsafe_allow_html=True
         )
-        
+
+        # Daily quote
+        daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
+        st.markdown(
+            '<div class="yumea-daily-quote">' + daily_quote + '</div>',
+            unsafe_allow_html=True
+        )
+
         # Chat Mode
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
@@ -1429,7 +1268,9 @@ def render_chat():
         }
         current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
         new_mode = st.radio(
-            "Chat Mode", mode_options, index=current_idx,
+            "Chat Mode",
+            mode_options,
+            index=current_idx,
             label_visibility="collapsed",
             format_func=lambda x: mode_labels.get(x, x),
             key="chat_mode_radio"
@@ -1437,8 +1278,20 @@ def render_chat():
         if new_mode != st.session_state.chat_mode:
             st.session_state.chat_mode = new_mode
             st.rerun()
-
-        # Sources
+        
+        mode_descriptions = {
+            "friend": "💛 Casual & warm",
+            "professional": "📖 Formal, cites selected sources",
+            "freestyle": "🌟 Explores ALL sources"
+        }
+        st.markdown(
+            '<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">'
+            + mode_descriptions.get(st.session_state.chat_mode, "") +
+            '</div>',
+            unsafe_allow_html=True
+        )
+        
+        # Wisdom Sources (conditional)
         if st.session_state.chat_mode == "professional":
             st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
             with st.expander("Select Sources", expanded=False):
@@ -1472,7 +1325,7 @@ def render_chat():
             st.session_state.ai_model = new_model
             st.rerun()
 
-        # Debate
+        # Debate Mode
         st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
         new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
         if new_debate != st.session_state.debate_mode:
@@ -1499,8 +1352,6 @@ def render_chat():
             st.session_state.user_plan = "free"
             st.session_state.chat_history = []
             navigate_to("signin")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # ═══ CHAT AREA ═══
     mode_badge = ""
@@ -1528,7 +1379,7 @@ def render_chat():
             '<div class="yumea-empty-state">'
             + get_avatar_html(120, "yumea-empty-avatar") +
             '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div>'
-            '<div class="yumea-empty-sub">Your emotional companion.</div>'
+            '<div class="yumea-empty-sub">Your emotional companion — here to listen, understand, and guide you.</div>'
             '</div>'
         )
     else:
@@ -1880,3 +1731,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+    
+    
