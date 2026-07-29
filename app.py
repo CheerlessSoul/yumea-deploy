@@ -966,9 +966,19 @@ def render_signin():
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1], gap="medium")
-        with col1:
+    
+    with col1:
         if yumea_img:
-            st.markdown('<div class="signin-image-wrapper"><img src="data:image/jpeg;base64,' + yumea_img + '" alt="Yumea"><div class="signin-image-overlay"><div class="signin-quote-mark">"</div><div class="signin-tagline-1">AI that feels.</div><div class="signin-tagline-2">Answers that matter."</div></div></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="signin-image-wrapper">'
+                '<img src="data:image/jpeg;base64,' + yumea_img + '" alt="Yumea">'
+                '<div class="signin-image-overlay">'
+                '<div class="signin-quote-mark">"</div>'
+                '<div class="signin-tagline-1">AI that feels.</div>'
+                '<div class="signin-tagline-2">Answers that matter."</div>'
+                '</div></div>',
+                unsafe_allow_html=True
+            )
         
         st.markdown(
             '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:15px auto 0;">'
@@ -1027,7 +1037,6 @@ def render_signin():
                         st.rerun()
         if st.button("👤 Create New Account", use_container_width=True):
             navigate_to("signup")
-
 
 def render_signup():
     col1, col2, col3 = st.columns([1, 2, 1])
