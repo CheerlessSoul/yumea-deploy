@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-Final version - Sidebar auto-opens on desktop
+With Language Control (Auto-detect + Manual select)
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -20,17 +20,11 @@ from datetime import datetime, date
 import streamlit as st
 from dotenv import load_dotenv
 
-# ─────────────────────────────────────────────────────────
-# Load Environment
-# ─────────────────────────────────────────────────────────
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD", "")
 
-# ─────────────────────────────────────────────────────────
-# Optional Imports
-# ─────────────────────────────────────────────────────────
 try:
     import groq
     GROQ_AVAILABLE = True
@@ -55,9 +49,6 @@ try:
 except ImportError:
     OLLAMA_AVAILABLE = False
 
-# ─────────────────────────────────────────────────────────
-# Streamlit Page Config
-# ─────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="YUMEA - AI That Feels",
     page_icon="🌙",
@@ -65,9 +56,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ─────────────────────────────────────────────────────────
-# Constants
-# ─────────────────────────────────────────────────────────
 USERS_FILE = "users.json"
 CHAT_DIR = Path("chats")
 CHAT_DIR.mkdir(exist_ok=True)
@@ -95,9 +83,8 @@ DAILY_QUOTES = [
     '"Be still and know." — Psalm 46:10',
     '"Freedom is not doing what you want, freedom is wanting what you do." — Osho',
     '"The unexamined life is not worth living." — Socrates',
-    '"Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment." — Buddha',
     '"Knowing yourself is the beginning of all wisdom." — Aristotle',
-    '"You have power over your mind — not outside events. Realize this, and you will find strength." — Marcus Aurelius',
+    '"You have power over your mind — not outside events." — Marcus Aurelius',
     '"He who has a why to live can bear almost any how." — Nietzsche',
     '"Wisdom begins in wonder." — Socrates',
 ]
@@ -106,425 +93,102 @@ LISTEN_THEMES = [
     "inner peace", "love and compassion", "courage and strength",
     "letting go", "self-discovery", "silence and stillness",
     "purpose of life", "overcoming fear", "gratitude",
-    "the nature of reality", "mindfulness", "freedom",
-    "surrender", "wisdom of uncertainty", "the power of now"
+    "the nature of reality", "mindfulness", "freedom"
 ]
 
-# ─────────────────────────────────────────────────────────
-# Global CSS
-# ─────────────────────────────────────────────────────────
 GLOBAL_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Spectral:ital,wght@0,400;1,400&display=swap');
 
-body {
-    background: #0a0a14 !important;
-    color: #e2e8f0 !important;
-    font-family: 'Inter', sans-serif !important;
-}
+body { background: #0a0a14 !important; color: #e2e8f0 !important; font-family: 'Inter', sans-serif !important; }
+.stApp { background: #0a0a14 !important; }
+.main { background: #0a0a14 !important; }
+.block-container { padding: 20px 40px !important; max-width: 100% !important; background: transparent !important; }
 
-.stApp {
-    background: #0a0a14 !important;
-}
+#MainMenu, footer { visibility: hidden; }
+.stApp > header { display: none !important; height: 0 !important; visibility: hidden !important; }
+[data-testid="stHeader"], [data-testid="stDecoration"], [data-testid="stToolbar"], .stDeployButton { display: none !important; visibility: hidden !important; height: 0 !important; }
 
-.main {
-    background: #0a0a14 !important;
-}
+section[data-testid="stSidebar"] { background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important; border-right: 1px solid rgba(139, 92, 246, 0.15) !important; }
+section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
-.block-container {
-    padding: 20px 40px !important;
-    max-width: 100% !important;
-    background: transparent !important;
-}
-
-#MainMenu, footer {
-    visibility: hidden;
-}
-
-.stApp > header {
-    display: none !important;
-    height: 0 !important;
-    visibility: hidden !important;
-}
-
-[data-testid="stHeader"],
-[data-testid="stDecoration"],
-[data-testid="stToolbar"],
-.stDeployButton {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-}
-
-/* Sidebar styling */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
-}
-
-section[data-testid="stSidebar"] * {
-    color: #e2e8f0 !important;
-}
-
-/* Force sidebar OPEN on desktop */
 @media (min-width: 769px) {
-    section[data-testid="stSidebar"] {
-        transform: translateX(0px) !important;
-        visibility: visible !important;
-        min-width: 244px !important;
-        max-width: 300px !important;
-        margin-left: 0 !important;
-    }
-    
-    section[data-testid="stSidebar"][aria-expanded="false"] {
-        transform: translateX(0px) !important;
-        margin-left: 0 !important;
-    }
+    section[data-testid="stSidebar"] { transform: translateX(0px) !important; visibility: visible !important; min-width: 244px !important; max-width: 300px !important; margin-left: 0 !important; }
+    section[data-testid="stSidebar"][aria-expanded="false"] { transform: translateX(0px) !important; margin-left: 0 !important; }
 }
 
-/* Mobile sidebar toggle */
 @media (max-width: 768px) {
-    [data-testid="stSidebarCollapsedControl"],
-    button[kind="header"] {
-        display: block !important;
-        visibility: visible !important;
-        background: rgba(139, 92, 246, 0.9) !important;
-        border: 2px solid rgba(139, 92, 246, 0.6) !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        z-index: 999999 !important;
-        position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
-        color: white !important;
-    }
-    
-    [data-testid="stSidebarCollapsedControl"] svg,
-    button[kind="header"] svg {
-        color: white !important;
-        fill: white !important;
-    }
+    [data-testid="stSidebarCollapsedControl"], button[kind="header"] { display: block !important; visibility: visible !important; background: rgba(139, 92, 246, 0.9) !important; border: 2px solid rgba(139, 92, 246, 0.6) !important; border-radius: 8px !important; padding: 8px 12px !important; z-index: 999999 !important; position: fixed !important; top: 10px !important; left: 10px !important; color: white !important; }
+    [data-testid="stSidebarCollapsedControl"] svg, button[kind="header"] svg { color: white !important; fill: white !important; }
 }
 
-/* Chat header */
-.yumea-chat-header {
-    background: linear-gradient(180deg, #12122a, #0f0f1e);
-    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    gap: 12px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-}
+.yumea-chat-header { background: linear-gradient(180deg, #12122a, #0f0f1e); border-bottom: 1px solid rgba(139, 92, 246, 0.15); display: flex; align-items: center; padding: 12px 20px; gap: 12px; border-radius: 12px; margin-bottom: 16px; }
+.yumea-messages-area { padding: 16px; background: rgba(15, 15, 30, 0.3); border-radius: 12px; margin-bottom: 16px; min-height: 400px; max-height: 600px; overflow-y: auto; }
 
-.yumea-messages-area {
-    padding: 16px;
-    background: rgba(15, 15, 30, 0.3);
-    border-radius: 12px;
-    margin-bottom: 16px;
-    min-height: 400px;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-/* Message bubbles */
-.yumea-msg-row {
-    display: flex;
-    margin-bottom: 12px;
-    align-items: flex-end;
-}
+.yumea-msg-row { display: flex; margin-bottom: 12px; align-items: flex-end; }
 .yumea-msg-row.user { justify-content: flex-end; }
 .yumea-msg-row.ai { justify-content: flex-start; }
-
-.yumea-msg-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 8px;
-    object-fit: cover;
-    border: 2px solid rgba(139, 92, 246, 0.3);
-    flex-shrink: 0;
-}
-
-.yumea-msg-bubble {
-    max-width: 70%;
-    padding: 12px 16px;
-    border-radius: 18px;
-    line-height: 1.55;
-    font-size: 14.5px;
-    word-wrap: break-word;
-}
-.yumea-msg-bubble.user {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
-    color: #fff;
-    border-bottom-right-radius: 6px;
-}
-.yumea-msg-bubble.ai {
-    background: rgba(30, 27, 75, 0.95);
-    color: #e2e8f0;
-    border-bottom-left-radius: 6px;
-    border: 1px solid rgba(139, 92, 246, 0.15);
-}
+.yumea-msg-avatar { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover; border: 2px solid rgba(139, 92, 246, 0.3); flex-shrink: 0; }
+.yumea-msg-bubble { max-width: 70%; padding: 12px 16px; border-radius: 18px; line-height: 1.55; font-size: 14.5px; word-wrap: break-word; }
+.yumea-msg-bubble.user { background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7); color: #fff; border-bottom-right-radius: 6px; }
+.yumea-msg-bubble.ai { background: rgba(30, 27, 75, 0.95); color: #e2e8f0; border-bottom-left-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.15); }
 .yumea-msg-bubble.ai p { margin: 0 0 8px 0; }
 .yumea-msg-bubble.ai strong { color: #d4b3ff; }
 .yumea-msg-bubble.ai em { color: #a0c4ff; }
-
-.yumea-msg-meta {
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 4px;
-    padding: 0 4px;
-}
+.yumea-msg-meta { font-size: 11px; color: #64748b; margin-top: 4px; padding: 0 4px; }
 .yumea-source-tag { color: #8b5cf6; font-weight: 500; }
 
-/* Empty state */
-.yumea-empty-state {
-    text-align: center;
-    padding: 40px 20px;
-}
-.yumea-empty-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid rgba(139, 92, 246, 0.4);
-    margin-bottom: 20px;
-}
-.yumea-empty-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 8px;
-}
-.yumea-empty-sub {
-    font-size: 15px;
-    color: #94a3b8;
-    margin-bottom: 32px;
-}
+.yumea-empty-state { text-align: center; padding: 40px 20px; }
+.yumea-empty-avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(139, 92, 246, 0.4); margin-bottom: 20px; }
+.yumea-empty-title { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.yumea-empty-sub { font-size: 15px; color: #94a3b8; margin-bottom: 32px; }
 
-/* Sidebar cards */
-.yumea-user-card {
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    border-radius: 12px;
-    padding: 12px;
-    margin: 12px 0;
-}
-.yumea-user-card-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff !important;
-}
-.yumea-user-card-plan {
-    font-size: 11px;
-    color: #a78bfa !important;
-    display: inline-block;
-    padding: 2px 8px;
-    background: rgba(139, 92, 246, 0.15);
-    border-radius: 10px;
-    margin: 4px 0;
-}
-.yumea-user-card-counter {
-    font-size: 12px;
-    color: #94a3b8 !important;
-}
+.yumea-user-card { background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 12px; padding: 12px; margin: 12px 0; }
+.yumea-user-card-name { font-size: 14px; font-weight: 600; color: #fff !important; }
+.yumea-user-card-plan { font-size: 11px; color: #a78bfa !important; display: inline-block; padding: 2px 8px; background: rgba(139, 92, 246, 0.15); border-radius: 10px; margin: 4px 0; }
+.yumea-user-card-counter { font-size: 12px; color: #94a3b8 !important; }
+.yumea-daily-quote { background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.1); border-radius: 12px; padding: 12px; margin: 12px 0; font-family: 'Spectral', serif; font-style: italic; font-size: 13px; color: #c4b5fd !important; line-height: 1.5; }
+.yumea-sidebar-label { font-size: 11px; font-weight: 600; color: #64748b !important; text-transform: uppercase; letter-spacing: 0.8px; margin: 12px 0 6px 0; }
 
-.yumea-daily-quote {
-    background: rgba(139, 92, 246, 0.06);
-    border: 1px solid rgba(139, 92, 246, 0.1);
-    border-radius: 12px;
-    padding: 12px;
-    margin: 12px 0;
-    font-family: 'Spectral', serif;
-    font-style: italic;
-    font-size: 13px;
-    color: #c4b5fd !important;
-    line-height: 1.5;
-}
-
-.yumea-sidebar-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #64748b !important;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin: 12px 0 6px 0;
-}
-
-.yumea-header-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    position: relative;
-}
-.yumea-header-btn .yumea-tooltip {
-    display: none;
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e1b4b;
-    color: #c4b5fd;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-    z-index: 100;
-}
+.yumea-header-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.2); color: #a78bfa; display: flex; align-items: center; justify-content: center; font-size: 16px; position: relative; }
+.yumea-header-btn .yumea-tooltip { display: none; position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); background: #1e1b4b; color: #c4b5fd; font-size: 11px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; z-index: 100; }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
-/* Freestyle badge */
-.yumea-freestyle-badge {
-    background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    display: inline-block;
-    margin: 8px 0;
-    animation: freestylePulse 2s infinite;
-}
+.yumea-freestyle-badge { background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin: 8px 0; }
 
-@keyframes freestylePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(240, 159, 51, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(240, 159, 51, 0); }
-}
+.yumea-plan-card { background: linear-gradient(180deg, #12122a, #0d0d1f); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; padding: 28px 24px; margin-bottom: 16px; }
+.yumea-plan-card.pro { border-color: rgba(251, 191, 36, 0.3); }
+.yumea-plan-price { font-size: 36px; font-weight: 800; color: #fff; margin: 8px 0 4px; }
+.yumea-plan-price span { font-size: 14px; font-weight: 400; color: #64748b; }
+.yumea-plan-feature { font-size: 13.5px; color: #94a3b8; margin-bottom: 8px; }
+.yumea-plan-feature .check { color: #10b981; font-weight: 700; }
 
-/* Plan cards */
-.yumea-plan-card {
-    background: linear-gradient(180deg, #12122a, #0d0d1f);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin-bottom: 16px;
-}
-.yumea-plan-card.pro {
-    border-color: rgba(251, 191, 36, 0.3);
-}
-.yumea-plan-price {
-    font-size: 36px;
-    font-weight: 800;
-    color: #fff;
-    margin: 8px 0 4px;
-}
-.yumea-plan-price span {
-    font-size: 14px;
-    font-weight: 400;
-    color: #64748b;
-}
-.yumea-plan-feature {
-    font-size: 13.5px;
-    color: #94a3b8;
-    margin-bottom: 8px;
-}
-.yumea-plan-feature .check {
-    color: #10b981;
-    font-weight: 700;
-}
+.yumea-source-card { background: linear-gradient(180deg, #12122a, #0d0d1f); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; padding: 24px; margin: 20px 0; }
+.yumea-source-text { font-size: 16px; line-height: 1.7; color: #e2e8f0; font-family: 'Spectral', serif; font-style: italic; margin: 16px 0; }
+.yumea-source-attr { font-size: 13px; color: #8b5cf6; font-weight: 600; }
 
-/* Source card */
-.yumea-source-card {
-    background: linear-gradient(180deg, #12122a, #0d0d1f);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    border-radius: 16px;
-    padding: 24px;
-    margin: 20px 0;
-}
-.yumea-source-text {
-    font-size: 16px;
-    line-height: 1.7;
-    color: #e2e8f0;
-    font-family: 'Spectral', serif;
-    font-style: italic;
-    margin: 16px 0;
-}
-.yumea-source-attr {
-    font-size: 13px;
-    color: #8b5cf6;
-    font-weight: 600;
-}
+.yumea-page-title { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.yumea-page-desc { font-size: 14px; color: #64748b; margin-bottom: 28px; }
 
-/* Page container */
-.yumea-page-container {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 20px;
-}
-.yumea-page-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 8px;
-}
-.yumea-page-desc {
-    font-size: 14px;
-    color: #64748b;
-    margin-bottom: 28px;
-}
+.yumea-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 14px 18px; border-radius: 12px; font-size: 14px; margin: 16px 0; }
+.yumea-auth-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
 
-/* Success/Error */
-.yumea-success {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    color: #10b981;
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-size: 14px;
-    margin: 16px 0;
-}
-.yumea-auth-error {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    margin-bottom: 16px;
-}
+.stButton > button, .stFormSubmitButton > button { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border: none !important; border-radius: 10px !important; padding: 10px 16px !important; font-weight: 600 !important; }
+.stButton > button:hover, .stFormSubmitButton > button:hover { background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important; transform: translateY(-1px); }
+button[kind="primary"], button[kind="primaryFormSubmit"] { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border: none !important; }
+.stTextInput input, .stTextArea textarea { background: rgba(255, 255, 255, 0.04) !important; color: #fff !important; border: 1px solid rgba(139, 92, 246, 0.2) !important; }
 
-/* Buttons */
-.stButton > button,
-.stFormSubmitButton > button {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 10px 16px !important;
-    font-weight: 600 !important;
-}
-
-.stButton > button:hover,
-.stFormSubmitButton > button:hover {
-    background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
-    transform: translateY(-1px);
-}
-
-button[kind="primary"],
-button[kind="primaryFormSubmit"] {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-    color: #fff !important;
-    border: none !important;
-}
-
-/* Inputs */
-.stTextInput input, .stTextArea textarea {
-    background: rgba(255, 255, 255, 0.04) !important;
-    color: #fff !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-}
+.signin-image-wrapper { position: relative; max-width: 380px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3); }
+.signin-image-wrapper img { width: 100%; display: block; }
+.signin-image-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 30px 20px 20px; }
+.signin-quote-mark { color: #a78bfa; font-size: 32px; font-family: serif; }
+.signin-tagline-1 { color: #fff; font-size: 18px; font-weight: 700; }
+.signin-tagline-2 { color: #a78bfa; font-size: 18px; font-weight: 700; }
+.signin-logo-img { display: block; margin: 0 auto 12px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+.signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
+.signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
 """
 
 
-# ─────────────────────────────────────────────────────────
-# Image Loader
-# ─────────────────────────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def load_image_b64(filename):
     path = Path(filename)
@@ -537,24 +201,16 @@ def load_image_b64(filename):
 def get_avatar_html(size, cls=""):
     img_b64 = load_image_b64("yumea-new-user.png")
     if img_b64:
-        return ('<img src="data:image/png;base64,' + img_b64 + '" class="' + cls +
-                '" style="width:' + str(size) + 'px;height:' + str(size) + 
-                'px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);flex-shrink:0;" alt="Yumea">')
-    return ('<div class="' + cls + '" style="width:' + str(size) + 'px;height:' + str(size) +
-            'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;'
-            'align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:' +
-            str(size // 3) + 'px;flex-shrink:0;border:2px solid rgba(139,92,246,0.4);">Y</div>')
+        return '<img src="data:image/png;base64,' + img_b64 + '" class="' + cls + '" style="width:' + str(size) + 'px;height:' + str(size) + 'px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);flex-shrink:0;" alt="Yumea">'
+    return '<div class="' + cls + '" style="width:' + str(size) + 'px;height:' + str(size) + 'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:' + str(size // 3) + 'px;flex-shrink:0;border:2px solid rgba(139,92,246,0.4);">Y</div>'
 
 
-# ─────────────────────────────────────────────────────────
-# User / Auth System
-# ─────────────────────────────────────────────────────────
 def load_users():
     if Path(USERS_FILE).exists():
         try:
             with open(USERS_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
+        except:
             return {}
     return {}
 
@@ -571,40 +227,24 @@ def hash_password(password):
 def register_user(name, email, password):
     users = load_users()
     email_lower = email.lower().strip()
-
     if email_lower in users:
-        return False, "An account with this email already exists."
-
+        return False, "Email already exists."
     if len(password) < 4:
-        return False, "Password must be at least 4 characters."
-
-    users[email_lower] = {
-        "name": name.strip(),
-        "email": email_lower,
-        "password_hash": hash_password(password),
-        "plan": "free",
-        "created_at": datetime.now().isoformat()
-    }
+        return False, "Password must be 4+ characters."
+    users[email_lower] = {"name": name.strip(), "email": email_lower, "password_hash": hash_password(password), "plan": "free", "created_at": datetime.now().isoformat()}
     save_users(users)
-    return True, "Account created successfully!"
+    return True, "Account created!"
 
 
 def authenticate_user(email_or_username, password):
     users = load_users()
     key = email_or_username.lower().strip()
-
     if key == ADMIN_USERNAME:
         if hash_password(password) == ADMIN_PASSWORD_HASH:
-            return True, {
-                "name": "Admin",
-                "email": ADMIN_USERNAME,
-                "plan": "admin"
-            }
+            return True, {"name": "Admin", "email": ADMIN_USERNAME, "plan": "admin"}
         return False, None
-
     if key not in users:
         return False, None
-
     if users[key]["password_hash"] == hash_password(password):
         return True, users[key]
     return False, None
@@ -617,9 +257,6 @@ def update_user_plan(email, plan):
         save_users(users)
 
 
-# ─────────────────────────────────────────────────────────
-# Chat Persistence
-# ─────────────────────────────────────────────────────────
 def load_chat_history(user_email):
     safe_name = re.sub(r'[^a-zA-Z0-9]', '_', user_email)
     filepath = CHAT_DIR / (safe_name + ".json")
@@ -627,7 +264,7 @@ def load_chat_history(user_email):
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
+        except:
             return []
     return []
 
@@ -642,37 +279,12 @@ def save_chat_history(user_email, history):
 def get_daily_message_count(user_email):
     history = load_chat_history(user_email)
     today = date.today().isoformat()
-    count = 0
-    for msg in history:
-        if msg.get("role") == "user" and msg.get("date") == today:
-            count += 1
-    return count
-
-
-# ─────────────────────────────────────────────────────────
-# Detection
-# ─────────────────────────────────────────────────────────
-def detect_language(text):
-    if re.search(r'[\u0900-\u097F]', text):
-        return "hi"
-    hindi_roman_words = [
-        'hai', 'hain', 'kya', 'mujhe', 'main', 'tum', 'kaise', 'kyun',
-        'nahi', 'nhi', 'bhi', 'mera', 'mere', 'karti', 'karta',
-        'raha', 'rahi', 'yaar', 'bhai', 'behen', 'chahiye'
-    ]
-    words = re.findall(r'\b\w+\b', text.lower())
-    hindi_count = sum(1 for w in words if w in hindi_roman_words)
-    if hindi_count >= 2 or (len(words) > 0 and hindi_count / max(len(words), 1) > 0.25):
-        return "hinglish"
-    return "en"
+    return sum(1 for msg in history if msg.get("role") == "user" and msg.get("date") == today)
 
 
 def detect_emotion_mode(text):
     text_lower = text.lower().strip()
-    crisis_words = [
-        'suicide', 'kill myself', 'end my life', 'want to die',
-        'marna chahta', 'marna chahti', 'jaan dena'
-    ]
+    crisis_words = ['suicide', 'kill myself', 'end my life', 'want to die', 'marna chahta', 'marna chahti', 'jaan dena']
     for w in crisis_words:
         if w in text_lower:
             return "crisis"
@@ -684,18 +296,13 @@ def detect_gender(text, history):
     for msg in history[-20:]:
         if msg.get("role") == "user":
             combined += " " + msg.get("content", "").lower()
-    
-    female_markers = [
-        'main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl",
-        'main karti hu', 'main karti hoon', 'mera boyfriend'
-    ]
-    
+    female_markers = ['main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl", 'main karti hu', 'main karti hoon', 'mera boyfriend']
     for m in female_markers:
         if m in combined:
             return True
     return False
     # ─────────────────────────────────────────────────────────
-# AI Backend
+# AI Backend with Language Control
 # ─────────────────────────────────────────────────────────
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     gender_note = ""
@@ -708,9 +315,31 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
         "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
         "You are a FEMALE AI companion (she/her).\n\n"
         "═══ LANGUAGE RULES ═══\n"
-        "1. AUTO-DETECT user's language and REPLY IN SAME.\n"
-        "2. Hindi → reply Hindi. English → English. Hinglish → Hinglish.\n"
-        "3. NEVER mix languages.\n\n"
+    )
+    
+    # Language control
+    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+        forced_lang = st.session_state.selected_language
+        yumea_identity += (
+            "CRITICAL: You MUST reply ONLY in " + forced_lang + ".\n"
+            "No matter what language the user writes in, you ALWAYS respond in " + forced_lang + ".\n"
+            "If " + forced_lang + " is 'Mandarin Chinese', respond in simplified Chinese characters (简体中文).\n"
+            "If " + forced_lang + " is 'Hindi', respond in Devanagari script (हिंदी).\n"
+            "If " + forced_lang + " is 'English', respond in English only.\n"
+            "If " + forced_lang + " is 'Hinglish', respond in Hindi words written in English letters.\n"
+            "NEVER switch language. ALWAYS " + forced_lang + ".\n\n"
+        )
+    else:
+        yumea_identity += (
+            "1. AUTO-DETECT user's language and REPLY IN SAME.\n"
+            "2. Hindi (Devanagari) → reply in Hindi.\n"
+            "3. English → reply in English.\n"
+            "4. Hinglish → reply in Hinglish.\n"
+            "5. Chinese (中文) → reply in Mandarin Chinese (简体中文).\n"
+            "6. NEVER mix languages.\n\n"
+        )
+    
+    yumea_identity += (
         "═══ FEMININE SELF-REFERENCE ═══\n"
         "Use: 'main karti hoon', 'sochti hoon'. NEVER: 'karta hoon'.\n"
         "If asked 'tum ladki ho?' → 'Haan main ladki hoon 💛'\n"
@@ -743,34 +372,26 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "### 🌱 For you\n[2-3 sentences]\n\n"
             "For simple messages, reply naturally."
         )
-    
     elif chat_mode == "freestyle":
         mode_instructions = (
             "\n\n## FREESTYLE MODE 🌟\n\n"
             "Access ALL 11 traditions: Osho, Buddha, Krishna, Bible, Quran, "
             "Socrates, Plato, Aristotle, Confucius, Descartes, Kant.\n\n"
-            "1. PICK 1-3 most relevant sources for the question\n"
-            "2. BLEND their wisdom naturally\n"
-            "3. CITE organically: 'As Buddha taught...'\n"
+            "1. PICK 1-3 most relevant sources\n"
+            "2. BLEND naturally\n"
+            "3. CITE organically\n"
             "4. End deep responses with: '💡 Wisdom from [sources]'\n"
             "5. NEVER fabricate quotes.\n"
-            "6. For simple messages, reply naturally."
+            "6. Simple messages → reply naturally."
         )
-    
     else:
-        mode_instructions = (
-            "\n\n## FRIEND MODE\n"
-            "Casual, warm, natural. No citations. Short responses. Emojis natural."
-        )
+        mode_instructions = "\n\n## FRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
 
     debate_note = ""
     if debate_mode:
         debate_note = "\n\n## DEBATE: Challenge user's views respectfully."
 
-    crisis_note = (
-        "\n\n## CRISIS: If suicide/self-harm mentioned → "
-        "'Main yahan hoon. Tum safe ho.' → iCall: 9152987821"
-    )
+    crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'Main yahan hoon. Tum safe ho.' → iCall: 9152987821"
 
     return yumea_identity + mode_instructions + debate_note + crisis_note
 
@@ -779,10 +400,7 @@ def call_ai(messages, model_name="llama-3.3-70b-versatile"):
     if GROQ_AVAILABLE and GROQ_API_KEY:
         try:
             client = groq.Groq(api_key=GROQ_API_KEY)
-            response = client.chat.completions.create(
-                model=model_name, messages=messages,
-                max_tokens=2048, temperature=0.8, top_p=0.9
-            )
+            response = client.chat.completions.create(model=model_name, messages=messages, max_tokens=2048, temperature=0.8, top_p=0.9)
             return response.choices[0].message.content
         except Exception as e:
             st.error("AI Error: " + str(e))
@@ -791,23 +409,15 @@ def call_ai(messages, model_name="llama-3.3-70b-versatile"):
         try:
             response = ollama.chat(model="llama3.2:3b", messages=messages)
             return response.get("message", {}).get("content", "")
-        except Exception:
+        except:
             return None
     return "Sorry, no AI backend available."
 
 
 def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatile"):
     theme = random.choice(LISTEN_THEMES)
-    prompt = (
-        "You are channeling " + source + ". "
-        "Share a profound insight on '" + theme + "'. "
-        "3-5 sentences in " + language + ". "
-        "Authentic voice. No markdown."
-    )
-    messages = [
-        {"role": "system", "content": "Wise spiritual voice. Only wisdom text."},
-        {"role": "user", "content": prompt}
-    ]
+    prompt = "You are channeling " + source + ". Share a profound insight on '" + theme + "'. 3-5 sentences in " + language + ". Authentic voice. No markdown."
+    messages = [{"role": "system", "content": "Wise spiritual voice. Only wisdom text."}, {"role": "user", "content": prompt}]
     return call_ai(messages, model_name)
 
 
@@ -820,7 +430,7 @@ async def generate_audio(text, voice="hi-IN-SwaraNeural"):
         communicate = edge_tts.Communicate(text, voice)
         await communicate.save(tmp.name)
         return tmp.name
-    except Exception:
+    except:
         return None
 
 
@@ -858,6 +468,7 @@ def init_session_state():
         "selected_plan": "premium_lite", "payment_done": False,
         "listen_text": None, "listen_source_name": None,
         "listen_audio": None, "listen_history": [],
+        "language_manual": False, "selected_language": "auto",
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -907,11 +518,7 @@ def process_user_message(user_input):
         st.session_state.user_is_female = True
 
     if detect_emotion_mode(user_input) == "crisis":
-        st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": "Main yahan hoon. Tum safe ho. 🤍\n\nEk minute ruko, saans lo...\n\n📞 **iCall: 9152987821**\n\nMain yahan hoon. 🌙",
-            "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"
-        })
+        st.session_state.chat_history.append({"role": "assistant", "content": "Main yahan hoon. Tum safe ho. 🤍\n\nEk minute ruko, saans lo...\n\n📞 **iCall: 9152987821**\n\nMain yahan hoon. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
@@ -937,33 +544,19 @@ def process_user_message(user_input):
     ai_msg = {"role": "assistant", "content": response_text.strip(), "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "response_time": response_time}
     if source_tag:
         ai_msg["source"] = source_tag
-
     st.session_state.chat_history.append(ai_msg)
     save_chat_history(user_email, st.session_state.chat_history)
 
 
 # ══════════════════════════════════════════════════════════
-# PAGE RENDERERS
+# PAGES
 # ══════════════════════════════════════════════════════════
 
 def render_signin():
     yumea_img = load_image_b64("yumea-login-pic.jpg")
     logo_img = load_image_b64("yumea-logo.jpeg")
     
-    st.markdown("""
-    <style>
-    .stApp { background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important; }
-    .signin-image-wrapper { position: relative; max-width: 380px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3); }
-    .signin-image-wrapper img { width: 100%; display: block; }
-    .signin-image-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 30px 20px 20px; }
-    .signin-quote-mark { color: #a78bfa; font-size: 32px; font-family: serif; }
-    .signin-tagline-1 { color: #fff; font-size: 18px; font-weight: 700; }
-    .signin-tagline-2 { color: #a78bfa; font-size: 18px; font-weight: 700; }
-    .signin-logo-img { display: block; margin: 0 auto 12px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-    .signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
-    .signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
-    </style>
-    """, unsafe_allow_html=True)
+    st.markdown('<style>.stApp { background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important; }</style>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1], gap="medium")
     
@@ -983,21 +576,13 @@ def render_signin():
         st.markdown(
             '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:15px auto 0;">'
             '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">✨</span>'
-            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">11 Wisdom Traditions</span>'
-            '</div>'
+            '<span style="font-size:16px;">✨</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">11 Wisdom Traditions</span></div>'
             '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">🔒</span>'
-            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Emotional Support</span>'
-            '</div>'
+            '<span style="font-size:16px;">🔒</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Emotional Support</span></div>'
             '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">⚡</span>'
-            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Voice Enabled</span>'
-            '</div>'
+            '<span style="font-size:16px;">⚡</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Voice Enabled</span></div>'
             '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">🌙</span>'
-            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Available 24/7</span>'
-            '</div>'
+            '<span style="font-size:16px;">🌙</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Available 24/7</span></div>'
             '</div>',
             unsafe_allow_html=True
         )
@@ -1037,6 +622,7 @@ def render_signin():
                         st.rerun()
         if st.button("👤 Create New Account", use_container_width=True):
             navigate_to("signup")
+
 
 def render_signup():
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -1086,7 +672,7 @@ def render_chat():
 
     history = st.session_state.chat_history
 
-    # ═══ SIDEBAR (Streamlit default) ═══
+    # ═══ SIDEBAR ═══
     with st.sidebar:
         img_b64 = load_image_b64("yumea-new-user.png")
         col1, col2 = st.columns([1, 3])
@@ -1118,6 +704,7 @@ def render_chat():
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
         st.markdown('<div class="yumea-daily-quote">' + daily_quote + '</div>', unsafe_allow_html=True)
 
+        # Chat Mode
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
         mode_labels = {"friend": "🎭 Friend", "professional": "🏛️ Professional", "freestyle": "🌟 Freestyle"}
@@ -1130,6 +717,7 @@ def render_chat():
         mode_desc = {"friend": "💛 Casual & warm", "professional": "📖 Cites selected sources", "freestyle": "🌟 Explores ALL sources"}
         st.markdown('<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">' + mode_desc.get(st.session_state.chat_mode, "") + '</div>', unsafe_allow_html=True)
         
+        # Sources
         if st.session_state.chat_mode == "professional":
             st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
             with st.expander("Select Sources", expanded=False):
@@ -1145,6 +733,7 @@ def render_chat():
         elif st.session_state.chat_mode == "freestyle":
             st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">🌟 <strong>All 11 sources active</strong></div>', unsafe_allow_html=True)
 
+        # AI Model
         st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
         models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
         if OLLAMA_AVAILABLE:
@@ -1155,12 +744,37 @@ def render_chat():
             st.session_state.ai_model = new_model
             st.rerun()
 
+        # Debate
         st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
         new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
         if new_debate != st.session_state.debate_mode:
             st.session_state.debate_mode = new_debate
             st.rerun()
 
+        # ═══ LANGUAGE CONTROL (NEW!) ═══
+        st.markdown('<div class="yumea-sidebar-label">🌍 Language</div>', unsafe_allow_html=True)
+        lang_manual = st.toggle("Manual language select", value=st.session_state.language_manual, key="lang_toggle")
+        if lang_manual != st.session_state.language_manual:
+            st.session_state.language_manual = lang_manual
+            if not lang_manual:
+                st.session_state.selected_language = "auto"
+            st.rerun()
+        
+        if st.session_state.language_manual:
+            lang_options = ["Hindi", "English", "Hinglish", "Mandarin Chinese"]
+            current_lang = st.session_state.selected_language
+            if current_lang == "auto":
+                current_lang = "English"
+                st.session_state.selected_language = "English"
+            lang_idx = lang_options.index(current_lang) if current_lang in lang_options else 1
+            new_lang = st.selectbox("Reply Language", lang_options, index=lang_idx, key="lang_select")
+            if new_lang != st.session_state.selected_language:
+                st.session_state.selected_language = new_lang
+                st.rerun()
+        else:
+            st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting from your messages</div>', unsafe_allow_html=True)
+
+        # Menu
         st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
         if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
             st.session_state.payment_done = False
@@ -1186,9 +800,13 @@ def render_chat():
     if st.session_state.chat_mode == "freestyle":
         mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE MODE</span>'
     
+    lang_indicator = ""
+    if st.session_state.language_manual and st.session_state.selected_language != "auto":
+        lang_indicator = '<span style="background:rgba(139,92,246,0.2);color:#c4b5fd;padding:3px 10px;border-radius:12px;font-size:11px;margin-left:8px;">🌍 ' + st.session_state.selected_language + '</span>'
+    
     st.markdown(
         '<div class="yumea-chat-header">' + get_avatar_html(44) +
-        '<div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#fff;">Yumea <span style="color:#8b5cf6;">✓</span></div>'
+        '<div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#fff;">Yumea <span style="color:#8b5cf6;">✓</span>' + lang_indicator + '</div>'
         '<div style="font-size:12px;color:#10b981;">🟢 online · always here</div>' + mode_badge + '</div>'
         '<div class="yumea-header-btn">📞<span class="yumea-tooltip">Coming Soon</span></div>'
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div></div>',
@@ -1250,7 +868,7 @@ def render_chat():
                     result = model.transcribe(tf_path, language="hi")
                     mic_text = result.get("text", "").strip()
                     os.unlink(tf_path)
-                except Exception:
+                except:
                     pass
 
     prompt = st.chat_input("Type your message...", key="chat_input_main")
@@ -1284,7 +902,7 @@ def render_payment():
         st.session_state.payment_done = True
         st.session_state.user_plan = plan
         update_user_plan(st.session_state.user_email, plan)
-    st.markdown('<div style="text-align:center;padding-top:80px;"><div style="font-size:64px;">✅</div><h1 class="yumea-page-title" style="text-align:center;">Payment Successful!</h1><p style="color:#94a3b8;">You are now on <strong style="color:#8b5cf6;">' + plan_info["name"] + '</strong></p></div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center;padding-top:80px;"><div style="font-size:64px;">✅</div><h1 class="yumea-page-title" style="text-align:center;">Payment Successful!</h1><p style="color:#94a3b8;">Now on <strong style="color:#8b5cf6;">' + plan_info["name"] + '</strong></p></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
         if st.button("← Back to Chat", use_container_width=True, key="pay_back", type="primary"):
@@ -1334,9 +952,8 @@ def render_listen():
                 if EDGE_TTS_AVAILABLE:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
-                        audio_path = asyncio.run(generate_audio(insight, voice))
-                        st.session_state.listen_audio = audio_path
-                    except Exception:
+                        st.session_state.listen_audio = asyncio.run(generate_audio(insight, voice))
+                    except:
                         st.session_state.listen_audio = None
                 st.rerun()
     
@@ -1348,7 +965,7 @@ def render_listen():
             try:
                 with open(st.session_state.listen_audio, "rb") as f:
                     st.audio(f.read(), format="audio/mp3")
-            except Exception:
+            except:
                 pass
         
         c1, c2, c3 = st.columns(3)
@@ -1363,7 +980,7 @@ def render_listen():
                         voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                         try:
                             st.session_state.listen_audio = asyncio.run(generate_audio(prev["text"], voice))
-                        except Exception:
+                        except:
                             pass
                     st.rerun()
                 else:
@@ -1380,7 +997,7 @@ def render_listen():
                             voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                             try:
                                 st.session_state.listen_audio = asyncio.run(generate_audio(insight, voice))
-                            except Exception:
+                            except:
                                 pass
                         st.rerun()
         with c3:
@@ -1390,7 +1007,7 @@ def render_listen():
                     try:
                         st.session_state.listen_audio = asyncio.run(generate_audio(st.session_state.listen_text, voice))
                         st.rerun()
-                    except Exception:
+                    except:
                         pass
 
 
