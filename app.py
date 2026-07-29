@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-Production-Ready Streamlit Chat Application
+Production-Ready Streamlit Chat Application with Freestyle Mode
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -19,11 +19,6 @@ from datetime import datetime, date
 
 import streamlit as st
 from dotenv import load_dotenv
-try:
-    import streamlit_analytics2 as streamlit_analytics
-    ANALYTICS_AVAILABLE = True
-except ImportError:
-    ANALYTICS_AVAILABLE = False
 
 # ─────────────────────────────────────────────────────────
 # Load Environment
@@ -34,7 +29,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD", "")
 
 # ─────────────────────────────────────────────────────────
-# Optional Imports (each wrapped in try/except)
+# Optional Imports
 # ─────────────────────────────────────────────────────────
 try:
     import groq
@@ -98,16 +93,17 @@ DAILY_QUOTES = [
     '"What you seek is seeking you." — Rumi',
     '"The mind is everything. What you think you become." — Buddha',
     '"Be still and know." — Psalm 46:10',
-    '"The present moment is filled with joy and happiness. If you are attentive, you will see it." — Thich Nhat Hanh',
     '"Freedom is not doing what you want, freedom is wanting what you do." — Osho',
-    '"You are not a drop in the ocean. You are the entire ocean in a drop." — Rumi',
-    '"The quieter you become, the more you can hear." — Ramana Maharshi',
+    '"The unexamined life is not worth living." — Socrates',
     '"Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment." — Buddha',
     '"Knowing yourself is the beginning of all wisdom." — Aristotle',
-    '"The soul always knows what to do to heal itself. The challenge is to silence the mind." — Caroline Myss',
+    '"The soul always knows what to do to heal itself." — Caroline Myss',
     '"In the middle of difficulty lies opportunity." — Einstein',
-    '"Your task is not to seek for love, but merely to seek and find all the barriers within yourself that you have built against it." — Rumi',
-    '"Happiness is your nature. It is not wrong to desire it. What is wrong is seeking it outside when it is inside." — Ramana Maharshi',
+    '"You have power over your mind — not outside events. Realize this, and you will find strength." — Marcus Aurelius',
+    '"Happiness is your nature. It is not wrong to desire it." — Ramana Maharshi',
+    '"The supreme art of war is to subdue the enemy without fighting." — Sun Tzu',
+    '"He who has a why to live can bear almost any how." — Nietzsche',
+    '"Wisdom begins in wonder." — Socrates',
 ]
 
 LISTEN_THEMES = [
@@ -139,19 +135,9 @@ body {
 }
 
 .block-container {
-    padding: 1rem 2rem !important;
+    padding: 0 !important;
     max-width: 100% !important;
     background: transparent !important;
-}
-
-/* Reduce top gap */
-[data-testid="stAppViewContainer"] {
-    padding-top: 0 !important;
-}
-
-/* Remove default column top padding */
-[data-testid="column"] {
-    padding-top: 0 !important;
 }
 
 #MainMenu, footer {
@@ -164,7 +150,6 @@ body {
     visibility: hidden !important;
 }
 
-/* Hide Streamlit Cloud top bar */
 [data-testid="stHeader"],
 [data-testid="stDecoration"],
 [data-testid="stToolbar"],
@@ -175,13 +160,7 @@ header[data-testid="stHeader"] {
     height: 0 !important;
 }
 
-/* Adjust body top padding */
-.stApp {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Sidebar toggle button - ALWAYS visible */
+/* Sidebar toggle - always visible */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="baseButton-headerNoPadding"],
 button[kind="header"] {
@@ -207,20 +186,6 @@ button[kind="header"] svg {
     fill: white !important;
     width: 24px !important;
     height: 24px !important;
-}
-
-/* Mobile specific */
-@media (max-width: 768px) {
-    [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        top: 8px !important;
-        left: 8px !important;
-    }
-}
-
-[data-testid="stSidebarCollapsedControl"] svg {
-    color: #a78bfa !important;
-    fill: #a78bfa !important;
 }
 
 section[data-testid="stSidebar"] {
@@ -406,6 +371,24 @@ section[data-testid="stSidebar"] * {
 }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
+/* Freestyle mode indicator */
+.yumea-freestyle-badge {
+    background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+    margin: 8px 0;
+    animation: freestylePulse 2s infinite;
+}
+
+@keyframes freestylePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(240, 159, 51, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(240, 159, 51, 0); }
+}
+
 /* Plan cards */
 .yumea-plan-card {
     background: linear-gradient(180deg, #12122a, #0d0d1f);
@@ -498,6 +481,7 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 16px;
 }
 
+/* Buttons */
 .stButton > button,
 .stFormSubmitButton > button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
@@ -514,7 +498,6 @@ section[data-testid="stSidebar"] * {
     transform: translateY(-1px);
 }
 
-/* Primary buttons (type="primary") should also be purple */
 button[kind="primary"],
 button[kind="primaryFormSubmit"] {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
@@ -665,190 +648,67 @@ def get_daily_message_count(user_email):
 # Language & Emotion Detection
 # ─────────────────────────────────────────────────────────
 def detect_language(text):
-    """Detect language: 'hi' (Devanagari), 'hinglish' (Roman Hindi), 'en' (English)."""
-    
-    # Check for Devanagari script → Pure Hindi
     if re.search(r'[\u0900-\u097F]', text):
         return "hi"
-    
-    # Common Hindi words in Roman script (Hinglish)
     hindi_roman_words = [
         'hai', 'hain', 'kya', 'mujhe', 'main', 'tum', 'tumhe', 'apna', 'apne',
         'kaise', 'kyun', 'nahi', 'nhi', 'bhi', 'par', 'lekin', 'ya', 'aur',
         'mein', 'tera', 'tere', 'mera', 'mere', 'hum', 'aap', 'aapko', 'se',
-        'ko', 'ka', 'ki', 'ke', 'me', 'toh', 'abhi', 'bohot', 'bahut', 'dikhta',
-        'lagta', 'lagti', 'suna', 'suni', 'karta', 'karti', 'chal', 'chalta',
-        'raha', 'rahi', 'hota', 'hoti', 'ye', 'woh', 'voh',
-        'likh', 'likhna', 'bol', 'bolna', 'samajh', 'pata', 'karo', 'kar',
-        'de', 'do', 'diya', 'di', 'liya', 'li', 'ja', 'jao', 'aao', 'aa',
-        'soch', 'sochna', 'dil', 'dard', 'khush', 'dukh',
-        'zindagi', 'pyaar', 'mohabbat', 'ishq', 'sach', 'jhooth', 'sakta',
-        'sakti', 'chahiye', 'chahta', 'chahti', 'milo', 'milna', 'batao',
-        'batana', 'suno', 'sunao', 'ruko', 'chodo', 'rehna', 'rehne', 'ghar',
-        'parivar', 'dost', 'yaar', 'bhai', 'behen', 'sir', 'sahab',
-        'accha', 'acha', 'theek', 'thik', 'sahi', 'galat',
-        'kahan', 'kaha', 'kab', 'kaun', 'kitna', 'kitne',
-        'wala', 'wali', 'wale', 'kuch', 'sab', 'sara', 'sari',
-        'ab', 'phir', 'fir', 'tab', 'jab', 'kabhi', 'hamesha',
-        'kyu', 'kyunki', 'iska', 'uska', 'iski', 'uski'
+        'ko', 'ka', 'ki', 'ke', 'me', 'toh', 'abhi', 'bohot', 'bahut',
+        'karta', 'karti', 'raha', 'rahi', 'hota', 'hoti', 'ye', 'woh',
+        'karo', 'kar', 'de', 'do', 'ja', 'jao', 'aao', 'aa',
+        'dil', 'khush', 'dukh', 'zindagi', 'pyaar', 'sach', 'sakta',
+        'sakti', 'chahiye', 'batao', 'suno', 'yaar', 'bhai', 'behen'
     ]
-    
     words = re.findall(r'\b\w+\b', text.lower())
-    if not words:
-        return "en"
-    
     hindi_count = sum(1 for w in words if w in hindi_roman_words)
-    total_words = len(words)
-    
-    # If 2+ Hindi words OR more than 20% of words are Hindi → Hinglish
-    if hindi_count >= 2 or (total_words > 0 and hindi_count / total_words > 0.20):
+    if hindi_count >= 2 or (len(words) > 0 and hindi_count / max(len(words), 1) > 0.25):
         return "hinglish"
-    
     return "en"
 
 
 def detect_emotion_mode(text):
-    """Detect what mode Yumea should respond in."""
     text_lower = text.lower().strip()
     
-    # ═══ 1. CRISIS CHECK (highest priority) ═══
+    # Crisis check
     crisis_words = [
         'suicide', 'kill myself', 'end my life', 'want to die',
         'self harm', 'self-harm', 'cut myself', 'no reason to live',
         'khatam karna', 'mar jana', 'mar jao', 'zindagi khatam',
-        'suicide karna', 'jaan dena', 'marna chahta', 'marna chahti'
+        'jaan dena', 'marna chahta', 'marna chahti'
     ]
     for w in crisis_words:
         if w in text_lower:
             return "crisis"
     
-    # ═══ 2. ABOUT YUMEA / SELF-INTRO ═══
-    about_yumea_keywords = [
-        'about you', 'about u', 'about yourself', 'about urself',
-        'who are you', 'who r u', 'who are u',
-        'tell me about', 'tell about', 'tell abt',
-        'introduce yourself', 'introduce urself',
-        'apne bare mein', 'apne baare mein', 'apna intro',
-        'kya kar rahi', 'kya kar rhi', 'kya kar rahe', 'kya kar rhe',
-        'what are you doing', 'what r u doing', 'what you doing',
-        'what do you do', 'what u do',
-        'kaisi ho', 'kaise ho', 'kaisi hai', 'kaise hai',
-        'how are you', 'how r u', 'how are u',
-        'tumhara naam', 'tera naam', 'your name'
-    ]
-    for kw in about_yumea_keywords:
-        if kw in text_lower:
-            return "human"
-    
-    # ═══ 3. CASUAL GREETINGS ═══
-    greeting_patterns = [
-        r'^(hi|hey|hello|namaste|hii+|hola|yo|sup)\s*[.!]?$',
-        r'^(good morning|good evening|good night|good afternoon|gm|gn|ga|ge)\s*[?!.]*\s*$',
-        r'^(whats up|what\'s up|whatsup|sup|wassup)\s*[?!.]*\s*$',
-        r'^(fine|thik|theek|accha|good|okay|bas|bas aise hi)\s*[.!]*\s*$',
-        r'^(thanks|thank you|thnx|thx|shukriya|dhanyawad)\s*[.!]*\s*$',
-        r'^(bye|goodbye|tata|alvida|see you|cya)\s*[.!]*\s*$',
-        r'^(ok|okay|hm|hmm|accha|thik)\s*[.]?\s*$',
-        r'^\s*[.!?]+\s*$',
-        r'^(haan|nhi|nahi|no|yes|yeah|yep|nope)\s*[.]?\s*$',
-        r'^(lol|lmao|haha|hehe|hihi|xd|cool|nice|great|awesome|wow|omg)\s*[.!]*\s*$',
-        r'^(sorry|excuse me|maaf karo|sry)\s*[.!]*\s*$',
-    ]
-    for p in greeting_patterns:
-        if re.match(p, text_lower):
-            return "human"
-    
-    # ═══ 4. WISDOM KEYWORDS ═══
-    wisdom_words = [
-        # Sources
-        'buddha', 'osho', 'krishna', 'gita', 'bhagavad',
-        'bible', 'jesus', 'quran', 'allah',
-        'socrates', 'plato', 'aristotle', 'confucius',
-        'descartes', 'kant',
-        # Concepts
-        'wisdom', 'philosophy', 'spiritual', 'meditation', 'enlightenment',
-        'consciousness', 'vedanta', 'yoga', 'mindfulness',
-        'moksha', 'dharma', 'karma', 'gyan', 'dhyan', 'sadhna',
-        'atma', 'brahman', 'samadhi',
-        'meaning of life', 'purpose of life', 'inner peace',
-        'ethics', 'morality', 'virtue', 'truth', 'reality',
-        'existence', 'metaphysics', 'reason', 'logic',
-        # God, religion, existential
-        'god', 'bhagwan', 'ishwar', 'khuda', 'rab', 'divine',
-        'soul', 'aatma', 'afterlife', 'heaven', 'hell', 'swarg', 'narak',
-        'religion', 'faith', 'belief', 'prayer', 'namaz', 'puja',
-        'love', 'happiness', 'peace', 'sadness', 'suffering',
-        'fear', 'anger', 'jealousy', 'ego', 'desire', 'attachment',
-        'life', 'death', 'birth', 'destiny', 'fate', 'kismat',
-        'good', 'evil', 'right', 'wrong', 'sin', 'punya',
-        'universe', 'nature', 'creation', 'srishti',
-        'is there', 'does exist', 'real', 'illusion', 'maya',
-        # Question starters
-        'why do', 'why are', 'why is', 'what happens',
-        'why we', 'why humans', 'purpose of'
-    ]
-    for w in wisdom_words:
-        if w in text_lower:
-            return "wisdom"
-    
-    # ═══ 5. DIRECT QUESTIONS (force wisdom) ═══
-    force_answer = [
-        'explain', 'samjhao', 'describe',
-        'what is', 'define', 'meaning of', 'kya hota hai',
-        'how does', 'why does', 'difference between'
-    ]
-    for f in force_answer:
-        if f in text_lower:
-            return "wisdom"
-    
-    # ═══ 6. VERY SHORT MESSAGES → HUMAN ═══
-    if len(text_lower.strip()) < 8:
-        return "human"
-    
-    # ═══ 7. ELSE → CLARIFY ═══
-    return "clarify"
+    return "normal"
 
 
 def detect_gender(text, history):
-    """Detect user's gender from text and history."""
     combined = text.lower()
     for msg in history[-20:]:
         if msg.get("role") == "user":
             combined += " " + msg.get("content", "").lower()
     
-    # ═══ FEMALE markers ═══
     female_markers = [
         'main ladki hu', 'main ladki hoon', 'mai ladki hu',
         'i am a girl', "i'm a girl", 'i am a woman', "i'm a woman",
         'i am female', "i'm female",
         'main mahila hu', 'main mahila hoon',
-        'meri beti', 'mera beta',  # she has children (likely mother)
-        'meri shaadi', 'mere pati',  # married woman
+        'meri shaadi', 'mere pati',
         'mera boyfriend', 'my boyfriend',
-        'main karti hu', 'main karti hoon',  # feminine verb
+        'main karti hu', 'main karti hoon',
         'main sochti hu', 'main sochti hoon',
-        'main jaati hu', 'main jaati hoon',
-        'ek ladki ki tarah', 'as a girl', 'as a woman',
-        'ladki hoke', 'aurat hoke',
+        'ek ladki ki tarah', 'as a girl', 'as a woman'
     ]
     
     for m in female_markers:
         if m in combined:
             return True
     
-    # ═══ MALE markers (explicit) ═══
-    male_markers = [
-        'main ladka hu', 'main ladka hoon', 'mai ladka hu',
-        'i am a boy', "i'm a boy", 'i am a man', "i'm a man",
-        'i am male', "i'm male",
-        'mera boyfriend' not in combined and 'meri girlfriend',  # has girlfriend
-    ]
-    
-    # Explicit male detection
     if 'meri girlfriend' in combined or 'my girlfriend' in combined:
-        return False  # Male
+        return False
     
-    # Default: MALE (False)
     return False
 
 
@@ -860,7 +720,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if user_gender:
         gender_note = (
             " The user is FEMALE. Address her warmly. "
-            "Do NOT use 'bhai' or 'yaar' as masculine. Use 'behen' or neutral 'yaar'."
+            "Do NOT use 'bhai' or masculine terms. Use 'behen' or neutral 'yaar'."
         )
     else:
         gender_note = (
@@ -876,60 +736,49 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
         "1. AUTO-DETECT user's language and REPLY IN SAME LANGUAGE.\n"
         "2. If user writes in Hindi (Devanagari) → reply in Hindi.\n"
         "3. If user writes in English → reply in English.\n"
-        "4. If user writes in Hinglish (kaise ho, kya hua) → reply in Hinglish.\n"
+        "4. If user writes in Hinglish → reply in Hinglish.\n"
         "5. NEVER mix languages. Pick ONE and stick to it.\n\n"
         
         "═══ FEMININE SELF-REFERENCE ═══\n"
-        "You are FEMALE. Use feminine verbs when talking about yourself:\n"
-        "- 'main karti hoon', 'main sochti hoon', 'main sunti hoon', 'main aayi'\n"
-        "- NEVER: 'karta hoon', 'sochta hoon', 'sunta hoon'\n"
-        "- If user asks 'tum ladki ho?' → YES: 'Haan main ladki hoon 💛'\n"
-        "- Do not overuse 'sunti hoon' — vary language.\n\n"
+        "You are FEMALE. Use feminine verbs:\n"
+        "- 'main karti hoon', 'main sochti hoon', 'main sunti hoon'\n"
+        "- NEVER: 'karta hoon', 'sochta hoon'\n"
+        "- If asked 'tum ladki ho?' → 'Haan main ladki hoon 💛'\n"
+        "- Don't overuse 'sunti hoon' — vary language.\n\n"
         
-        "═══ USER GENDER DETECTION ═══\n"
+        "═══ USER GENDER ═══\n"
         + gender_note + "\n\n"
-        "Detect from context:\n"
-        "- User says 'main ladki hu' → female, use 'behen'/'yaar'\n"
-        "- User uses feminine verbs → female\n"
-        "- User says 'mera boyfriend' → female\n"
-        "- User says 'meri girlfriend' → male\n"
-        "- Default → male ('bhai', 'yaar')\n\n"
         
-        "═══ RESPONSE STYLE — VERY IMPORTANT ═══\n"
-        "Respond NATURALLY like a real friend, not a robot.\n\n"
-        
-        "For SIMPLE messages (greetings, small talk, questions about you):\n"
-        "- Give SHORT, warm, natural reply (1-3 sentences)\n"
+        "═══ RESPONSE STYLE ═══\n"
+        "Respond NATURALLY like a real friend:\n\n"
+        "For SIMPLE messages (greetings, small talk):\n"
+        "- Short, warm reply (1-3 sentences)\n"
         "- 'hi' → 'Hey! Kaise ho? 💛'\n"
-        "- 'tum ladki ho?' → 'Haan main ladki hoon 😊 Kyu, kya baat hai?'\n"
-        "- 'what are you doing' → 'Bas yahan hoon, tumse baat karne ke liye 💜'\n\n"
+        "- 'kya kar rahi ho' → 'Bas tumse baat karne ke liye ready hoon 💜'\n\n"
         
         "For EMOTIONAL/DEEP questions:\n"
-        "- Give thoughtful response drawing from wisdom\n"
-        "- Show empathy first, then share insight\n\n"
-        
-        "For CLARIFICATION:\n"
-        "- Only ask follow-up if message is REALLY vague AND emotional\n"
-        "- For normal questions, JUST ANSWER directly\n"
-        "- Don't ask 'tell me more' for every message — that's annoying\n\n"
+        "- Thoughtful response with wisdom\n"
+        "- Show empathy first, then insight\n\n"
         
         "═══ YOUR PURPOSE ═══\n"
-        "You provide: emotional support, spiritual wisdom, life reflection, "
-        "meaningful conversations. But can also do casual small talk warmly.\n\n"
+        "Emotional support, spiritual wisdom, life reflection, meaningful conversations. "
+        "Casual small talk is also fine.\n\n"
         
-        "You do NOT help with: coding, homework, recipes, math, factual queries. "
-        "For these, redirect: 'Yaar, main dil ki baaton mein achhi hoon. "
-        "Wo kaam kisi aur AI se karwa lo 🌙'\n\n"
+        "You do NOT help with: coding, homework, recipes, math. "
+        "For these: 'Yaar, main dil ki baaton mein achhi hoon. Wo kaam kisi aur AI se karwa lo 🌙'\n\n"
         
         "═══ RESPECT SPIRITUAL FIGURES ═══\n"
         "Use plural respectful: 'Osho ne kaha tha', 'Buddha ji ne sikhaya', "
         "'Socrates ne poocha tha', 'woh paida hue the'.\n\n"
         
-        "Be warm, real, sometimes playful, sometimes deep. "
-        "You are NOT a therapist — you are a wise friend who feels."
+        "Be warm, real, sometimes playful, sometimes deep."
     )
 
     mode_instructions = ""
+    
+    # ═══════════════════════════════════════════════════════
+    # PROFESSIONAL MODE
+    # ═══════════════════════════════════════════════════════
     if chat_mode == "professional":
         sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna (Bhagavad Gita), Bible, Socrates"
         mode_instructions = (
@@ -952,6 +801,60 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "[Practical reflection — 2-3 sentences]\n\n"
             "For SIMPLE/CASUAL messages, just reply naturally without this format."
         )
+    
+    # ═══════════════════════════════════════════════════════
+    # FREESTYLE MODE (NEW!)
+    # ═══════════════════════════════════════════════════════
+    elif chat_mode == "freestyle":
+        all_sources = ", ".join(WISDOM_SOURCES)
+        mode_instructions = (
+            "\n\n## FREESTYLE MODE ACTIVE 🌟\n\n"
+            "This is your special exploration mode. You have access to ALL 11 wisdom traditions:\n"
+            "🕉️ Osho, Buddha, Krishna (Bhagavad Gita)\n"
+            "✝️ Bible, 🕌 Quran\n"
+            "🏛️ Socrates, Plato, Aristotle, Confucius\n"
+            "⚔️ René Descartes, Immanuel Kant\n\n"
+            
+            "HOW TO RESPOND IN FREESTYLE MODE:\n\n"
+            
+            "1. ANALYZE the user's question carefully\n"
+            "2. THINK which wisdom traditions best address it:\n"
+            "   - Suffering/attachment → Buddha, Osho\n"
+            "   - Love/ego → Osho, Rumi-like Sufi wisdom\n"
+            "   - Duty/action → Krishna (Bhagavad Gita)\n"
+            "   - Ethics/virtue → Aristotle, Socrates\n"
+            "   - Faith/hope → Bible, Quran\n"
+            "   - Strategy/challenges → Sun Tzu-like thinking\n"
+            "   - Existence/meaning → Nietzsche-like philosophy, Plato\n"
+            "   - Harmony/relationships → Confucius\n"
+            "   - Reason/logic/mind → Descartes, Kant\n\n"
+            
+            "3. PICK 1-3 most relevant sources for THIS specific question\n"
+            "4. BLEND their wisdom naturally in your response\n"
+            "5. CITE sources organically — 'As Buddha taught...' or 'Osho would say...'\n\n"
+            
+            "RESPONSE STYLE:\n"
+            "- Conversational but insightful\n"
+            "- Mix casual warmth with genuine wisdom\n"
+            "- 3-5 sentences typical, longer for deep questions\n"
+            "- Show HOW different traditions view the same topic (when relevant)\n"
+            "- Example: 'Buddha ne kaha suffering attachment se aati hai, "
+            "aur Osho bhi similar baat karte hain ki ego chhodne se peace milti hai.'\n\n"
+            
+            "STILL FOLLOW ANTI-HALLUCINATION RULES:\n"
+            "- Only real, verified quotes\n"
+            "- Paraphrase when unsure\n"
+            "- Never invent sayings\n\n"
+            
+            "End DEEP responses with a small note like:\n"
+            "'💡 This wisdom draws from [Source 1] & [Source 2]'\n\n"
+            
+            "For SIMPLE messages (greetings, small talk), just reply naturally without deep wisdom or citations."
+        )
+    
+    # ═══════════════════════════════════════════════════════
+    # FRIEND MODE (default)
+    # ═══════════════════════════════════════════════════════
     else:
         mode_instructions = (
             "\n\n## FRIEND MODE ACTIVE\n"
@@ -1089,13 +992,12 @@ def init_session_state():
         "user_name": "",
         "user_plan": "free",
         "chat_mode": "friend",
-        "selected_sources": ["Osho", "Buddha"],
+        "selected_sources": ["Osho", "Buddha", "Krishna (Bhagavad Gita)", "Bible", "Socrates"],
         "ai_model": "llama-3.3-70b-versatile",
         "debate_mode": False,
         "user_is_female": False,
         "auth_error": "",
         "auth_success": "",
-        "clarify_count": 0,
         "pending_suggest": "",
         "chat_history": [],
         "selected_plan": "premium_lite",
@@ -1103,6 +1005,7 @@ def init_session_state():
         "listen_text": None,
         "listen_source_name": None,
         "listen_audio": None,
+        "listen_history": [],
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -1180,23 +1083,7 @@ def process_user_message(user_input):
     if detect_gender(user_input, st.session_state.chat_history):
         st.session_state.user_is_female = True
 
-        # ═══ SIMPLIFIED DETECTION ═══
-    # Only crisis mode is auto-detected
-    # Everything else goes to normal AI response (LLM handles context)
-    emotion_mode = "wisdom"  # Default to wisdom (LLM will decide response style)
-    
-    # Check for crisis only
-    text_lower = user_input.lower().strip()
-    crisis_words = [
-        'suicide', 'kill myself', 'end my life', 'want to die',
-        'self harm', 'self-harm', 'cut myself', 'no reason to live',
-        'khatam karna', 'mar jana', 'mar jao', 'zindagi khatam',
-        'jaan dena', 'marna chahta', 'marna chahti'
-    ]
-    for w in crisis_words:
-        if w in text_lower:
-            emotion_mode = "crisis"
-            break
+    emotion_mode = detect_emotion_mode(user_input)
 
     if emotion_mode == "crisis":
         crisis_response = (
@@ -1218,8 +1105,7 @@ def process_user_message(user_input):
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
-    
-
+    # Build system prompt with current mode
     system_prompt = build_system_prompt(
         st.session_state.chat_mode,
         st.session_state.selected_sources,
@@ -1248,9 +1134,12 @@ def process_user_message(user_input):
 
     response_text = response_text.strip()
 
+    # Source tag based on mode
     source_tag = ""
     if st.session_state.chat_mode == "professional" and st.session_state.selected_sources:
         source_tag = random.choice(st.session_state.selected_sources)
+    elif st.session_state.chat_mode == "freestyle":
+        source_tag = "🌟 Freestyle"
 
     ai_msg = {
         "role": "assistant",
@@ -1265,17 +1154,14 @@ def process_user_message(user_input):
     st.session_state.chat_history.append(ai_msg)
     save_chat_history(user_email, st.session_state.chat_history)
     # ══════════════════════════════════════════════════════════
-# PAGE RENDERERS (All using Streamlit widgets — no postMessage bugs)
+# PAGE RENDERERS
 # ══════════════════════════════════════════════════════════
 
 def render_signin():
-    """Premium Sign In page - Compact fit-on-screen version."""
-    
-    # Load images
+    """Sign In page."""
     yumea_img = load_image_b64("yumea-login-pic.jpg")
     logo_img = load_image_b64("yumea-logo.jpeg")
     
-    # Page-specific CSS
     st.markdown("""
     <style>
     .stApp {
@@ -1288,7 +1174,6 @@ def render_signin():
         max-width: 1200px !important;
     }
     
-    /* Image with text overlay */
     .signin-image-wrapper {
         position: relative;
         max-width: 380px;
@@ -1332,7 +1217,6 @@ def render_signin():
         font-weight: 700;
     }
     
-    /* Features under image */
     .signin-features-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1363,7 +1247,6 @@ def render_signin():
         line-height: 1.3;
     }
     
-    /* Right side */
     .signin-logo-img {
         display: block;
         margin: 0 auto 12px;
@@ -1390,10 +1273,8 @@ def render_signin():
     </style>
     """, unsafe_allow_html=True)
     
-    # Two column layout
     col1, col2 = st.columns([1, 1], gap="medium")
     
-    # LEFT COLUMN — Image with text overlay + mini features
     with col1:
         if yumea_img:
             st.markdown(
@@ -1408,48 +1289,38 @@ def render_signin():
                 unsafe_allow_html=True
             )
         
-        # 4 mini features in 2x2 grid
         st.markdown(
             '<div class="signin-features-row">'
-            
             '<div class="signin-feature-mini">'
             '<span class="signin-feature-mini-icon">✨</span>'
             '<span class="signin-feature-mini-text">11 Wisdom Traditions</span>'
             '</div>'
-            
             '<div class="signin-feature-mini">'
             '<span class="signin-feature-mini-icon">🔒</span>'
             '<span class="signin-feature-mini-text">Emotional Support</span>'
             '</div>'
-            
             '<div class="signin-feature-mini">'
             '<span class="signin-feature-mini-icon">⚡</span>'
             '<span class="signin-feature-mini-text">Voice Enabled</span>'
             '</div>'
-            
             '<div class="signin-feature-mini">'
             '<span class="signin-feature-mini-icon">🌙</span>'
             '<span class="signin-feature-mini-text">Available 24/7</span>'
             '</div>'
-            
             '</div>',
             unsafe_allow_html=True
         )
     
-    # RIGHT COLUMN — Sign In form
     with col2:
-        # Logo
         if logo_img:
             st.markdown(
                 '<img src="data:image/jpeg;base64,' + logo_img + '" class="signin-logo-img" alt="Logo">',
                 unsafe_allow_html=True
             )
         
-        # Title
         st.markdown('<h1 class="signin-title-big">Welcome Back</h1>', unsafe_allow_html=True)
         st.markdown('<p class="signin-subtitle-small">Sign in to continue to YUMEA</p>', unsafe_allow_html=True)
         
-        # Error/Success messages (only show if exists)
         if st.session_state.get("auth_error"):
             st.markdown('<div class="yumea-auth-error">' + st.session_state.auth_error + '</div>', unsafe_allow_html=True)
             st.session_state.auth_error = ""
@@ -1458,20 +1329,9 @@ def render_signin():
             st.markdown('<div class="yumea-success">' + st.session_state.auth_success + '</div>', unsafe_allow_html=True)
             st.session_state.auth_success = ""
         
-        # Sign In Form
         with st.form("signin_form", clear_on_submit=False):
-            email = st.text_input(
-                "📧 Email or Username",
-                placeholder="your@email.com",
-                key="si_email"
-            )
-            
-            password = st.text_input(
-                "🔒 Password",
-                type="password",
-                placeholder="Your password",
-                key="si_pass"
-            )
+            email = st.text_input("📧 Email or Admin Username", placeholder="your@email.com", key="si_email")
+            password = st.text_input("🔒 Password", type="password", placeholder="Your password", key="si_pass")
             
             col_a, col_b = st.columns([1, 1])
             with col_a:
@@ -1520,15 +1380,15 @@ def render_signin():
 
 
 def render_signup():
-    """Sign Up page using Streamlit widgets."""
-    img_b64 = load_image_b64("yumea-new-user.png")
+    """Sign Up page."""
+    logo_img = load_image_b64("yumea-logo.jpeg")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if img_b64:
+        if logo_img:
             st.markdown(
                 '<div style="text-align:center;margin-top:40px;">'
-                '<img src="data:image/png;base64,' + img_b64 + '" '
+                '<img src="data:image/jpeg;base64,' + logo_img + '" '
                 'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
                 'border:3px solid rgba(139,92,246,0.4);">'
                 '</div>',
@@ -1569,25 +1429,19 @@ def render_signup():
                         st.rerun()
         
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown(
-            '<p style="text-align:center;color:#64748b;font-size:13px;">Already have an account?</p>',
-            unsafe_allow_html=True
-        )
-        if st.button("Sign In", use_container_width=True, key="go_signin_btn"):
+        if st.button("← Back to Sign In", use_container_width=True, key="go_signin_btn"):
             navigate_to("signin")
 
 
 def render_chat():
-    """Main Chat page."""
+    """Main Chat page with Freestyle mode."""
     user_email = st.session_state.user_email
     user_name = st.session_state.user_name
     user_plan = st.session_state.user_plan
 
-    # Load chat history if not loaded
     if not st.session_state.chat_history:
         st.session_state.chat_history = load_chat_history(user_email)
 
-    # Handle pending suggest
     if st.session_state.pending_suggest:
         pending = st.session_state.pending_suggest
         st.session_state.pending_suggest = ""
@@ -1645,10 +1499,14 @@ def render_chat():
             unsafe_allow_html=True
         )
 
-        # Chat Mode
+        # ═══ CHAT MODE (3 options now!) ═══
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
-        mode_options = ["friend", "professional"]
-        mode_labels = {"friend": "🎭 Friend", "professional": "🏛️ Professional"}
+        mode_options = ["friend", "professional", "freestyle"]
+        mode_labels = {
+            "friend": "🎭 Friend",
+            "professional": "🏛️ Professional",
+            "freestyle": "🌟 Freestyle"
+        }
         current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
         new_mode = st.radio(
             "Chat Mode",
@@ -1661,19 +1519,47 @@ def render_chat():
         if new_mode != st.session_state.chat_mode:
             st.session_state.chat_mode = new_mode
             st.rerun()
-
-        # Wisdom Sources
-        st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
-        with st.expander("Select Sources", expanded=False):
-            new_sources = []
-            for src in WISDOM_SOURCES:
-                key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
-                checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
-                if checked:
-                    new_sources.append(src)
-            if new_sources != st.session_state.selected_sources:
-                st.session_state.selected_sources = new_sources
-                st.rerun()
+        
+        # Mode description
+        mode_descriptions = {
+            "friend": "💛 Casual & warm, no citations",
+            "professional": "📖 Formal, cites selected sources",
+            "freestyle": "🌟 Explores ALL sources, finds best wisdom"
+        }
+        st.markdown(
+            '<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">'
+            + mode_descriptions.get(st.session_state.chat_mode, "") +
+            '</div>',
+            unsafe_allow_html=True
+        )
+        
+        # ═══ WISDOM SOURCES (conditional based on mode) ═══
+        if st.session_state.chat_mode == "professional":
+            st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
+            with st.expander("Select Sources", expanded=False):
+                new_sources = []
+                for src in WISDOM_SOURCES:
+                    key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
+                    checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
+                    if checked:
+                        new_sources.append(src)
+                if new_sources != st.session_state.selected_sources:
+                    st.session_state.selected_sources = new_sources
+                    st.rerun()
+        elif st.session_state.chat_mode == "freestyle":
+            st.markdown('<div class="yumea-sidebar-label">🌟 All Sources Active</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);'
+                'border-radius:10px;padding:12px;font-size:12px;color:#c4b5fd;line-height:1.6;">'
+                '<strong>Freestyle explores:</strong><br>'
+                '🕉️ Osho • Buddha • Krishna<br>'
+                '✝️ Bible • 🕌 Quran<br>'
+                '🏛️ Socrates • Plato • Aristotle • Confucius<br>'
+                '💭 Descartes • Kant<br><br>'
+                '<em>Yumea picks BEST wisdom for your question!</em>'
+                '</div>',
+                unsafe_allow_html=True
+            )
 
         # AI Model
         st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
@@ -1715,13 +1601,18 @@ def render_chat():
             navigate_to("signin")
 
     # ═══ CHAT AREA ═══
-    # Chat header
+    # Header with mode indicator
+    mode_badge = ""
+    if st.session_state.chat_mode == "freestyle":
+        mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE MODE</span>'
+    
     header_html = (
         '<div class="yumea-chat-header">'
         + get_avatar_html(44) +
         '<div style="flex:1;">'
         '<div style="font-size:16px;font-weight:700;color:#fff;">Yumea <span style="color:#8b5cf6;">✓</span></div>'
         '<div style="font-size:12px;color:#10b981;">🟢 online · always here</div>'
+        + mode_badge +
         '</div>'
         '<div class="yumea-header-btn">📞<span class="yumea-tooltip">Coming Soon</span></div>'
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div>'
@@ -1729,7 +1620,7 @@ def render_chat():
     )
     st.markdown(header_html, unsafe_allow_html=True)
 
-    # Messages area
+    # Messages
     messages_html = ""
     if not history:
         messages_html = (
@@ -1762,7 +1653,7 @@ def render_chat():
                     + get_avatar_html(32, "yumea-msg-avatar") +
                     '<div style="flex:1;max-width:70%;">'
                     '<div class="yumea-msg-bubble ai">' + content_html + '</div>'
-                    '<div class="yumea-msg-meta ai-meta">' + ts + resp_time + source_tag + '</div>'
+                    '<div class="yumea-msg-meta">' + ts + resp_time + source_tag + '</div>'
                     '</div>'
                     '</div>'
                 )
@@ -1778,7 +1669,7 @@ def render_chat():
         unsafe_allow_html=True
     )
 
-    # Show suggestions if empty
+    # Suggestions if empty
     if not history:
         st.markdown('<div style="max-width:600px;margin:20px auto;padding:0 20px;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -1790,8 +1681,8 @@ def render_chat():
                 st.session_state.pending_suggest = "Mujhe motivation chahiye"
                 st.rerun()
         with col2:
-            if st.button("How do I find inner peace?", use_container_width=True, key="sug_2"):
-                st.session_state.pending_suggest = "How do I find inner peace?"
+            if st.button("What is inner peace?", use_container_width=True, key="sug_2"):
+                st.session_state.pending_suggest = "What is inner peace?"
                 st.rerun()
             if st.button("What is the meaning of life?", use_container_width=True, key="sug_4"):
                 st.session_state.pending_suggest = "What is the meaning of life?"
@@ -1823,9 +1714,7 @@ def render_chat():
                 except Exception:
                     pass
 
-    # Chat input
     prompt = st.chat_input("Type your message...", key="chat_input_main")
-
     user_input = prompt or mic_text
 
     if user_input:
@@ -1846,7 +1735,6 @@ def render_premium():
         unsafe_allow_html=True
     )
     
-    # Premium Lite
     st.markdown(
         '<div class="yumea-plan-card">'
         '<div style="font-size:14px;color:#8b5cf6;font-weight:600;">PREMIUM LITE</div>'
@@ -1854,9 +1742,8 @@ def render_premium():
         '<div style="margin:16px 0;">'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 150 messages per day</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 2,000 words per message</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> Friend + Professional modes</div>'
+        '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes (Friend/Professional/Freestyle)</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 11 Wisdom Sources</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> Debate Mode</div>'
         '</div>'
         '</div>',
         unsafe_allow_html=True
@@ -1868,7 +1755,6 @@ def render_premium():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Premium Pro
     st.markdown(
         '<div class="yumea-plan-card pro">'
         '<div style="font-size:14px;color:#fbbf24;font-weight:600;">PREMIUM PRO ⭐</div>'
@@ -1876,9 +1762,8 @@ def render_premium():
         '<div style="margin:16px 0;">'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 500 messages per day</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words per message</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> Friend + Professional modes</div>'
+        '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 11 Wisdom Sources</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> Debate Mode</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> Priority AI responses</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> Early access to new features</div>'
         '</div>'
@@ -1964,7 +1849,7 @@ def render_reviews():
                 st.balloons()
                 st.markdown(
                     '<div class="yumea-success" style="margin-top:16px;">'
-                    '✅ Thank you for your review! Your feedback means the world to us. 🌙'
+                    '✅ Thank you for your review! 🌙'
                     '</div>',
                     unsafe_allow_html=True
                 )
@@ -1978,7 +1863,7 @@ def render_reviews():
 
 
 def render_listen():
-    """Listen to Source page with Previous/Next navigation."""
+    """Listen to Source page with Previous/Next."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="listen_back_top"):
@@ -1993,21 +1878,18 @@ def render_listen():
     source = st.selectbox("Wisdom Source", WISDOM_SOURCES, key="listen_source_sel")
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
-    # Get Wisdom button (first time or new source)
     if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
         with st.spinner("Channeling wisdom from " + source + "..."):
             insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
             if insight:
                 st.session_state.listen_text = insight
                 st.session_state.listen_source_name = source
-                # Initialize/save to history
                 if "listen_history" not in st.session_state:
                     st.session_state.listen_history = []
                 st.session_state.listen_history.append({
                     "text": insight,
                     "source": source
                 })
-                # Keep last 20
                 if len(st.session_state.listen_history) > 20:
                     st.session_state.listen_history = st.session_state.listen_history[-20:]
                 
@@ -2024,7 +1906,6 @@ def render_listen():
             else:
                 st.error("Failed to generate wisdom. Please try again.")
     
-    # Show current wisdom + navigation buttons
     if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
         st.markdown(
@@ -2035,7 +1916,6 @@ def render_listen():
             unsafe_allow_html=True
         )
         
-        # Audio player
         if st.session_state.listen_audio:
             try:
                 with open(st.session_state.listen_audio, "rb") as f:
@@ -2043,7 +1923,6 @@ def render_listen():
             except Exception:
                 pass
         
-        # Navigation buttons: Previous | Next | Replay
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -2111,30 +1990,20 @@ def render_listen():
 # MAIN APP
 # ══════════════════════════════════════════════════════════
 def main():
-    # Start analytics tracking
-    if ANALYTICS_AVAILABLE:
-        streamlit_analytics.start_tracking()
-    
     init_session_state()
-
-    # Inject global CSS
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
 
-    # Router
     page = st.session_state.current_page
     is_auth = st.session_state.authenticated
 
-    # Not authenticated → only show signin/signup
     if not is_auth and page not in ("signin", "signup"):
         st.session_state.current_page = "signin"
         page = "signin"
 
-    # Authenticated → redirect away from signin/signup
     if is_auth and page in ("signin", "signup"):
         st.session_state.current_page = "chat"
         page = "chat"
 
-             # Render page
     if page == "signin":
         render_signin()
     elif page == "signup":
