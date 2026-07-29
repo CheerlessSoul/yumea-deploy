@@ -160,28 +160,26 @@ header[data-testid="stHeader"] {
     height: 0 !important;
 }
 
-/* Sidebar toggle - ALWAYS visible in both open and closed states */
+/* Sidebar toggle - BRIGHT WHITE for visibility */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="baseButton-headerNoPadding"],
 button[kind="header"],
-[data-testid="collapsedControl"],
-.st-emotion-cache-r90ti5,
-.st-emotion-cache-1egp7xh {
+[data-testid="collapsedControl"] {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: rgba(139, 92, 246, 0.9) !important;
-    border: 2px solid rgba(139, 92, 246, 0.6) !important;
+    background: #ffffff !important;
+    border: 3px solid #ff0000 !important;
     border-radius: 8px !important;
-    padding: 8px 12px !important;
+    padding: 10px !important;
     z-index: 999999 !important;
     position: fixed !important;
-    top: 10px !important;
-    left: 10px !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
-    width: 40px !important;
-    height: 40px !important;
+    top: 15px !important;
+    left: 15px !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.8) !important;
+    width: 50px !important;
+    height: 50px !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
@@ -191,11 +189,12 @@ button[kind="header"],
 [data-testid="baseButton-headerNoPadding"] svg,
 button[kind="header"] svg,
 [data-testid="collapsedControl"] svg {
-    color: white !important;
-    fill: white !important;
-    width: 24px !important;
-    height: 24px !important;
+    color: #000000 !important;
+    fill: #000000 !important;
+    width: 28px !important;
+    height: 28px !important;
     display: block !important;
+    stroke: #000000 !important;
 }
 
 /* Force show when sidebar is closed */
