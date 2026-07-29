@@ -1133,7 +1133,7 @@ def render_signin():
             password = st.text_input("🔒 Password", type="password")
             submitted = st.form_submit_button("Sign In →", use_container_width=True, type="primary")
             
-            if submitted:
+                        if submitted:
                 if not email or not password:
                     st.session_state.auth_error = "Please fill in all fields."
                     st.rerun()
@@ -1145,6 +1145,16 @@ def render_signin():
                         st.session_state.user_name = user["name"]
                         st.session_state.user_plan = user.get("plan", "free")
                         st.session_state.current_page = "chat"
+                        # Force sidebar to open after login
+                        st.markdown(
+                            '<script>'
+                            'setTimeout(function(){'
+                            'var btn = window.parent.document.querySelector("[data-testid=stSidebarCollapsedControl]");'
+                            'if(btn) btn.click();'
+                            '}, 500);'
+                            '</script>',
+                            unsafe_allow_html=True
+                        )
                         st.rerun()
                     else:
                         st.session_state.auth_error = "Invalid email or password."
