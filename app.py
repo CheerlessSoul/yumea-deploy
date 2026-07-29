@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-With ChatGPT-style collapsible sidebar
+Fixed sidebar toggle with Streamlit buttons
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -155,7 +155,7 @@ body {
     height: 0 !important;
 }
 
-/* Hide Streamlit default sidebar completely */
+/* Hide Streamlit default sidebar */
 section[data-testid="stSidebar"] {
     display: none !important;
 }
@@ -168,9 +168,9 @@ button[kind="header"],
 }
 
 /* ═══════════════════════════════════════════════
-   CUSTOM MINI SIDEBAR (Collapsed)
+   MINI SIDEBAR (Collapsed)
 ═══════════════════════════════════════════════ */
-.yumea-mini-sidebar {
+.yumea-mini-sidebar-bg {
     position: fixed;
     top: 0;
     left: 0;
@@ -178,47 +178,43 @@ button[kind="header"],
     height: 100vh;
     background: linear-gradient(180deg, #0d0d1f, #0a0a15);
     border-right: 1px solid rgba(139, 92, 246, 0.2);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px 0;
-    gap: 12px;
+    z-index: 9998;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.yumea-mini-btn {
+.yumea-mini-buttons-container {
+    position: fixed;
+    top: 15px;
+    left: 10px;
     width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(139, 92, 246, 0.15);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    color: #a78bfa;
+    z-index: 9999;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none !important;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.yumea-mini-btn:hover {
-    background: rgba(139, 92, 246, 0.3);
+.yumea-mini-buttons-container .stButton > button {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: #a78bfa !important;
+    font-size: 20px !important;
+    min-width: 40px !important;
+}
+
+.yumea-mini-buttons-container .stButton > button:hover {
+    background: rgba(139, 92, 246, 0.3) !important;
     color: #fff !important;
     transform: scale(1.05);
 }
 
-.yumea-mini-btn.toggle {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff !important;
-    border-color: #8b5cf6;
-}
-
 /* ═══════════════════════════════════════════════
-   FULL CUSTOM SIDEBAR
+   FULL SIDEBAR (Open)
 ═══════════════════════════════════════════════ */
-.yumea-full-sidebar {
+.yumea-full-sidebar-bg {
     position: fixed;
     top: 0;
     left: 0;
@@ -226,10 +222,19 @@ button[kind="header"],
     height: 100vh;
     background: linear-gradient(180deg, #0d0d1f, #0a0a15);
     border-right: 1px solid rgba(139, 92, 246, 0.2);
+    z-index: 9998;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.yumea-sidebar-content {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    padding: 16px;
     z-index: 9999;
     overflow-y: auto;
-    padding: 16px;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
 }
 
 .yumea-sidebar-header {
@@ -247,29 +252,33 @@ button[kind="header"],
     gap: 10px;
 }
 
-.yumea-sidebar-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: rgba(139, 92, 246, 0.15);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    cursor: pointer;
-    text-decoration: none !important;
-    transition: all 0.2s;
+/* Close button (Streamlit) */
+.yumea-close-btn-container {
+    position: fixed;
+    top: 15px;
+    left: 235px;
+    z-index: 10001;
 }
 
-.yumea-sidebar-close:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.4);
+.yumea-close-btn-container .stButton > button {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: #a78bfa !important;
+    font-size: 16px !important;
+    min-width: 34px !important;
+}
+
+.yumea-close-btn-container .stButton > button:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
     color: #f87171 !important;
 }
 
-/* Chat area with sidebar padding */
+/* Chat area */
 .yumea-chat-header {
     background: linear-gradient(180deg, #12122a, #0f0f1e);
     border-bottom: 1px solid rgba(139, 92, 246, 0.15);
@@ -341,7 +350,6 @@ button[kind="header"],
 }
 .yumea-source-tag { color: #8b5cf6; font-weight: 500; }
 
-/* Empty state */
 .yumea-empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -443,7 +451,6 @@ button[kind="header"],
 }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
-/* Freestyle badge */
 .yumea-freestyle-badge {
     background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7);
     color: white;
@@ -493,7 +500,6 @@ button[kind="header"],
     font-weight: 700;
 }
 
-/* Source card */
 .yumea-source-card {
     background: linear-gradient(180deg, #12122a, #0d0d1f);
     border: 1px solid rgba(139, 92, 246, 0.15);
@@ -515,7 +521,6 @@ button[kind="header"],
     font-weight: 600;
 }
 
-/* Page container */
 .yumea-page-container {
     max-width: 700px;
     margin: 0 auto;
@@ -533,7 +538,6 @@ button[kind="header"],
     margin-bottom: 28px;
 }
 
-/* Success/Error */
 .yumea-success {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
@@ -553,7 +557,7 @@ button[kind="header"],
     margin-bottom: 16px;
 }
 
-/* Buttons */
+/* Buttons default */
 .stButton > button,
 .stFormSubmitButton > button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
@@ -577,7 +581,6 @@ button[kind="primaryFormSubmit"] {
     border: none !important;
 }
 
-/* Inputs */
 .stTextInput input, .stTextArea textarea {
     background: rgba(255, 255, 255, 0.04) !important;
     color: #fff !important;
@@ -608,7 +611,9 @@ def get_avatar_html(size, cls=""):
             'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;'
             'align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:' +
             str(size // 3) + 'px;flex-shrink:0;border:2px solid rgba(139,92,246,0.4);">Y</div>')
-    # ─────────────────────────────────────────────────────────
+
+
+# ─────────────────────────────────────────────────────────
 # User / Auth System
 # ─────────────────────────────────────────────────────────
 def load_users():
@@ -776,9 +781,7 @@ def detect_gender(text, history):
         return False
     
     return False
-
-
-# ─────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────
 # AI Backend
 # ─────────────────────────────────────────────────────────
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
@@ -894,8 +897,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "RESPONSE STYLE:\n"
             "- Conversational but insightful\n"
             "- Mix casual warmth with genuine wisdom\n"
-            "- 3-5 sentences typical, longer for deep questions\n"
-            "- Show HOW different traditions view the same topic (when relevant)\n\n"
+            "- 3-5 sentences typical, longer for deep questions\n\n"
             
             "STILL FOLLOW ANTI-HALLUCINATION RULES:\n"
             "- Only real, verified quotes\n"
@@ -972,12 +974,11 @@ def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatil
         "Write 3-5 sentences in " + language + ". "
         "Sound authentic to " + source + "'s voice and teaching style. "
         "Do NOT use markdown formatting — just plain text. "
-        "Do NOT mention the theme name explicitly. "
-        "Make it feel like a direct transmission of wisdom."
+        "Do NOT mention the theme name explicitly."
     )
 
     messages = [
-        {"role": "system", "content": "You are a wise spiritual voice. Respond only with the wisdom text, nothing else. No markdown, no headers, no bullet points. Just flowing prose."},
+        {"role": "system", "content": "You are a wise spiritual voice. Respond only with the wisdom text, nothing else. No markdown, no headers, no bullet points."},
         {"role": "user", "content": prompt}
     ]
 
@@ -997,12 +998,9 @@ async def generate_audio(text, voice="hi-IN-SwaraNeural"):
         return None
 
 
-# ─────────────────────────────────────────────────────────
-# Email Sending
-# ─────────────────────────────────────────────────────────
 def send_review_email(name, email, rating, liked, improve, thoughts):
     if not EMAIL_ADDRESS or not EMAIL_APP_PASSWORD:
-        return False, "Email not configured. Review noted locally."
+        return False, "Email not configured."
 
     try:
         import smtplib
@@ -1034,9 +1032,6 @@ def send_review_email(name, email, rating, liked, improve, thoughts):
         return False, "Failed to send: " + str(e)
 
 
-# ─────────────────────────────────────────────────────────
-# Session State
-# ─────────────────────────────────────────────────────────
 def init_session_state():
     defaults = {
         "current_page": "signin",
@@ -1078,21 +1073,15 @@ def md_to_html(text):
     html = html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     html = re.sub(r'^### (.+)$', r'<h4 style="color:#d4b3ff;font-size:15px;font-weight:700;margin:12px 0 6px;">\1</h4>', html, flags=re.MULTILINE)
     html = re.sub(r'^## (.+)$', r'<h3 style="color:#d4b3ff;font-size:16px;font-weight:700;margin:14px 0 8px;">\1</h3>', html, flags=re.MULTILINE)
-    html = re.sub(r'^# (.+)$', r'<h2 style="color:#d4b3ff;font-size:18px;font-weight:700;margin:16px 0 8px;">\1</h2>', html, flags=re.MULTILINE)
-    html = re.sub(r'\*\*\*(.+?)\*\*\*', r'<strong><em>\1</em></strong>', html)
     html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html)
     html = re.sub(r'\*(.+?)\*', r'<em>\1</em>', html)
     html = html.replace("\n\n", "</p><p>")
     html = html.replace("\n", "<br>")
     html = "<p>" + html + "</p>"
     html = html.replace("<p></p>", "")
-    html = html.replace("<p><br></p>", "")
     return html
 
 
-# ─────────────────────────────────────────────────────────
-# Message Processor
-# ─────────────────────────────────────────────────────────
 def process_user_message(user_input):
     user_email = st.session_state.user_email
     user_plan = st.session_state.user_plan
@@ -1101,14 +1090,13 @@ def process_user_message(user_input):
     word_count = len(user_input.split())
     if word_count > plan_info["words"]:
         st.session_state.chat_history.append({
-            "role": "user",
-            "content": user_input,
+            "role": "user", "content": user_input,
             "time": datetime.now().strftime("%I:%M %p"),
             "date": date.today().isoformat()
         })
         st.session_state.chat_history.append({
             "role": "assistant",
-            "content": "⚠️ Your message exceeds the " + str(plan_info["words"]) + " word limit for your " + plan_info["name"] + " plan. Please keep it shorter, or upgrade to send longer messages. 💎",
+            "content": "⚠️ Your message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎",
             "time": datetime.now().strftime("%I:%M %p"),
             "date": date.today().isoformat()
         })
@@ -1119,7 +1107,7 @@ def process_user_message(user_input):
     if msg_count >= plan_info["messages"]:
         st.session_state.chat_history.append({
             "role": "assistant",
-            "content": "🚫 You've reached your daily message limit (" + str(plan_info["messages"]) + " messages). Upgrade to Premium for more messages!\n\n💎 **Premium Lite** — 150 messages/day (₹69/month)\n💎 **Premium Pro** — 500 messages/day (₹199/month)",
+            "content": "🚫 Daily limit reached (" + str(plan_info["messages"]) + " messages). Upgrade to Premium!",
             "time": datetime.now().strftime("%I:%M %p"),
             "date": date.today().isoformat(),
             "source": "YUMEA System"
@@ -1128,8 +1116,7 @@ def process_user_message(user_input):
         return
 
     st.session_state.chat_history.append({
-        "role": "user",
-        "content": user_input,
+        "role": "user", "content": user_input,
         "time": datetime.now().strftime("%I:%M %p"),
         "date": date.today().isoformat()
     })
@@ -1143,15 +1130,12 @@ def process_user_message(user_input):
         crisis_response = (
             "Main yahan hoon. Tum safe ho. 🤍\n\n"
             "Ek minute ruko, dheere se saans lo...\n\n"
-            "Tumhari zindagi bahut qeemti hai. Abhi yeh feel ho raha hai, "
-            "lekin yeh waqai nahi hai ki tum theek nahi ho sakte.\n\n"
-            "Please, abhi ek professional se baat karo — yeh helpline 24/7 available hai:\n\n"
+            "Please, professional se baat karo:\n\n"
             "📞 **iCall: 9152987821**\n\n"
-            "Main yahan hoon, par mujhse zyada ek insaan tumhari madad kar sakta hai. Please call karo. 🌙"
+            "Main yahan hoon. 🌙"
         )
         st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": crisis_response,
+            "role": "assistant", "content": crisis_response,
             "time": datetime.now().strftime("%I:%M %p"),
             "date": date.today().isoformat(),
             "source": "Crisis Support"
@@ -1167,23 +1151,17 @@ def process_user_message(user_input):
     )
 
     ai_messages = [{"role": "system", "content": system_prompt}]
-
     context_history = st.session_state.chat_history[-20:]
     for m in context_history:
         if m["role"] in ("user", "assistant"):
             ai_messages.append({"role": m["role"], "content": m["content"]})
 
     start_time = time.time()
-    model_to_use = st.session_state.ai_model
-    if model_to_use.startswith("ollama:"):
-        response_text = call_ai(ai_messages, "llama-3.3-70b-versatile")
-    else:
-        response_text = call_ai(ai_messages, model_to_use)
-
+    response_text = call_ai(ai_messages, st.session_state.ai_model)
     response_time = round(time.time() - start_time, 1)
 
     if response_text is None:
-        response_text = "Sorry, I couldn't connect right now. Please try again in a moment. 🌙"
+        response_text = "Sorry, I couldn't connect. Please try again. 🌙"
 
     response_text = response_text.strip()
 
@@ -1194,8 +1172,7 @@ def process_user_message(user_input):
         source_tag = "🌟 Freestyle"
 
     ai_msg = {
-        "role": "assistant",
-        "content": response_text,
+        "role": "assistant", "content": response_text,
         "time": datetime.now().strftime("%I:%M %p"),
         "date": date.today().isoformat(),
         "response_time": response_time
@@ -1205,117 +1182,28 @@ def process_user_message(user_input):
 
     st.session_state.chat_history.append(ai_msg)
     save_chat_history(user_email, st.session_state.chat_history)
-    # ══════════════════════════════════════════════════════════
+
+
+# ══════════════════════════════════════════════════════════
 # PAGE RENDERERS
 # ══════════════════════════════════════════════════════════
 
 def render_signin():
-    """Sign In page."""
     yumea_img = load_image_b64("yumea-login-pic.jpg")
     logo_img = load_image_b64("yumea-logo.jpeg")
     
     st.markdown("""
     <style>
-    .stApp {
-        background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important;
-    }
-    
-    .signin-image-wrapper {
-        position: relative;
-        max-width: 380px;
-        margin: 0 auto;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
-    }
-    
-    .signin-image-wrapper img {
-        width: 100%;
-        display: block;
-    }
-    
-    .signin-image-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 60%, transparent 100%);
-        padding: 30px 20px 20px;
-    }
-    
-    .signin-quote-mark {
-        color: #a78bfa;
-        font-size: 32px;
-        line-height: 0.8;
-        font-family: serif;
-    }
-    
-    .signin-tagline-1 {
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: 700;
-        margin-top: 4px;
-    }
-    
-    .signin-tagline-2 {
-        color: #a78bfa;
-        font-size: 18px;
-        font-weight: 700;
-    }
-    
-    .signin-features-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        max-width: 380px;
-        margin: 15px auto 0;
-    }
-    
-    .signin-feature-mini {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(139, 92, 246, 0.08);
-        border: 1px solid rgba(139, 92, 246, 0.2);
-        border-radius: 10px;
-        padding: 8px 10px;
-    }
-    
-    .signin-feature-mini-icon {
-        font-size: 16px;
-        flex-shrink: 0;
-    }
-    
-    .signin-feature-mini-text {
-        color: #e2e8f0;
-        font-size: 11px;
-        font-weight: 500;
-        line-height: 1.3;
-    }
-    
-    .signin-logo-img {
-        display: block;
-        margin: 0 auto 12px;
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-    
-    .signin-title-big {
-        text-align: center;
-        color: #ffffff;
-        font-size: 28px;
-        font-weight: 800;
-        margin: 0 0 4px 0;
-    }
-    
-    .signin-subtitle-small {
-        text-align: center;
-        color: #a78bfa;
-        font-size: 13px;
-        margin-bottom: 20px;
-    }
+    .stApp { background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important; }
+    .signin-image-wrapper { position: relative; max-width: 380px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3); }
+    .signin-image-wrapper img { width: 100%; display: block; }
+    .signin-image-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 30px 20px 20px; }
+    .signin-quote-mark { color: #a78bfa; font-size: 32px; font-family: serif; }
+    .signin-tagline-1 { color: #fff; font-size: 18px; font-weight: 700; }
+    .signin-tagline-2 { color: #a78bfa; font-size: 18px; font-weight: 700; }
+    .signin-logo-img { display: block; margin: 0 auto 12px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+    .signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
+    .signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
     
@@ -1330,39 +1218,13 @@ def render_signin():
                 '<div class="signin-quote-mark">"</div>'
                 '<div class="signin-tagline-1">AI that feels.</div>'
                 '<div class="signin-tagline-2">Answers that matter."</div>'
-                '</div>'
-                '</div>',
+                '</div></div>',
                 unsafe_allow_html=True
             )
-        
-        st.markdown(
-            '<div class="signin-features-row">'
-            '<div class="signin-feature-mini">'
-            '<span class="signin-feature-mini-icon">✨</span>'
-            '<span class="signin-feature-mini-text">11 Wisdom Traditions</span>'
-            '</div>'
-            '<div class="signin-feature-mini">'
-            '<span class="signin-feature-mini-icon">🔒</span>'
-            '<span class="signin-feature-mini-text">Emotional Support</span>'
-            '</div>'
-            '<div class="signin-feature-mini">'
-            '<span class="signin-feature-mini-icon">⚡</span>'
-            '<span class="signin-feature-mini-text">Voice Enabled</span>'
-            '</div>'
-            '<div class="signin-feature-mini">'
-            '<span class="signin-feature-mini-icon">🌙</span>'
-            '<span class="signin-feature-mini-text">Available 24/7</span>'
-            '</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
     
     with col2:
         if logo_img:
-            st.markdown(
-                '<img src="data:image/jpeg;base64,' + logo_img + '" class="signin-logo-img" alt="Logo">',
-                unsafe_allow_html=True
-            )
+            st.markdown('<img src="data:image/jpeg;base64,' + logo_img + '" class="signin-logo-img">', unsafe_allow_html=True)
         
         st.markdown('<h1 class="signin-title-big">Welcome Back</h1>', unsafe_allow_html=True)
         st.markdown('<p class="signin-subtitle-small">Sign in to continue to YUMEA</p>', unsafe_allow_html=True)
@@ -1375,19 +1237,9 @@ def render_signin():
             st.markdown('<div class="yumea-success">' + st.session_state.auth_success + '</div>', unsafe_allow_html=True)
             st.session_state.auth_success = ""
         
-        with st.form("signin_form", clear_on_submit=False):
-            email = st.text_input("📧 Email or Admin Username", placeholder="your@email.com", key="si_email")
-            password = st.text_input("🔒 Password", type="password", placeholder="Your password", key="si_pass")
-            
-            col_a, col_b = st.columns([1, 1])
-            with col_a:
-                remember = st.checkbox("Remember me", key="si_remember")
-            with col_b:
-                st.markdown(
-                    '<div style="text-align:right;padding-top:8px;color:#a78bfa;font-size:13px;">Forgot password?</div>',
-                    unsafe_allow_html=True
-                )
-            
+        with st.form("signin_form"):
+            email = st.text_input("📧 Email or Admin Username", placeholder="your@email.com")
+            password = st.text_input("🔒 Password", type="password")
             submitted = st.form_submit_button("Sign In →", use_container_width=True, type="primary")
             
             if submitted:
@@ -1407,48 +1259,25 @@ def render_signin():
                         st.session_state.auth_error = "Invalid email or password."
                         st.rerun()
         
-        st.markdown(
-            '<div style="text-align:center;color:#64748b;font-size:12px;margin:12px 0 8px;">'
-            "Don't have an account?"
-            '</div>',
-            unsafe_allow_html=True
-        )
-        
-        if st.button("👤 Create New Account", use_container_width=True, key="go_signup_btn"):
+        if st.button("👤 Create New Account", use_container_width=True):
             navigate_to("signup")
 
 
 def render_signup():
-    """Sign Up page."""
-    logo_img = load_image_b64("yumea-logo.jpeg")
-    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if logo_img:
-            st.markdown(
-                '<div style="text-align:center;margin-top:40px;">'
-                '<img src="data:image/jpeg;base64,' + logo_img + '" '
-                'style="width:80px;height:80px;border-radius:50%;object-fit:cover;'
-                'border:3px solid rgba(139,92,246,0.4);">'
-                '</div>',
-                unsafe_allow_html=True
-            )
-        
-        st.markdown(
-            '<h1 style="text-align:center;color:#fff;font-size:28px;margin:16px 0 4px;">Create Account</h1>'
-            '<p style="text-align:center;color:#64748b;font-size:14px;margin-bottom:24px;">Join YUMEA — your AI companion</p>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<h1 style="text-align:center;color:#fff;font-size:28px;margin:40px 0 4px;">Create Account</h1>', unsafe_allow_html=True)
+        st.markdown('<p style="text-align:center;color:#64748b;font-size:14px;margin-bottom:24px;">Join YUMEA</p>', unsafe_allow_html=True)
         
         if st.session_state.get("auth_error"):
             st.markdown('<div class="yumea-auth-error">' + st.session_state.auth_error + '</div>', unsafe_allow_html=True)
             st.session_state.auth_error = ""
         
-        with st.form("signup_form", clear_on_submit=False):
-            name = st.text_input("Your Name", placeholder="Enter your name", key="su_name")
-            email = st.text_input("Email Address", placeholder="your@email.com", key="su_email")
-            password = st.text_input("Password", type="password", placeholder="At least 4 characters", key="su_pass")
-            confirm = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="su_confirm")
+        with st.form("signup_form"):
+            name = st.text_input("Your Name")
+            email = st.text_input("Email Address")
+            password = st.text_input("Password", type="password")
+            confirm = st.text_input("Confirm Password", type="password")
             submitted = st.form_submit_button("Create Account", use_container_width=True, type="primary")
             
             if submitted:
@@ -1467,13 +1296,12 @@ def render_signup():
                         st.session_state.auth_error = msg
                         st.rerun()
         
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("← Back to Sign In", use_container_width=True, key="go_signin_btn"):
+        if st.button("← Back to Sign In", use_container_width=True):
             navigate_to("signin")
 
 
 def render_chat():
-    """Main Chat page with ChatGPT-style collapsible sidebar."""
+    """Chat page with collapsible sidebar using Streamlit buttons."""
     user_email = st.session_state.user_email
     user_name = st.session_state.user_name
     user_plan = st.session_state.user_plan
@@ -1487,54 +1315,39 @@ def render_chat():
         process_user_message(pending)
         st.rerun()
 
-        # ═══ QUERY PARAM HANDLERS ═══
-    query_params = st.query_params
-    
-    if "toggle_sidebar" in query_params:
-        # Preserve auth state before rerun
-        st.session_state.sidebar_open = not st.session_state.get("sidebar_open", True)
-        st.session_state.authenticated = True  # Force preserve
-        # Clear params without rerun
-        try:
-            del st.query_params["toggle_sidebar"]
-        except:
-            pass
-        st.rerun()
-    
-    if "goto" in query_params:
-        target = query_params["goto"]
-        # Preserve auth
-        st.session_state.authenticated = True
-        try:
-            del st.query_params["goto"]
-        except:
-            pass
-        if target == "premium":
-            st.session_state.payment_done = False
-            st.session_state.current_page = "premium"
-            st.rerun()
-        elif target == "reviews":
-            st.session_state.current_page = "reviews"
-            st.rerun()
-        elif target == "listen":
-            st.session_state.current_page = "listen"
-            st.rerun()
+    history = st.session_state.chat_history
+    sidebar_open = st.session_state.get("sidebar_open", True)
 
-    # ═══ RENDER SIDEBAR ═══
+    # ═══ MINI SIDEBAR (Closed) ═══
     if not sidebar_open:
-        # MINI SIDEBAR
+        # Background
         st.markdown(
-            '<div class="yumea-mini-sidebar">'
-            '<a href="?toggle_sidebar=1" target="_self" class="yumea-mini-btn toggle" title="Open Sidebar">☰</a>'
-            '<a href="?goto=premium" target="_self" class="yumea-mini-btn" title="Buy Premium">💎</a>'
-            '<a href="?goto=reviews" target="_self" class="yumea-mini-btn" title="Rate Yumea">⭐</a>'
-            '<a href="?goto=listen" target="_self" class="yumea-mini-btn" title="Listen to Source">🎧</a>'
-            '</div>'
+            '<div class="yumea-mini-sidebar-bg"></div>'
             '<style>.block-container { padding-left: 80px !important; }</style>',
             unsafe_allow_html=True
         )
+        
+        # Buttons container with Streamlit buttons
+        st.markdown('<div class="yumea-mini-buttons-container">', unsafe_allow_html=True)
+        
+        if st.button("☰", key="mini_open_btn", help="Open Sidebar"):
+            st.session_state.sidebar_open = True
+            st.rerun()
+        
+        if st.button("💎", key="mini_premium_btn", help="Buy Premium"):
+            st.session_state.payment_done = False
+            navigate_to("premium")
+        
+        if st.button("⭐", key="mini_reviews_btn", help="Rate Yumea"):
+            navigate_to("reviews")
+        
+        if st.button("🎧", key="mini_listen_btn", help="Listen to Source"):
+            navigate_to("listen")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ═══ FULL SIDEBAR (Open) ═══
     else:
-        # FULL SIDEBAR
         img_b64 = load_image_b64("yumea-new-user.png")
         
         avatar_display = ""
@@ -1551,7 +1364,7 @@ def render_chat():
                 'align-items:center;justify-content:center;color:#fff;font-weight:800;">Y</div>'
             )
         
-        # User card
+        # Plan info
         plan_info = PLANS.get(user_plan, PLANS["free"])
         msg_count = get_daily_message_count(user_email)
         msg_limit = plan_info["messages"]
@@ -1560,16 +1373,14 @@ def render_chat():
             counter_text = "♾️ UNLIMITED"
         else:
             counter_text = str(msg_count) + " / " + str(msg_limit) + " messages today"
-            if msg_count >= msg_limit:
-                counter_text = "🚫 LIMIT — " + counter_text
 
-        # Daily quote
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
 
+        # Sidebar background + brand + user card + quote
         sidebar_html = (
-            '<div class="yumea-full-sidebar">'
+            '<div class="yumea-full-sidebar-bg"></div>'
+            '<div class="yumea-sidebar-content">'
             
-            # Header
             '<div class="yumea-sidebar-header">'
             '<div class="yumea-sidebar-brand">'
             + avatar_display +
@@ -1578,118 +1389,118 @@ def render_chat():
             '<div style="font-size:10px;color:#8b5cf6;">AI That Feels</div>'
             '</div>'
             '</div>'
-            '<a href="?toggle_sidebar=1" target="_self" class="yumea-sidebar-close" title="Close">✕</a>'
             '</div>'
             
-            # User card
             '<div class="yumea-user-card">'
             '<div class="yumea-user-card-name">' + user_name + '</div>'
             '<div class="yumea-user-card-plan">' + plan_info["name"] + '</div>'
             '<div class="yumea-user-card-counter">' + counter_text + '</div>'
             '</div>'
             
-            # Daily quote
             '<div class="yumea-daily-quote">' + daily_quote + '</div>'
             
             '</div>'
             
-            # Adjust main content
             '<style>.block-container { padding-left: 300px !important; }</style>'
         )
         
         st.markdown(sidebar_html, unsafe_allow_html=True)
         
-        # Streamlit controls (positioned via container)
-        with st.container():
-            # Chat Mode
+        # Close button (Streamlit) — positioned via CSS
+        st.markdown('<div class="yumea-close-btn-container">', unsafe_allow_html=True)
+        if st.button("✕", key="close_sidebar_btn", help="Close Sidebar"):
+            st.session_state.sidebar_open = False
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Sidebar controls (positioned)
+        st.markdown(
+            '<div style="position:fixed;top:230px;left:16px;width:260px;z-index:10000;">',
+            unsafe_allow_html=True
+        )
+        
+        # Chat Mode
+        st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
+        mode_options = ["friend", "professional", "freestyle"]
+        mode_labels = {
+            "friend": "🎭 Friend",
+            "professional": "🏛️ Professional",
+            "freestyle": "🌟 Freestyle"
+        }
+        current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
+        new_mode = st.radio(
+            "Chat Mode", mode_options, index=current_idx,
+            label_visibility="collapsed",
+            format_func=lambda x: mode_labels.get(x, x),
+            key="chat_mode_radio"
+        )
+        if new_mode != st.session_state.chat_mode:
+            st.session_state.chat_mode = new_mode
+            st.rerun()
+
+        # Sources
+        if st.session_state.chat_mode == "professional":
+            st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
+            with st.expander("Select Sources", expanded=False):
+                new_sources = []
+                for src in WISDOM_SOURCES:
+                    key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
+                    checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
+                    if checked:
+                        new_sources.append(src)
+                if new_sources != st.session_state.selected_sources:
+                    st.session_state.selected_sources = new_sources
+                    st.rerun()
+        elif st.session_state.chat_mode == "freestyle":
             st.markdown(
-                '<div style="position:fixed;top:230px;left:16px;width:260px;z-index:10000;">',
+                '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);'
+                'border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">'
+                '🌟 <strong>All 11 sources active</strong><br>'
+                'Yumea picks BEST wisdom!'
+                '</div>',
                 unsafe_allow_html=True
             )
-            
-            st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
-            mode_options = ["friend", "professional", "freestyle"]
-            mode_labels = {
-                "friend": "🎭 Friend",
-                "professional": "🏛️ Professional",
-                "freestyle": "🌟 Freestyle"
-            }
-            current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
-            new_mode = st.radio(
-                "Chat Mode",
-                mode_options,
-                index=current_idx,
-                label_visibility="collapsed",
-                format_func=lambda x: mode_labels.get(x, x),
-                key="chat_mode_radio"
-            )
-            if new_mode != st.session_state.chat_mode:
-                st.session_state.chat_mode = new_mode
-                st.rerun()
 
-            # Wisdom Sources
-            if st.session_state.chat_mode == "professional":
-                st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
-                with st.expander("Select Sources", expanded=False):
-                    new_sources = []
-                    for src in WISDOM_SOURCES:
-                        key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
-                        checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
-                        if checked:
-                            new_sources.append(src)
-                    if new_sources != st.session_state.selected_sources:
-                        st.session_state.selected_sources = new_sources
-                        st.rerun()
-            elif st.session_state.chat_mode == "freestyle":
-                st.markdown(
-                    '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);'
-                    'border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">'
-                    '🌟 <strong>All 11 sources active</strong><br>'
-                    'Yumea picks BEST wisdom!'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
+        # AI Model
+        st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
+        models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+        if OLLAMA_AVAILABLE:
+            models.append("ollama:llama3.2:3b")
+        model_idx = models.index(st.session_state.ai_model) if st.session_state.ai_model in models else 0
+        new_model = st.selectbox("AI Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
+        if new_model != st.session_state.ai_model:
+            st.session_state.ai_model = new_model
+            st.rerun()
 
-            # AI Model
-            st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
-            models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-            if OLLAMA_AVAILABLE:
-                models.append("ollama:llama3.2:3b")
-            model_idx = models.index(st.session_state.ai_model) if st.session_state.ai_model in models else 0
-            new_model = st.selectbox("AI Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
-            if new_model != st.session_state.ai_model:
-                st.session_state.ai_model = new_model
-                st.rerun()
+        # Debate
+        st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
+        new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
+        if new_debate != st.session_state.debate_mode:
+            st.session_state.debate_mode = new_debate
+            st.rerun()
 
-            # Debate Mode
-            st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
-            new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
-            if new_debate != st.session_state.debate_mode:
-                st.session_state.debate_mode = new_debate
-                st.rerun()
-
-            # Menu
-            st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
-            if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
-                st.session_state.payment_done = False
-                navigate_to("premium")
-            if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
-                navigate_to("reviews")
-            if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
-                navigate_to("listen")
-            if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
-                st.session_state.chat_history = []
-                save_chat_history(user_email, [])
-                st.rerun()
-            if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
-                st.session_state.authenticated = False
-                st.session_state.user_email = ""
-                st.session_state.user_name = ""
-                st.session_state.user_plan = "free"
-                st.session_state.chat_history = []
-                navigate_to("signin")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Menu
+        st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
+        if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
+            st.session_state.payment_done = False
+            navigate_to("premium")
+        if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
+            navigate_to("reviews")
+        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
+            navigate_to("listen")
+        if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
+            st.session_state.chat_history = []
+            save_chat_history(user_email, [])
+            st.rerun()
+        if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
+            st.session_state.authenticated = False
+            st.session_state.user_email = ""
+            st.session_state.user_name = ""
+            st.session_state.user_plan = "free"
+            st.session_state.chat_history = []
+            navigate_to("signin")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ═══ CHAT AREA ═══
     mode_badge = ""
@@ -1717,7 +1528,7 @@ def render_chat():
             '<div class="yumea-empty-state">'
             + get_avatar_html(120, "yumea-empty-avatar") +
             '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div>'
-            '<div class="yumea-empty-sub">Your emotional companion — here to listen, understand, and guide you.</div>'
+            '<div class="yumea-empty-sub">Your emotional companion.</div>'
             '</div>'
         )
     else:
@@ -1750,12 +1561,7 @@ def render_chat():
 
     st.markdown(
         '<div class="yumea-messages-area" id="yumea-messages">' + messages_html + '</div>'
-        '<script>'
-        'setTimeout(function(){'
-        'var m=document.getElementById("yumea-messages");'
-        'if(m)m.scrollTop=m.scrollHeight;'
-        '},100);'
-        '</script>',
+        '<script>setTimeout(function(){var m=document.getElementById("yumea-messages");if(m)m.scrollTop=m.scrollHeight;},100);</script>',
         unsafe_allow_html=True
     )
 
@@ -1813,7 +1619,6 @@ def render_chat():
 
 
 def render_premium():
-    """Premium plans page."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="premium_back"):
@@ -1821,7 +1626,7 @@ def render_premium():
     
     st.markdown(
         '<h1 class="yumea-page-title">💎 Upgrade Your Experience</h1>'
-        '<p class="yumea-page-desc">Unlock more messages, longer conversations, and deeper wisdom.</p>',
+        '<p class="yumea-page-desc">Unlock more messages and deeper wisdom.</p>',
         unsafe_allow_html=True
     )
     
@@ -1853,7 +1658,6 @@ def render_premium():
         '<div class="yumea-plan-feature"><span class="check">✓</span> 500 messages per day</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words per message</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> All 11 Wisdom Sources</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> Priority AI responses</div>'
         '</div>'
         '</div>',
@@ -1868,7 +1672,6 @@ def render_premium():
 
 
 def render_payment():
-    """Mock Payment page."""
     plan = st.session_state.get("selected_plan", "premium_lite")
     plan_info = PLANS.get(plan, PLANS["premium_lite"])
 
@@ -1883,11 +1686,8 @@ def render_payment():
         '<div style="font-size:64px;margin-bottom:20px;">✅</div>'
         '<h1 class="yumea-page-title" style="text-align:center;">Payment Successful!</h1>'
         '<p class="yumea-page-desc" style="text-align:center;">'
-        'You are now on <strong style="color:#8b5cf6;">' + plan_info["name"] + '</strong> plan at ' + plan_info["price"] +
-        '</p>'
-        '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:20px;max-width:400px;margin:24px auto;">'
-        '<div style="color:#10b981;font-size:14px;">🎉 Enjoy your upgraded experience!</div>'
-        '</div>',
+        'You are now on <strong style="color:#8b5cf6;">' + plan_info["name"] + '</strong>'
+        '</p>',
         unsafe_allow_html=True
     )
     
@@ -1900,7 +1700,6 @@ def render_payment():
 
 
 def render_reviews():
-    """Reviews page."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="rev_back"):
@@ -1908,12 +1707,11 @@ def render_reviews():
     
     st.markdown(
         '<h1 class="yumea-page-title">⭐ Rate Yumea</h1>'
-        '<p class="yumea-page-desc">Your feedback helps Yumea become a better companion.</p>',
+        '<p class="yumea-page-desc">Your feedback helps Yumea grow.</p>',
         unsafe_allow_html=True
     )
     
-    rating = st.slider("Your Rating (1-5 stars)", 1, 5, 5, step=1, key="rev_rating")
-    
+    rating = st.slider("Rating", 1, 5, 5, key="rev_rating")
     stars_display = "⭐" * rating
     st.markdown(
         '<div style="text-align:center;font-size:32px;letter-spacing:6px;margin:12px 0;">' + stars_display + '</div>',
@@ -1926,32 +1724,23 @@ def render_reviews():
     with col2:
         rev_email = st.text_input("Email", value=st.session_state.user_email, key="rev_email")
     
-    liked = st.text_area("What did you like about Yumea?", key="rev_liked", height=80)
-    improve = st.text_area("What can we improve?", key="rev_improve", height=80)
+    liked = st.text_area("What did you like?", key="rev_liked", height=80)
+    improve = st.text_area("What to improve?", key="rev_improve", height=80)
     thoughts = st.text_area("Overall thoughts", key="rev_thoughts", height=80)
     
     if st.button("Submit Review", type="primary", use_container_width=True, key="rev_submit"):
-        with st.spinner("Sending your review..."):
+        with st.spinner("Sending..."):
             success, msg = send_review_email(rev_name, rev_email, rating, liked, improve, thoughts)
             if success:
                 st.balloons()
-                st.markdown(
-                    '<div class="yumea-success" style="margin-top:16px;">'
-                    '✅ Thank you for your review! 🌙'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
+                st.markdown('<div class="yumea-success">✅ Thank you! 🌙</div>', unsafe_allow_html=True)
             else:
-                st.markdown(
-                    '<div class="yumea-auth-error" style="margin-top:16px;">' + msg + '</div>',
-                    unsafe_allow_html=True
-                )
+                st.markdown('<div class="yumea-auth-error">' + msg + '</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_listen():
-    """Listen to Source page."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="listen_back_top"):
@@ -1959,7 +1748,7 @@ def render_listen():
     
     st.markdown(
         '<h1 class="yumea-page-title">🎧 Listen to Source</h1>'
-        '<p class="yumea-page-desc">Select a wisdom tradition and listen to its voice.</p>',
+        '<p class="yumea-page-desc">Select a wisdom tradition.</p>',
         unsafe_allow_html=True
     )
     
@@ -1967,20 +1756,14 @@ def render_listen():
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
     if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
-        with st.spinner("Channeling wisdom from " + source + "..."):
+        with st.spinner("Channeling wisdom..."):
             insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
             if insight:
                 st.session_state.listen_text = insight
                 st.session_state.listen_source_name = source
                 if "listen_history" not in st.session_state:
                     st.session_state.listen_history = []
-                st.session_state.listen_history.append({
-                    "text": insight,
-                    "source": source
-                })
-                if len(st.session_state.listen_history) > 20:
-                    st.session_state.listen_history = st.session_state.listen_history[-20:]
-                
+                st.session_state.listen_history.append({"text": insight, "source": source})
                 if EDGE_TTS_AVAILABLE:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
@@ -1988,11 +1771,7 @@ def render_listen():
                         st.session_state.listen_audio = audio_path
                     except Exception:
                         st.session_state.listen_audio = None
-                else:
-                    st.session_state.listen_audio = None
                 st.rerun()
-            else:
-                st.error("Failed to generate wisdom. Please try again.")
     
     if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
@@ -2015,7 +1794,7 @@ def render_listen():
         
         with col1:
             if st.button("⬅️ Previous", use_container_width=True, key="listen_prev"):
-                if "listen_history" in st.session_state and len(st.session_state.listen_history) > 1:
+                if len(st.session_state.listen_history) > 1:
                     st.session_state.listen_history.pop()
                     previous = st.session_state.listen_history[-1]
                     st.session_state.listen_text = previous["text"]
@@ -2026,42 +1805,30 @@ def render_listen():
                             audio_path = asyncio.run(generate_audio(previous["text"], voice))
                             st.session_state.listen_audio = audio_path
                         except Exception:
-                            st.session_state.listen_audio = None
+                            pass
                     st.rerun()
                 else:
-                    st.warning("No previous wisdom available.")
+                    st.warning("No previous wisdom.")
         
         with col2:
             if st.button("➡️ Next Wisdom", use_container_width=True, key="listen_next"):
-                with st.spinner("Channeling new wisdom from " + source + "..."):
+                with st.spinner("Channeling..."):
                     insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
                     if insight:
                         st.session_state.listen_text = insight
                         st.session_state.listen_source_name = source
-                        if "listen_history" not in st.session_state:
-                            st.session_state.listen_history = []
-                        st.session_state.listen_history.append({
-                            "text": insight,
-                            "source": source
-                        })
-                        if len(st.session_state.listen_history) > 20:
-                            st.session_state.listen_history = st.session_state.listen_history[-20:]
-                        
+                        st.session_state.listen_history.append({"text": insight, "source": source})
                         if EDGE_TTS_AVAILABLE:
                             voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                             try:
                                 audio_path = asyncio.run(generate_audio(insight, voice))
                                 st.session_state.listen_audio = audio_path
                             except Exception:
-                                st.session_state.listen_audio = None
-                        else:
-                            st.session_state.listen_audio = None
+                                pass
                         st.rerun()
-                    else:
-                        st.error("Failed to generate new wisdom. Please try again.")
         
         with col3:
-            if st.button("🔊 Replay Audio", use_container_width=True, key="listen_replay"):
+            if st.button("🔊 Replay", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
@@ -2074,19 +1841,12 @@ def render_listen():
     st.markdown('</div>', unsafe_allow_html=True)
 
 
+# ══════════════════════════════════════════════════════════
+# MAIN APP
+# ══════════════════════════════════════════════════════════
 def main():
     init_session_state()
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
-
-    # Check if this is a sidebar toggle request (preserve everything)
-    query_params = st.query_params
-    if "toggle_sidebar" in query_params or "goto" in query_params:
-        # These are internal navigation - don't reset auth
-        if not st.session_state.get("authenticated", False):
-            # If somehow not authenticated but has these params, still show chat
-            # Only redirect if truly not logged in
-            if not st.session_state.get("user_email", ""):
-                st.session_state.current_page = "signin"
 
     page = st.session_state.current_page
     is_auth = st.session_state.authenticated
