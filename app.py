@@ -2027,6 +2027,19 @@ def render_listen():
 def main():
     init_session_state()
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
+        # JavaScript to force show sidebar toggle
+    st.markdown("""
+    <script>
+    setInterval(function() {
+        var toggleBtn = document.querySelector('[data-testid="stSidebarCollapsedControl"]');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'flex';
+            toggleBtn.style.visibility = 'visible';
+            toggleBtn.style.opacity = '1';
+        }
+    }, 500);
+    </script>
+    """, unsafe_allow_html=True)
 
     page = st.session_state.current_page
     is_auth = st.session_state.authenticated
