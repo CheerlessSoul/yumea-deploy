@@ -160,11 +160,14 @@ header[data-testid="stHeader"] {
     height: 0 !important;
 }
 
-/* Sidebar toggle - always visible */
+/* Sidebar toggle - ALWAYS visible in both open and closed states */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="baseButton-headerNoPadding"],
-button[kind="header"] {
-    display: block !important;
+button[kind="header"],
+[data-testid="collapsedControl"],
+.st-emotion-cache-r90ti5,
+.st-emotion-cache-1egp7xh {
+    display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     background: rgba(139, 92, 246, 0.9) !important;
@@ -177,6 +180,38 @@ button[kind="header"] {
     left: 10px !important;
     color: white !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+    width: 40px !important;
+    height: 40px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="baseButton-headerNoPadding"] svg,
+button[kind="header"] svg,
+[data-testid="collapsedControl"] svg {
+    color: white !important;
+    fill: white !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: block !important;
+}
+
+/* Force show when sidebar is closed */
+section[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stSidebarCollapsedControl"],
+section[data-testid="stSidebar"][aria-expanded="false"] ~ button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hamburger icon styling */
+button[data-testid="stSidebarCollapsedControl"]::before {
+    content: "☰";
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 [data-testid="stSidebarCollapsedControl"] svg,
