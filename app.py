@@ -966,9 +966,31 @@ def render_signin():
     """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1], gap="medium")
-    with col1:
+        with col1:
         if yumea_img:
             st.markdown('<div class="signin-image-wrapper"><img src="data:image/jpeg;base64,' + yumea_img + '" alt="Yumea"><div class="signin-image-overlay"><div class="signin-quote-mark">"</div><div class="signin-tagline-1">AI that feels.</div><div class="signin-tagline-2">Answers that matter."</div></div></div>', unsafe_allow_html=True)
+        
+        st.markdown(
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:15px auto 0;">'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
+            '<span style="font-size:16px;">✨</span>'
+            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">11 Wisdom Traditions</span>'
+            '</div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
+            '<span style="font-size:16px;">🔒</span>'
+            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Emotional Support</span>'
+            '</div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
+            '<span style="font-size:16px;">⚡</span>'
+            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Voice Enabled</span>'
+            '</div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
+            '<span style="font-size:16px;">🌙</span>'
+            '<span style="color:#e2e8f0;font-size:11px;font-weight:500;">Available 24/7</span>'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True
+        )
     
     with col2:
         if logo_img:
