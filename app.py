@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-Production-Ready Streamlit Chat Application with Freestyle Mode
+With ChatGPT-style collapsible sidebar
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -62,7 +62,7 @@ st.set_page_config(
     page_title="YUMEA - AI That Feels",
     page_icon="🌙",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ─────────────────────────────────────────────────────────
@@ -97,11 +97,7 @@ DAILY_QUOTES = [
     '"The unexamined life is not worth living." — Socrates',
     '"Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment." — Buddha',
     '"Knowing yourself is the beginning of all wisdom." — Aristotle',
-    '"The soul always knows what to do to heal itself." — Caroline Myss',
-    '"In the middle of difficulty lies opportunity." — Einstein',
     '"You have power over your mind — not outside events. Realize this, and you will find strength." — Marcus Aurelius',
-    '"Happiness is your nature. It is not wrong to desire it." — Ramana Maharshi',
-    '"The supreme art of war is to subdue the enemy without fighting." — Sun Tzu',
     '"He who has a why to live can bear almost any how." — Nietzsche',
     '"Wisdom begins in wonder." — Socrates',
 ]
@@ -135,7 +131,7 @@ body {
 }
 
 .block-container {
-    padding: 0 !important;
+    padding: 20px 40px !important;
     max-width: 100% !important;
     background: transparent !important;
 }
@@ -153,85 +149,127 @@ body {
 [data-testid="stHeader"],
 [data-testid="stDecoration"],
 [data-testid="stToolbar"],
-.stDeployButton,
-header[data-testid="stHeader"] {
+.stDeployButton {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
 }
 
-/* Sidebar toggle - BRIGHT WHITE for visibility */
+/* Hide Streamlit default sidebar completely */
+section[data-testid="stSidebar"] {
+    display: none !important;
+}
+
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="baseButton-headerNoPadding"],
 button[kind="header"],
 [data-testid="collapsedControl"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    background: #ffffff !important;
-    border: 3px solid #ff0000 !important;
-    border-radius: 8px !important;
-    padding: 10px !important;
-    z-index: 999999 !important;
-    position: fixed !important;
-    top: 15px !important;
-    left: 15px !important;
-    color: #000000 !important;
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.8) !important;
-    width: 50px !important;
-    height: 50px !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
+    display: none !important;
 }
 
-[data-testid="stSidebarCollapsedControl"] svg,
-[data-testid="baseButton-headerNoPadding"] svg,
-button[kind="header"] svg,
-[data-testid="collapsedControl"] svg {
-    color: #000000 !important;
-    fill: #000000 !important;
-    width: 28px !important;
-    height: 28px !important;
-    display: block !important;
-    stroke: #000000 !important;
+/* ═══════════════════════════════════════════════
+   CUSTOM MINI SIDEBAR (Collapsed)
+═══════════════════════════════════════════════ */
+.yumea-mini-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0d0d1f, #0a0a15);
+    border-right: 1px solid rgba(139, 92, 246, 0.2);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    gap: 12px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Force show when sidebar is closed */
-section[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stSidebarCollapsedControl"],
-section[data-testid="stSidebar"][aria-expanded="false"] ~ button {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* Hamburger icon styling */
-button[data-testid="stSidebarCollapsedControl"]::before {
-    content: "☰";
-    color: white;
+.yumea-mini-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 20px;
-    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none !important;
 }
 
-[data-testid="stSidebarCollapsedControl"] svg,
-[data-testid="baseButton-headerNoPadding"] svg,
-button[kind="header"] svg {
-    color: white !important;
-    fill: white !important;
-    width: 24px !important;
-    height: 24px !important;
+.yumea-mini-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+    color: #fff !important;
+    transform: scale(1.05);
 }
 
-section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d0d1f, #0a0a15) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
+.yumea-mini-btn.toggle {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff !important;
+    border-color: #8b5cf6;
 }
 
-section[data-testid="stSidebar"] * {
-    color: #e2e8f0 !important;
+/* ═══════════════════════════════════════════════
+   FULL CUSTOM SIDEBAR
+═══════════════════════════════════════════════ */
+.yumea-full-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0d0d1f, #0a0a15);
+    border-right: 1px solid rgba(139, 92, 246, 0.2);
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 16px;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Chat header */
+.yumea-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.yumea-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.yumea-sidebar-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: all 0.2s;
+}
+
+.yumea-sidebar-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171 !important;
+}
+
+/* Chat area with sidebar padding */
 .yumea-chat-header {
     background: linear-gradient(180deg, #12122a, #0f0f1e);
     border-bottom: 1px solid rgba(139, 92, 246, 0.15);
@@ -405,7 +443,7 @@ section[data-testid="stSidebar"] * {
 }
 .yumea-header-btn:hover .yumea-tooltip { display: block; }
 
-/* Freestyle mode indicator */
+/* Freestyle badge */
 .yumea-freestyle-badge {
     background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7);
     color: white;
@@ -539,11 +577,6 @@ button[kind="primaryFormSubmit"] {
     border: none !important;
 }
 
-button[kind="primary"]:hover,
-button[kind="primaryFormSubmit"]:hover {
-    background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important;
-}
-
 /* Inputs */
 .stTextInput input, .stTextArea textarea {
     background: rgba(255, 255, 255, 0.04) !important;
@@ -575,7 +608,7 @@ def get_avatar_html(size, cls=""):
             'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;'
             'align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:' +
             str(size // 3) + 'px;flex-shrink:0;border:2px solid rgba(139,92,246,0.4);">Y</div>')
-            # ─────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────
 # User / Auth System
 # ─────────────────────────────────────────────────────────
 def load_users():
@@ -704,7 +737,6 @@ def detect_language(text):
 def detect_emotion_mode(text):
     text_lower = text.lower().strip()
     
-    # Crisis check
     crisis_words = [
         'suicide', 'kill myself', 'end my life', 'want to die',
         'self harm', 'self-harm', 'cut myself', 'no reason to live',
@@ -810,9 +842,6 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
 
     mode_instructions = ""
     
-    # ═══════════════════════════════════════════════════════
-    # PROFESSIONAL MODE
-    # ═══════════════════════════════════════════════════════
     if chat_mode == "professional":
         sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna (Bhagavad Gita), Bible, Socrates"
         mode_instructions = (
@@ -836,11 +865,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "For SIMPLE/CASUAL messages, just reply naturally without this format."
         )
     
-    # ═══════════════════════════════════════════════════════
-    # FREESTYLE MODE (NEW!)
-    # ═══════════════════════════════════════════════════════
     elif chat_mode == "freestyle":
-        all_sources = ", ".join(WISDOM_SOURCES)
         mode_instructions = (
             "\n\n## FREESTYLE MODE ACTIVE 🌟\n\n"
             "This is your special exploration mode. You have access to ALL 11 wisdom traditions:\n"
@@ -854,14 +879,13 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "1. ANALYZE the user's question carefully\n"
             "2. THINK which wisdom traditions best address it:\n"
             "   - Suffering/attachment → Buddha, Osho\n"
-            "   - Love/ego → Osho, Rumi-like Sufi wisdom\n"
+            "   - Love/ego → Osho\n"
             "   - Duty/action → Krishna (Bhagavad Gita)\n"
             "   - Ethics/virtue → Aristotle, Socrates\n"
             "   - Faith/hope → Bible, Quran\n"
-            "   - Strategy/challenges → Sun Tzu-like thinking\n"
-            "   - Existence/meaning → Nietzsche-like philosophy, Plato\n"
-            "   - Harmony/relationships → Confucius\n"
-            "   - Reason/logic/mind → Descartes, Kant\n\n"
+            "   - Existence/meaning → Plato, Descartes\n"
+            "   - Reason/logic/mind → Descartes, Kant\n"
+            "   - Harmony/relationships → Confucius\n\n"
             
             "3. PICK 1-3 most relevant sources for THIS specific question\n"
             "4. BLEND their wisdom naturally in your response\n"
@@ -871,9 +895,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "- Conversational but insightful\n"
             "- Mix casual warmth with genuine wisdom\n"
             "- 3-5 sentences typical, longer for deep questions\n"
-            "- Show HOW different traditions view the same topic (when relevant)\n"
-            "- Example: 'Buddha ne kaha suffering attachment se aati hai, "
-            "aur Osho bhi similar baat karte hain ki ego chhodne se peace milti hai.'\n\n"
+            "- Show HOW different traditions view the same topic (when relevant)\n\n"
             
             "STILL FOLLOW ANTI-HALLUCINATION RULES:\n"
             "- Only real, verified quotes\n"
@@ -883,12 +905,9 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "End DEEP responses with a small note like:\n"
             "'💡 This wisdom draws from [Source 1] & [Source 2]'\n\n"
             
-            "For SIMPLE messages (greetings, small talk), just reply naturally without deep wisdom or citations."
+            "For SIMPLE messages (greetings, small talk), just reply naturally without deep wisdom."
         )
     
-    # ═══════════════════════════════════════════════════════
-    # FRIEND MODE (default)
-    # ═══════════════════════════════════════════════════════
     else:
         mode_instructions = (
             "\n\n## FRIEND MODE ACTIVE\n"
@@ -1040,6 +1059,7 @@ def init_session_state():
         "listen_source_name": None,
         "listen_audio": None,
         "listen_history": [],
+        "sidebar_open": True,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -1139,7 +1159,6 @@ def process_user_message(user_input):
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
-    # Build system prompt with current mode
     system_prompt = build_system_prompt(
         st.session_state.chat_mode,
         st.session_state.selected_sources,
@@ -1168,7 +1187,6 @@ def process_user_message(user_input):
 
     response_text = response_text.strip()
 
-    # Source tag based on mode
     source_tag = ""
     if st.session_state.chat_mode == "professional" and st.session_state.selected_sources:
         source_tag = random.choice(st.session_state.selected_sources)
@@ -1200,12 +1218,6 @@ def render_signin():
     <style>
     .stApp {
         background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important;
-    }
-    
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-        max-width: 1200px !important;
     }
     
     .signin-image-wrapper {
@@ -1404,13 +1416,6 @@ def render_signin():
         
         if st.button("👤 Create New Account", use_container_width=True, key="go_signup_btn"):
             navigate_to("signup")
-        
-        st.markdown(
-            '<div style="text-align:center;color:#64748b;font-size:11px;margin-top:12px;">'
-            '🔒 Enterprise-grade encryption'
-            '</div>',
-            unsafe_allow_html=True
-        )
 
 
 def render_signup():
@@ -1468,7 +1473,7 @@ def render_signup():
 
 
 def render_chat():
-    """Main Chat page with Freestyle mode."""
+    """Main Chat page with ChatGPT-style collapsible sidebar."""
     user_email = st.session_state.user_email
     user_name = st.session_state.user_name
     user_plan = st.session_state.user_plan
@@ -1482,29 +1487,59 @@ def render_chat():
         process_user_message(pending)
         st.rerun()
 
+    # ═══ QUERY PARAM HANDLERS ═══
+    query_params = st.query_params
+    
+    if "toggle_sidebar" in query_params:
+        st.session_state.sidebar_open = not st.session_state.sidebar_open
+        st.query_params.clear()
+        st.rerun()
+    
+    if "goto" in query_params:
+        target = query_params["goto"]
+        st.query_params.clear()
+        if target == "premium":
+            st.session_state.payment_done = False
+            navigate_to("premium")
+        elif target == "reviews":
+            navigate_to("reviews")
+        elif target == "listen":
+            navigate_to("listen")
+
     history = st.session_state.chat_history
+    sidebar_open = st.session_state.get("sidebar_open", True)
 
-    # ═══ SIDEBAR ═══
-    with st.sidebar:
+    # ═══ RENDER SIDEBAR ═══
+    if not sidebar_open:
+        # MINI SIDEBAR
+        st.markdown(
+            '<div class="yumea-mini-sidebar">'
+            '<a href="?toggle_sidebar=1" target="_self" class="yumea-mini-btn toggle" title="Open Sidebar">☰</a>'
+            '<a href="?goto=premium" target="_self" class="yumea-mini-btn" title="Buy Premium">💎</a>'
+            '<a href="?goto=reviews" target="_self" class="yumea-mini-btn" title="Rate Yumea">⭐</a>'
+            '<a href="?goto=listen" target="_self" class="yumea-mini-btn" title="Listen to Source">🎧</a>'
+            '</div>'
+            '<style>.block-container { padding-left: 80px !important; }</style>',
+            unsafe_allow_html=True
+        )
+    else:
+        # FULL SIDEBAR
         img_b64 = load_image_b64("yumea-new-user.png")
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if img_b64:
-                st.markdown(
-                    '<img src="data:image/png;base64,' + img_b64 + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(139,92,246,0.4);">',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;">Y</div>',
-                    unsafe_allow_html=True
-                )
-        with col2:
-            st.markdown('<div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;">YUMEA</div>', unsafe_allow_html=True)
-            st.markdown('<div style="font-size:11px;color:#8b5cf6;font-weight:500;margin-top:-4px;">AI That Feels</div>', unsafe_allow_html=True)
-
-        st.markdown('<div style="border-bottom:1px solid rgba(139,92,246,0.1);margin:12px 0;"></div>', unsafe_allow_html=True)
-
+        
+        avatar_display = ""
+        if img_b64:
+            avatar_display = (
+                '<img src="data:image/png;base64,' + img_b64 + '" '
+                'style="width:38px;height:38px;border-radius:50%;object-fit:cover;'
+                'border:2px solid rgba(139,92,246,0.4);">'
+            )
+        else:
+            avatar_display = (
+                '<div style="width:38px;height:38px;border-radius:50%;'
+                'background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;'
+                'align-items:center;justify-content:center;color:#fff;font-weight:800;">Y</div>'
+            )
+        
         # User card
         plan_info = PLANS.get(user_plan, PLANS["free"])
         msg_count = get_daily_message_count(user_email)
@@ -1517,125 +1552,135 @@ def render_chat():
             if msg_count >= msg_limit:
                 counter_text = "🚫 LIMIT — " + counter_text
 
-        st.markdown(
+        # Daily quote
+        daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
+
+        sidebar_html = (
+            '<div class="yumea-full-sidebar">'
+            
+            # Header
+            '<div class="yumea-sidebar-header">'
+            '<div class="yumea-sidebar-brand">'
+            + avatar_display +
+            '<div>'
+            '<div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;">YUMEA</div>'
+            '<div style="font-size:10px;color:#8b5cf6;">AI That Feels</div>'
+            '</div>'
+            '</div>'
+            '<a href="?toggle_sidebar=1" target="_self" class="yumea-sidebar-close" title="Close">✕</a>'
+            '</div>'
+            
+            # User card
             '<div class="yumea-user-card">'
             '<div class="yumea-user-card-name">' + user_name + '</div>'
             '<div class="yumea-user-card-plan">' + plan_info["name"] + '</div>'
             '<div class="yumea-user-card-counter">' + counter_text + '</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-        # Daily quote
-        daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
-        st.markdown(
-            '<div class="yumea-daily-quote">' + daily_quote + '</div>',
-            unsafe_allow_html=True
-        )
-
-        # ═══ CHAT MODE (3 options now!) ═══
-        st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
-        mode_options = ["friend", "professional", "freestyle"]
-        mode_labels = {
-            "friend": "🎭 Friend",
-            "professional": "🏛️ Professional",
-            "freestyle": "🌟 Freestyle"
-        }
-        current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
-        new_mode = st.radio(
-            "Chat Mode",
-            mode_options,
-            index=current_idx,
-            label_visibility="collapsed",
-            format_func=lambda x: mode_labels.get(x, x),
-            key="chat_mode_radio"
-        )
-        if new_mode != st.session_state.chat_mode:
-            st.session_state.chat_mode = new_mode
-            st.rerun()
-        
-        # Mode description
-        mode_descriptions = {
-            "friend": "💛 Casual & warm, no citations",
-            "professional": "📖 Formal, cites selected sources",
-            "freestyle": "🌟 Explores ALL sources, finds best wisdom"
-        }
-        st.markdown(
-            '<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">'
-            + mode_descriptions.get(st.session_state.chat_mode, "") +
-            '</div>',
-            unsafe_allow_html=True
+            '</div>'
+            
+            # Daily quote
+            '<div class="yumea-daily-quote">' + daily_quote + '</div>'
+            
+            '</div>'
+            
+            # Adjust main content
+            '<style>.block-container { padding-left: 300px !important; }</style>'
         )
         
-        # ═══ WISDOM SOURCES (conditional based on mode) ═══
-        if st.session_state.chat_mode == "professional":
-            st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
-            with st.expander("Select Sources", expanded=False):
-                new_sources = []
-                for src in WISDOM_SOURCES:
-                    key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
-                    checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
-                    if checked:
-                        new_sources.append(src)
-                if new_sources != st.session_state.selected_sources:
-                    st.session_state.selected_sources = new_sources
-                    st.rerun()
-        elif st.session_state.chat_mode == "freestyle":
-            st.markdown('<div class="yumea-sidebar-label">🌟 All Sources Active</div>', unsafe_allow_html=True)
+        st.markdown(sidebar_html, unsafe_allow_html=True)
+        
+        # Streamlit controls (positioned via container)
+        with st.container():
+            # Chat Mode
             st.markdown(
-                '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);'
-                'border-radius:10px;padding:12px;font-size:12px;color:#c4b5fd;line-height:1.6;">'
-                '<strong>Freestyle explores:</strong><br>'
-                '🕉️ Osho • Buddha • Krishna<br>'
-                '✝️ Bible • 🕌 Quran<br>'
-                '🏛️ Socrates • Plato • Aristotle • Confucius<br>'
-                '💭 Descartes • Kant<br><br>'
-                '<em>Yumea picks BEST wisdom for your question!</em>'
-                '</div>',
+                '<div style="position:fixed;top:230px;left:16px;width:260px;z-index:10000;">',
                 unsafe_allow_html=True
             )
+            
+            st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
+            mode_options = ["friend", "professional", "freestyle"]
+            mode_labels = {
+                "friend": "🎭 Friend",
+                "professional": "🏛️ Professional",
+                "freestyle": "🌟 Freestyle"
+            }
+            current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
+            new_mode = st.radio(
+                "Chat Mode",
+                mode_options,
+                index=current_idx,
+                label_visibility="collapsed",
+                format_func=lambda x: mode_labels.get(x, x),
+                key="chat_mode_radio"
+            )
+            if new_mode != st.session_state.chat_mode:
+                st.session_state.chat_mode = new_mode
+                st.rerun()
 
-        # AI Model
-        st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
-        models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-        if OLLAMA_AVAILABLE:
-            models.append("ollama:llama3.2:3b")
-        model_idx = models.index(st.session_state.ai_model) if st.session_state.ai_model in models else 0
-        new_model = st.selectbox("AI Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
-        if new_model != st.session_state.ai_model:
-            st.session_state.ai_model = new_model
-            st.rerun()
+            # Wisdom Sources
+            if st.session_state.chat_mode == "professional":
+                st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
+                with st.expander("Select Sources", expanded=False):
+                    new_sources = []
+                    for src in WISDOM_SOURCES:
+                        key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
+                        checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
+                        if checked:
+                            new_sources.append(src)
+                    if new_sources != st.session_state.selected_sources:
+                        st.session_state.selected_sources = new_sources
+                        st.rerun()
+            elif st.session_state.chat_mode == "freestyle":
+                st.markdown(
+                    '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);'
+                    'border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">'
+                    '🌟 <strong>All 11 sources active</strong><br>'
+                    'Yumea picks BEST wisdom!'
+                    '</div>',
+                    unsafe_allow_html=True
+                )
 
-        # Debate Mode
-        st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
-        new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
-        if new_debate != st.session_state.debate_mode:
-            st.session_state.debate_mode = new_debate
-            st.rerun()
+            # AI Model
+            st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
+            models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+            if OLLAMA_AVAILABLE:
+                models.append("ollama:llama3.2:3b")
+            model_idx = models.index(st.session_state.ai_model) if st.session_state.ai_model in models else 0
+            new_model = st.selectbox("AI Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
+            if new_model != st.session_state.ai_model:
+                st.session_state.ai_model = new_model
+                st.rerun()
 
-        # Menu
-        st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
-        if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
-            st.session_state.payment_done = False
-            navigate_to("premium")
-        if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
-            navigate_to("reviews")
-        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
-            navigate_to("listen")
-        if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
-            st.session_state.chat_history = []
-            save_chat_history(user_email, [])
-            st.rerun()
-        if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
-            st.session_state.authenticated = False
-            st.session_state.user_email = ""
-            st.session_state.user_name = ""
-            st.session_state.user_plan = "free"
-            st.session_state.chat_history = []
-            navigate_to("signin")
+            # Debate Mode
+            st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
+            new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
+            if new_debate != st.session_state.debate_mode:
+                st.session_state.debate_mode = new_debate
+                st.rerun()
+
+            # Menu
+            st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
+            if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
+                st.session_state.payment_done = False
+                navigate_to("premium")
+            if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
+                navigate_to("reviews")
+            if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
+                navigate_to("listen")
+            if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
+                st.session_state.chat_history = []
+                save_chat_history(user_email, [])
+                st.rerun()
+            if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
+                st.session_state.authenticated = False
+                st.session_state.user_email = ""
+                st.session_state.user_name = ""
+                st.session_state.user_plan = "free"
+                st.session_state.chat_history = []
+                navigate_to("signin")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # ═══ CHAT AREA ═══
-    # Header with mode indicator
     mode_badge = ""
     if st.session_state.chat_mode == "freestyle":
         mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE MODE</span>'
@@ -1661,7 +1706,7 @@ def render_chat():
             '<div class="yumea-empty-state">'
             + get_avatar_html(120, "yumea-empty-avatar") +
             '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div>'
-            '<div class="yumea-empty-sub">Your emotional companion — here to listen, understand, and guide you through life\'s deeper questions.</div>'
+            '<div class="yumea-empty-sub">Your emotional companion — here to listen, understand, and guide you.</div>'
             '</div>'
         )
     else:
@@ -1703,7 +1748,7 @@ def render_chat():
         unsafe_allow_html=True
     )
 
-    # Suggestions if empty
+    # Suggestions
     if not history:
         st.markdown('<div style="max-width:600px;margin:20px auto;padding:0 20px;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -1776,7 +1821,7 @@ def render_premium():
         '<div style="margin:16px 0;">'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 150 messages per day</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> 2,000 words per message</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes (Friend/Professional/Freestyle)</div>'
+        '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 11 Wisdom Sources</div>'
         '</div>'
         '</div>',
@@ -1799,7 +1844,6 @@ def render_premium():
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 3 chat modes</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> All 11 Wisdom Sources</div>'
         '<div class="yumea-plan-feature"><span class="check">✓</span> Priority AI responses</div>'
-        '<div class="yumea-plan-feature"><span class="check">✓</span> Early access to new features</div>'
         '</div>'
         '</div>',
         unsafe_allow_html=True
@@ -1832,7 +1876,6 @@ def render_payment():
         '</p>'
         '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:20px;max-width:400px;margin:24px auto;">'
         '<div style="color:#10b981;font-size:14px;">🎉 Enjoy your upgraded experience!</div>'
-        '<div style="color:#94a3b8;font-size:13px;margin-top:8px;">Your new limits are active immediately.</div>'
         '</div>',
         unsafe_allow_html=True
     )
@@ -1897,7 +1940,7 @@ def render_reviews():
 
 
 def render_listen():
-    """Listen to Source page with Previous/Next."""
+    """Listen to Source page."""
     st.markdown('<div class="yumea-page-container">', unsafe_allow_html=True)
     
     if st.button("← Back to Chat", key="listen_back_top"):
@@ -2026,19 +2069,6 @@ def render_listen():
 def main():
     init_session_state()
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
-        # JavaScript to force show sidebar toggle
-    st.markdown("""
-    <script>
-    setInterval(function() {
-        var toggleBtn = document.querySelector('[data-testid="stSidebarCollapsedControl"]');
-        if (toggleBtn) {
-            toggleBtn.style.display = 'flex';
-            toggleBtn.style.visibility = 'visible';
-            toggleBtn.style.opacity = '1';
-        }
-    }, 500);
-    </script>
-    """, unsafe_allow_html=True)
 
     page = st.session_state.current_page
     is_auth = st.session_state.authenticated
