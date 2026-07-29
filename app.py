@@ -1487,27 +1487,38 @@ def render_chat():
         process_user_message(pending)
         st.rerun()
 
-    # ═══ QUERY PARAM HANDLERS ═══
+        # ═══ QUERY PARAM HANDLERS ═══
     query_params = st.query_params
     
     if "toggle_sidebar" in query_params:
-        st.session_state.sidebar_open = not st.session_state.sidebar_open
-        st.query_params.clear()
+        # Preserve auth state before rerun
+        st.session_state.sidebar_open = not st.session_state.get("sidebar_open", True)
+        st.session_state.authenticated = True  # Force preserve
+        # Clear params without rerun
+        try:
+            del st.query_params["toggle_sidebar"]
+        except:
+            pass
         st.rerun()
     
     if "goto" in query_params:
         target = query_params["goto"]
-        st.query_params.clear()
+        # Preserve auth
+        st.session_state.authenticated = True
+        try:
+            del st.query_params["goto"]
+        except:
+            pass
         if target == "premium":
             st.session_state.payment_done = False
-            navigate_to("premium")
+            st.session_state.current_page = "premium"
+            st.rerun()
         elif target == "reviews":
-            navigate_to("reviews")
+            st.session_state.current_page = "reviews"
+            st.rerun()
         elif target == "listen":
-            navigate_to("listen")
-
-    history = st.session_state.chat_history
-    sidebar_open = st.session_state.get("sidebar_open", True)
+            st.session_state.current_page = "listen"
+            st.rerun()
 
     # ═══ RENDER SIDEBAR ═══
     if not sidebar_open:
@@ -2063,12 +2074,19 @@ def render_listen():
     st.markdown('</div>', unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════
-# MAIN APP
-# ══════════════════════════════════════════════════════════
 def main():
     init_session_state()
     st.markdown('<style>' + GLOBAL_CSS + '</style>', unsafe_allow_html=True)
+
+    # Check if this is a sidebar toggle request (preserve everything)
+    query_params = st.query_params
+    if "toggle_sidebar" in query_params or "goto" in query_params:
+        # These are internal navigation - don't reset auth
+        if not st.session_state.get("authenticated", False):
+            # If somehow not authenticated but has these params, still show chat
+            # Only redirect if truly not logged in
+            if not st.session_state.get("user_email", ""):
+                st.session_state.current_page = "signin"
 
     page = st.session_state.current_page
     is_auth = st.session_state.authenticated
