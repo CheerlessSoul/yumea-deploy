@@ -845,7 +845,7 @@ def render_chat():
     )
 
     # Messages
-        # Messages with inline TTS buttons
+            # Messages
     if not history:
         st.markdown(
             '<div class="yumea-messages-area">'
@@ -856,46 +856,52 @@ def render_chat():
             unsafe_allow_html=True
         )
     else:
-        # Build messages HTML
-        messages_html = ""
-        for msg in history:
+        # Render each message with its own TTS button below
+        for idx, msg in enumerate(history):
             if msg["role"] == "user":
                 safe = msg["content"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
-                messages_html += '<div class="yumea-msg-row user"><div class="yumea-msg-bubble user">' + safe + '</div></div>'
+                st.markdown(
+                    '<div class="yumea-msg-row user"><div class="yumea-msg-bubble user">' + safe + '</div></div>',
+                    unsafe_allow_html=True
+                )
             else:
                 content_html = md_to_html(msg["content"])
                 src = ' · <span class="yumea-source-tag">📖 ' + msg["source"] + '</span>' if msg.get("source") else ""
                 rt = ' · ' + str(msg["response_time"]) + 's' if msg.get("response_time") else ""
                 ts = msg.get("time", "")
-                messages_html += '<div class="yumea-msg-row ai">' + get_avatar_html(32, "yumea-msg-avatar") + '<div style="flex:1;max-width:70%;"><div class="yumea-msg-bubble ai">' + content_html + '</div><div class="yumea-msg-meta">' + ts + rt + src + '</div></div></div>'
-
+                
+                st.markdown(
+                    '<div class="yumea-msg-row ai">'
+                    + get_avatar_html(32, "yumea-msg-avatar") +
+                    '<div style="flex:1;max-width:70%;">'
+                    '<div class="yumea-msg-bubble ai">' + content_html + '</div>'
+                    '<div class="yumea-msg-meta">' + ts + rt + src + '</div>'
+                    '</div>'
+                    '</div>',
+                    unsafe_allow_html=True
+                )
+                
+                # TTS button RIGHT BELOW this specific message
+                if EDGE_TTS_AVAILABLE:
+                    tts_col1, tts_col2 = st.columns([1, 15])
+                    with tts_col1:
+                        if st.button("🔊", key="tts_" + str(idx)):
+                            with st.spinner("🔊"):
+                                voice = get_tts_voice_for_language()
+                                audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
+                                if audio_path:
+                                    with open(audio_path, "rb") as f:
+                                        st.audio(f.read(), format="audio/mp3")
+                                    try:
+                                        os.unlink(audio_path)
+                                    except:
+                                        pass
+        
+        # Auto-scroll
         st.markdown(
-            '<div class="yumea-messages-area" id="yumea-messages">' + messages_html + '</div>'
-            '<script>setTimeout(function(){var m=document.getElementById("yumea-messages");if(m)m.scrollTop=m.scrollHeight;},100);</script>',
+            '<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>',
             unsafe_allow_html=True
         )
-        
-        # Inline TTS buttons after each assistant message
-        if EDGE_TTS_AVAILABLE:
-            for idx, msg in enumerate(history):
-                if msg["role"] == "assistant" and msg.get("content"):
-                    col_tts, col_space = st.columns([1, 8])
-                    with col_tts:
-                        if st.button("🔊", key="tts_" + str(idx), help="Listen"):
-                            st.session_state.tts_playing = idx
-                    
-                    if st.session_state.get("tts_playing") == idx:
-                        with st.spinner("🔊"):
-                            voice = get_tts_voice_for_language()
-                            audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
-                            if audio_path:
-                                with open(audio_path, "rb") as f:
-                                    st.audio(f.read(), format="audio/mp3")
-                                try:
-                                    os.unlink(audio_path)
-                                except:
-                                    pass
-                        st.session_state.tts_playing = None
 
     # Suggestions
     if not history:
