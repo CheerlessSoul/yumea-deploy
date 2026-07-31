@@ -318,7 +318,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     )
     
     # Language control
-        if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         yumea_identity += (
             "⚠️ HIGHEST PRIORITY RULE — LANGUAGE ⚠️\n"
