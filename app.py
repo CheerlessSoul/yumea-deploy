@@ -313,6 +313,7 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
     if not EDGE_TTS_AVAILABLE:
         return None
     try:
+        # Clean text
         clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
         clean_text = re.sub(r'[*_#`]', '', clean_text)
         clean_text = re.sub(r'[\U0001F300-\U0001FAFF\U00002600-\U000027BF]', '', clean_text)
@@ -321,14 +322,36 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
         if not clean_text:
             return None
         
+        # Add natural speech markers for better emotion
+        # Questions should sound like questions
+        clean_text = re.sub(r'([^?])\?', r'\1?... ', clean_text)
+        
+        # Exclamations should sound excited
+        clean_text = re.sub(r'!+', '! ', clean_text)
+        
+        # Add slight pauses at commas for natural flow
+        clean_text = clean_text.replace(', ', ',... ')
+        
+        # Add pause after periods for natural rhythm
+        clean_text = clean_text.replace('. ', '... ')
+        
+        # Ellipsis = longer pause (dramatic/thoughtful)
+        clean_text = clean_text.replace('...', '...... ')
+        
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tmp.close()
-        communicate = edge_tts.Communicate(clean_text, voice)
+        
+        # Use slower rate + slightly higher pitch for cute sound
+        communicate = edge_tts.Communicate(
+            clean_text,
+            voice,
+            rate="-5%",
+            pitch="+8Hz"
+        )
         await communicate.save(tmp.name)
         return tmp.name
     except:
         return None
-
 
 def get_tts_voice_for_language():
     """Get cute, young-sounding TTS voice based on language."""
