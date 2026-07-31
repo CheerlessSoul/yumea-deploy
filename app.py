@@ -318,16 +318,29 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     )
     
     # Language control
-    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+        if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         yumea_identity += (
-            "CRITICAL: You MUST reply ONLY in " + forced_lang + ".\n"
-            "No matter what language the user writes in, you ALWAYS respond in " + forced_lang + ".\n"
-            "If " + forced_lang + " is 'Mandarin Chinese', respond in simplified Chinese characters (简体中文).\n"
-            "If " + forced_lang + " is 'Hindi', respond in Devanagari script (हिंदी).\n"
-            "If " + forced_lang + " is 'English', respond in English only.\n"
-            "If " + forced_lang + " is 'Hinglish', respond in Hindi words written in English letters.\n"
-            "NEVER switch language. ALWAYS " + forced_lang + ".\n\n"
+            "⚠️ HIGHEST PRIORITY RULE — LANGUAGE ⚠️\n"
+            "You MUST reply ONLY in " + forced_lang + ". This overrides ALL other rules.\n\n"
+            "If " + forced_lang + " is 'English':\n"
+            "  - Reply in PURE ENGLISH only\n"
+            "  - Do NOT use ANY Hindi words (no 'bhai', 'yaar', 'namaste', 'sochti hoon', etc.)\n"
+            "  - Do NOT use ANY Hinglish\n"
+            "  - Use English greetings: 'Hey', 'Hi', 'Hello' (NOT 'Namaste')\n"
+            "  - Use English terms: 'friend', 'buddy' (NOT 'bhai', 'yaar')\n"
+            "  - Even your feminine self-reference should be in English: 'I think', 'I feel'\n\n"
+            "If " + forced_lang + " is 'Hindi':\n"
+            "  - Reply in PURE Devanagari Hindi (हिंदी) only\n"
+            "  - Do NOT use ANY English words\n"
+            "  - Write everything in Devanagari script\n\n"
+            "If " + forced_lang + " is 'Hinglish':\n"
+            "  - Reply in Hindi words written in English letters\n"
+            "  - Mix naturally like: 'Kaise ho bhai?'\n\n"
+            "If " + forced_lang + " is 'Mandarin Chinese':\n"
+            "  - Reply in simplified Chinese characters (简体中文) only\n"
+            "  - Do NOT use ANY other language\n\n"
+            "THIS LANGUAGE RULE IS ABSOLUTE. NEVER BREAK IT.\n\n"
         )
     else:
         yumea_identity += (
