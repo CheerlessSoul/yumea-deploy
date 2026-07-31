@@ -123,7 +123,7 @@ section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 .yumea-chat-header { background: linear-gradient(180deg, #12122a, #0f0f1e); border-bottom: 1px solid rgba(139, 92, 246, 0.15); display: flex; align-items: center; padding: 12px 20px; gap: 12px; border-radius: 12px; margin-bottom: 16px; }
 .yumea-messages-area { padding: 16px; background: rgba(15, 15, 30, 0.3); border-radius: 12px; margin-bottom: 16px; min-height: 400px; max-height: 600px; overflow-y: auto; }
 
-.yumea-msg-row { display: flex; margin-bottom: 12px; align-items: flex-end; }
+.yumea-msg-row { display: flex; margin-bottom: 12px; align-items: flex-start; }
 .yumea-msg-row.user { justify-content: flex-end; }
 .yumea-msg-row.ai { justify-content: flex-start; }
 .yumea-msg-avatar { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover; border: 2px solid rgba(139, 92, 246, 0.3); flex-shrink: 0; }
