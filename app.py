@@ -881,11 +881,14 @@ def render_chat():
                     unsafe_allow_html=True
                 )
                 
-                # TTS button RIGHT BELOW this specific message
+                                # TTS button + audio player SIDE BY SIDE
                 if EDGE_TTS_AVAILABLE:
-                    tts_col1, tts_col2 = st.columns([1, 15])
+                    tts_col1, tts_col2 = st.columns([1, 10])
                     with tts_col1:
                         if st.button("🔊", key="tts_" + str(idx)):
+                            st.session_state.tts_playing = idx
+                    with tts_col2:
+                        if st.session_state.get("tts_playing") == idx:
                             with st.spinner("🔊"):
                                 voice = get_tts_voice_for_language()
                                 audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
