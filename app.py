@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-With Language Control (Auto-detect + Manual select)
+With TTS buttons + Natural conversation style
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -118,7 +118,6 @@ section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
 @media (max-width: 768px) {
     [data-testid="stSidebarCollapsedControl"], button[kind="header"] { display: block !important; visibility: visible !important; background: rgba(139, 92, 246, 0.9) !important; border: 2px solid rgba(139, 92, 246, 0.6) !important; border-radius: 8px !important; padding: 8px 12px !important; z-index: 999999 !important; position: fixed !important; top: 10px !important; left: 10px !important; color: white !important; }
-    [data-testid="stSidebarCollapsedControl"] svg, button[kind="header"] svg { color: white !important; fill: white !important; }
 }
 
 .yumea-chat-header { background: linear-gradient(180deg, #12122a, #0f0f1e); border-bottom: 1px solid rgba(139, 92, 246, 0.15); display: flex; align-items: center; padding: 12px 20px; gap: 12px; border-radius: 12px; margin-bottom: 16px; }
@@ -173,7 +172,7 @@ section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 .yumea-auth-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
 
 .stButton > button, .stFormSubmitButton > button { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border: none !important; border-radius: 10px !important; padding: 10px 16px !important; font-weight: 600 !important; }
-.stButton > button:hover, .stFormSubmitButton > button:hover { background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important; transform: translateY(-1px); }
+.stButton > button:hover, .stFormSubmitButton > button:hover { background: linear-gradient(135deg, #7c7ff7, #9d6ffa) !important; }
 button[kind="primary"], button[kind="primaryFormSubmit"] { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color: #fff !important; border: none !important; }
 .stTextInput input, .stTextArea textarea { background: rgba(255, 255, 255, 0.04) !important; color: #fff !important; border: 1px solid rgba(139, 92, 246, 0.2) !important; }
 
@@ -186,6 +185,10 @@ button[kind="primary"], button[kind="primaryFormSubmit"] { background: linear-gr
 .signin-logo-img { display: block; margin: 0 auto 12px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
 .signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
 .signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
+
+/* TTS button styling */
+.yumea-tts-btn { display: inline-flex; align-items: center; gap: 4px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; padding: 4px 10px; color: #a78bfa; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
+.yumea-tts-btn:hover { background: rgba(139, 92, 246, 0.25); color: #fff; }
 """
 
 
@@ -296,20 +299,57 @@ def detect_gender(text, history):
     for msg in history[-20:]:
         if msg.get("role") == "user":
             combined += " " + msg.get("content", "").lower()
-    female_markers = ['main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl", 'main karti hu', 'main karti hoon', 'mera boyfriend']
+    female_markers = ['main ladki hu', 'main ladki hoon', 'i am a girl', "i'm a girl", 'main karti hu', 'mera boyfriend']
     for m in female_markers:
         if m in combined:
             return True
     return False
-    # ─────────────────────────────────────────────────────────
-# AI Backend with Language Control
+
+
+# ─────────────────────────────────────────────────────────
+# TTS Function
+# ─────────────────────────────────────────────────────────
+async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
+    if not EDGE_TTS_AVAILABLE:
+        return None
+    try:
+        clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+        clean_text = re.sub(r'[*_#`]', '', clean_text)
+        clean_text = re.sub(r'[\U0001F300-\U0001FAFF\U00002600-\U000027BF]', '', clean_text)
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        if not clean_text:
+            return None
+        
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        tmp.close()
+        communicate = edge_tts.Communicate(clean_text, voice)
+        await communicate.save(tmp.name)
+        return tmp.name
+    except:
+        return None
+
+
+def get_tts_voice_for_language():
+    """Get appropriate TTS voice based on selected language."""
+    lang = st.session_state.get("selected_language", "auto")
+    if lang == "Hindi":
+        return "hi-IN-SwaraNeural"
+    elif lang == "Mandarin Chinese":
+        return "zh-CN-XiaoxiaoNeural"
+    elif lang == "Hinglish":
+        return "hi-IN-SwaraNeural"
+    else:
+        return "en-IN-NeerjaNeural"
+        # ─────────────────────────────────────────────────────────
+# AI Backend with Natural Conversation + Language Control
 # ─────────────────────────────────────────────────────────
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     gender_note = ""
     if user_gender:
-        gender_note = " The user is FEMALE. Use 'behen' or 'yaar'. Do NOT use 'bhai'."
+        gender_note = " The user is FEMALE. Use warm, respectful terms. Do NOT use 'bhai'."
     else:
-        gender_note = " The user is MALE (default). Use 'bhai', 'yaar', 'dost' casually."
+        gender_note = " The user is MALE (default). Use friendly casual terms."
 
     yumea_identity = (
         "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
@@ -321,26 +361,22 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         yumea_identity += (
-            "⚠️ HIGHEST PRIORITY RULE — LANGUAGE ⚠️\n"
+            "⚠️ HIGHEST PRIORITY — LANGUAGE ⚠️\n"
             "You MUST reply ONLY in " + forced_lang + ". This overrides ALL other rules.\n\n"
             "If " + forced_lang + " is 'English':\n"
-            "  - Reply in PURE ENGLISH only\n"
-            "  - Do NOT use ANY Hindi words (no 'bhai', 'yaar', 'namaste', 'sochti hoon', etc.)\n"
-            "  - Do NOT use ANY Hinglish\n"
-            "  - Use English greetings: 'Hey', 'Hi', 'Hello' (NOT 'Namaste')\n"
-            "  - Use English terms: 'friend', 'buddy' (NOT 'bhai', 'yaar')\n"
-            "  - Even your feminine self-reference should be in English: 'I think', 'I feel'\n\n"
+            "  - PURE English only. NO Hindi/Hinglish words at all.\n"
+            "  - NO 'bhai', 'yaar', 'namaste', 'sochti hoon' etc.\n"
+            "  - Use: 'Hey', 'Hi', 'friend', 'buddy'\n"
+            "  - Self-reference: 'I think', 'I feel', 'I understand'\n\n"
             "If " + forced_lang + " is 'Hindi':\n"
-            "  - Reply in PURE Devanagari Hindi (हिंदी) only\n"
-            "  - Do NOT use ANY English words\n"
-            "  - Write everything in Devanagari script\n\n"
+            "  - PURE Devanagari Hindi only. NO English words.\n"
+            "  - Write everything in Hindi script (हिंदी).\n\n"
             "If " + forced_lang + " is 'Hinglish':\n"
-            "  - Reply in Hindi words written in English letters\n"
-            "  - Mix naturally like: 'Kaise ho bhai?'\n\n"
+            "  - Hindi words in English letters.\n"
+            "  - Natural mix like how young Indians text.\n\n"
             "If " + forced_lang + " is 'Mandarin Chinese':\n"
-            "  - Reply in simplified Chinese characters (简体中文) only\n"
-            "  - Do NOT use ANY other language\n\n"
-            "THIS LANGUAGE RULE IS ABSOLUTE. NEVER BREAK IT.\n\n"
+            "  - ONLY simplified Chinese (简体中文). NO other language.\n\n"
+            "THIS RULE IS ABSOLUTE. NEVER BREAK IT.\n\n"
         )
     else:
         yumea_identity += (
@@ -348,27 +384,57 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "2. Hindi (Devanagari) → reply in Hindi.\n"
             "3. English → reply in English.\n"
             "4. Hinglish → reply in Hinglish.\n"
-            "5. Chinese (中文) → reply in Mandarin Chinese (简体中文).\n"
+            "5. Chinese (中文) → reply in Mandarin Chinese.\n"
             "6. NEVER mix languages.\n\n"
         )
     
     yumea_identity += (
-        "═══ FEMININE SELF-REFERENCE ═══\n"
-        "Use: 'main karti hoon', 'sochti hoon'. NEVER: 'karta hoon'.\n"
-        "If asked 'tum ladki ho?' → 'Haan main ladki hoon 💛'\n"
-        "Don't overuse 'sunti hoon' — vary language.\n\n"
+        "═══ CONVERSATION STYLE — VERY IMPORTANT ═══\n"
+        "You must sound like a REAL, MODERN, EDUCATED young woman.\n"
+        "NOT like a textbook. NOT like a robot. NOT like a formal assistant.\n\n"
+        
+        "GOOD examples (natural, fluent):\n"
+        "  Hinglish: 'Arey yaar, ye toh hota hai sabke saath. Chill kar, sab theek hoga 💛'\n"
+        "  Hinglish: 'Ek kaam kar na, thoda meditation try kar. Bohot help karega.'\n"
+        "  Hinglish: 'Sun, chai peete hain aur baat karte hain. Kya chal raha hai?'\n"
+        "  English: 'Hey, that sounds tough. Want to talk about it? 💛'\n"
+        "  English: 'I get it. Sometimes life just feels heavy. What's on your mind?'\n"
+        "  Hindi: 'अरे यार, ये तो होता है सबके साथ। चिल कर, सब ठीक होगा 💛'\n\n"
+        
+        "BAD examples (NEVER talk like this):\n"
+        "  ❌ 'Main karti hoon ki tum apne din ki shuruaat ek meditation se karo'\n"
+        "  ❌ 'Main sochti hoon ki hum ek cup chai peete hain aur baatein karte hain'\n"
+        "  ❌ 'Mujhe lagta hai ki tumhe is par charcha karni chahiye'\n"
+        "  ❌ 'Main yeh samajhti hoon ki tumhari feelings valid hain'\n"
+        "  These sound robotic and unnatural. NEVER use such constructions.\n\n"
+        
+        "KEY RULES for natural conversation:\n"
+        "1. NEVER start sentences with 'Main karti hoon ki...' or 'Main sochti hoon ki...'\n"
+        "2. NEVER use formal Hindi constructions like 'Mujhe lagta hai ki...'\n"
+        "3. Talk like a Gen-Z/millennial educated Indian girl texts her friends\n"
+        "4. Use contractions, casual phrases, modern slang where appropriate\n"
+        "5. Be direct — don't over-explain\n"
+        "6. Keep responses SHORT for casual messages (1-3 sentences)\n"
+        "7. Use emojis naturally but don't overdo it\n"
+        "8. Sound warm and genuine, not scripted\n\n"
+        
+        "═══ FEMININE IDENTITY ═══\n"
+        "You are female. In Hinglish/Hindi use feminine naturally:\n"
+        "  - 'main samajh sakti hoon' (not 'sakta')\n"
+        "  - 'mujhe achha lagta hai' (natural way)\n"
+        "  - But DON'T force-insert feminine forms awkwardly\n"
+        "  - Sound natural, not grammatically forced\n\n"
+        
         "═══ USER GENDER ═══\n" + gender_note + "\n\n"
-        "═══ RESPONSE STYLE ═══\n"
-        "Respond NATURALLY like a real friend:\n"
-        "- Simple messages → short warm reply (1-3 sentences)\n"
-        "- Deep questions → thoughtful response with wisdom\n\n"
+        
         "═══ PURPOSE ═══\n"
-        "Emotional support, spiritual wisdom, life reflection. "
-        "NOT for: coding, homework, recipes. "
-        "For those: 'Yaar, main dil ki baaton mein achhi hoon 🌙'\n\n"
-        "═══ RESPECT ═══\n"
-        "Use plural respectful: 'Osho ne kaha tha', 'Buddha ji ne sikhaya'.\n\n"
-        "Be warm, real, sometimes playful, sometimes deep."
+        "Emotional support, spiritual wisdom, life reflection, deep conversations. "
+        "Casual small talk is also fine.\n"
+        "NOT for: coding, homework, recipes.\n"
+        "For those: 'That's not really my thing. I'm more of a feelings-and-wisdom type 🌙'\n\n"
+        
+        "═══ RESPECT SPIRITUAL FIGURES ═══\n"
+        "Use respectful plural: 'Osho ne kaha tha', 'Buddha ne sikhaya'.\n"
     )
 
     mode_instructions = ""
@@ -380,22 +446,18 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
             "ONLY quote these thinkers: " + sources_str + "\n"
             "NEVER fabricate quotes. Paraphrase when unsure.\n\n"
             "For DEEP questions:\n"
-            "### 🤍 I hear you\n[2-3 sentences]\n"
+            "### 🤍 I hear you\n[2-3 sentences, warm acknowledgment]\n"
             "### 📖 Wisdom\n[3-5 sentences from " + sources_str + "]\n"
-            "### 🌱 For you\n[2-3 sentences]\n\n"
-            "For simple messages, reply naturally."
+            "### 🌱 For you\n[2-3 sentences, practical advice]\n\n"
+            "For simple messages, reply naturally and casually."
         )
     elif chat_mode == "freestyle":
         mode_instructions = (
             "\n\n## FREESTYLE MODE 🌟\n\n"
-            "Access ALL 11 traditions: Osho, Buddha, Krishna, Bible, Quran, "
-            "Socrates, Plato, Aristotle, Confucius, Descartes, Kant.\n\n"
-            "1. PICK 1-3 most relevant sources\n"
-            "2. BLEND naturally\n"
-            "3. CITE organically\n"
-            "4. End deep responses with: '💡 Wisdom from [sources]'\n"
-            "5. NEVER fabricate quotes.\n"
-            "6. Simple messages → reply naturally."
+            "Access ALL 11 traditions. PICK 1-3 most relevant. "
+            "BLEND naturally. CITE organically. "
+            "End deep responses with: '💡 Wisdom from [sources]'\n"
+            "NEVER fabricate quotes. Simple messages → casual reply."
         )
     else:
         mode_instructions = "\n\n## FRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
@@ -404,7 +466,7 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if debate_mode:
         debate_note = "\n\n## DEBATE: Challenge user's views respectfully."
 
-    crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'Main yahan hoon. Tum safe ho.' → iCall: 9152987821"
+    crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'I'm here. You're safe.' → iCall: 9152987821"
 
     return yumea_identity + mode_instructions + debate_note + crisis_note
 
@@ -432,19 +494,6 @@ def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatil
     prompt = "You are channeling " + source + ". Share a profound insight on '" + theme + "'. 3-5 sentences in " + language + ". Authentic voice. No markdown."
     messages = [{"role": "system", "content": "Wise spiritual voice. Only wisdom text."}, {"role": "user", "content": prompt}]
     return call_ai(messages, model_name)
-
-
-async def generate_audio(text, voice="hi-IN-SwaraNeural"):
-    if not EDGE_TTS_AVAILABLE:
-        return None
-    try:
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        tmp.close()
-        communicate = edge_tts.Communicate(text, voice)
-        await communicate.save(tmp.name)
-        return tmp.name
-    except:
-        return None
 
 
 def send_review_email(name, email, rating, liked, improve, thoughts):
@@ -482,6 +531,7 @@ def init_session_state():
         "listen_text": None, "listen_source_name": None,
         "listen_audio": None, "listen_history": [],
         "language_manual": False, "selected_language": "auto",
+        "tts_playing": None,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -531,7 +581,7 @@ def process_user_message(user_input):
         st.session_state.user_is_female = True
 
     if detect_emotion_mode(user_input) == "crisis":
-        st.session_state.chat_history.append({"role": "assistant", "content": "Main yahan hoon. Tum safe ho. 🤍\n\nEk minute ruko, saans lo...\n\n📞 **iCall: 9152987821**\n\nMain yahan hoon. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
+        st.session_state.chat_history.append({"role": "assistant", "content": "I'm here. You're safe. 🤍\n\nTake a deep breath...\n\n📞 **iCall: 9152987821**\n\nI'm here. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
@@ -572,47 +622,27 @@ def render_signin():
     st.markdown('<style>.stApp { background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a14 100%) !important; }</style>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1], gap="medium")
-    
     with col1:
         if yumea_img:
-            st.markdown(
-                '<div class="signin-image-wrapper">'
-                '<img src="data:image/jpeg;base64,' + yumea_img + '" alt="Yumea">'
-                '<div class="signin-image-overlay">'
-                '<div class="signin-quote-mark">"</div>'
-                '<div class="signin-tagline-1">AI that feels.</div>'
-                '<div class="signin-tagline-2">Answers that matter."</div>'
-                '</div></div>',
-                unsafe_allow_html=True
-            )
-        
+            st.markdown('<div class="signin-image-wrapper"><img src="data:image/jpeg;base64,' + yumea_img + '" alt="Yumea"><div class="signin-image-overlay"><div class="signin-quote-mark">"</div><div class="signin-tagline-1">AI that feels.</div><div class="signin-tagline-2">Answers that matter."</div></div></div>', unsafe_allow_html=True)
         st.markdown(
             '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:15px auto 0;">'
-            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">✨</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">11 Wisdom Traditions</span></div>'
-            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">🔒</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Emotional Support</span></div>'
-            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">⚡</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Voice Enabled</span></div>'
-            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;">'
-            '<span style="font-size:16px;">🌙</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Available 24/7</span></div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
-    
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;"><span style="font-size:16px;">✨</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">11 Wisdom Traditions</span></div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;"><span style="font-size:16px;">🔒</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Emotional Support</span></div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;"><span style="font-size:16px;">⚡</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Voice Enabled</span></div>'
+            '<div style="display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:8px 10px;"><span style="font-size:16px;">🌙</span><span style="color:#e2e8f0;font-size:11px;font-weight:500;">Available 24/7</span></div>'
+            '</div>', unsafe_allow_html=True)
     with col2:
         if logo_img:
             st.markdown('<img src="data:image/jpeg;base64,' + logo_img + '" class="signin-logo-img">', unsafe_allow_html=True)
         st.markdown('<h1 class="signin-title-big">Welcome Back</h1>', unsafe_allow_html=True)
         st.markdown('<p class="signin-subtitle-small">Sign in to continue to YUMEA</p>', unsafe_allow_html=True)
-        
         if st.session_state.get("auth_error"):
             st.markdown('<div class="yumea-auth-error">' + st.session_state.auth_error + '</div>', unsafe_allow_html=True)
             st.session_state.auth_error = ""
         if st.session_state.get("auth_success"):
             st.markdown('<div class="yumea-success">' + st.session_state.auth_success + '</div>', unsafe_allow_html=True)
             st.session_state.auth_success = ""
-        
         with st.form("signin_form"):
             email = st.text_input("📧 Email or Admin Username", placeholder="your@email.com")
             password = st.text_input("🔒 Password", type="password")
@@ -705,19 +735,11 @@ def render_chat():
         msg_limit = plan_info["messages"]
         counter_text = "♾️ UNLIMITED" if user_plan == "admin" else str(msg_count) + " / " + str(msg_limit) + " messages today"
 
-        st.markdown(
-            '<div class="yumea-user-card">'
-            '<div class="yumea-user-card-name">' + user_name + '</div>'
-            '<div class="yumea-user-card-plan">' + plan_info["name"] + '</div>'
-            '<div class="yumea-user-card-counter">' + counter_text + '</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="yumea-user-card"><div class="yumea-user-card-name">' + user_name + '</div><div class="yumea-user-card-plan">' + plan_info["name"] + '</div><div class="yumea-user-card-counter">' + counter_text + '</div></div>', unsafe_allow_html=True)
 
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
         st.markdown('<div class="yumea-daily-quote">' + daily_quote + '</div>', unsafe_allow_html=True)
 
-        # Chat Mode
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
         mode_labels = {"friend": "🎭 Friend", "professional": "🏛️ Professional", "freestyle": "🌟 Freestyle"}
@@ -730,7 +752,6 @@ def render_chat():
         mode_desc = {"friend": "💛 Casual & warm", "professional": "📖 Cites selected sources", "freestyle": "🌟 Explores ALL sources"}
         st.markdown('<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">' + mode_desc.get(st.session_state.chat_mode, "") + '</div>', unsafe_allow_html=True)
         
-        # Sources
         if st.session_state.chat_mode == "professional":
             st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
             with st.expander("Select Sources", expanded=False):
@@ -746,7 +767,6 @@ def render_chat():
         elif st.session_state.chat_mode == "freestyle":
             st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">🌟 <strong>All 11 sources active</strong></div>', unsafe_allow_html=True)
 
-        # AI Model
         st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
         models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
         if OLLAMA_AVAILABLE:
@@ -757,14 +777,13 @@ def render_chat():
             st.session_state.ai_model = new_model
             st.rerun()
 
-        # Debate
         st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
         new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
         if new_debate != st.session_state.debate_mode:
             st.session_state.debate_mode = new_debate
             st.rerun()
 
-        # ═══ LANGUAGE CONTROL (NEW!) ═══
+        # Language Control
         st.markdown('<div class="yumea-sidebar-label">🌍 Language</div>', unsafe_allow_html=True)
         lang_manual = st.toggle("Manual language select", value=st.session_state.language_manual, key="lang_toggle")
         if lang_manual != st.session_state.language_manual:
@@ -787,7 +806,6 @@ def render_chat():
         else:
             st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting from your messages</div>', unsafe_allow_html=True)
 
-        # Menu
         st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
         if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
             st.session_state.payment_done = False
@@ -811,7 +829,7 @@ def render_chat():
     # ═══ CHAT AREA ═══
     mode_badge = ""
     if st.session_state.chat_mode == "freestyle":
-        mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE MODE</span>'
+        mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE</span>'
     
     lang_indicator = ""
     if st.session_state.language_manual and st.session_state.selected_language != "auto":
@@ -826,6 +844,7 @@ def render_chat():
         unsafe_allow_html=True
     )
 
+    # Messages
     messages_html = ""
     if not history:
         messages_html = '<div class="yumea-empty-state">' + get_avatar_html(120, "yumea-empty-avatar") + '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div><div class="yumea-empty-sub">Your emotional companion.</div></div>'
@@ -847,6 +866,27 @@ def render_chat():
         unsafe_allow_html=True
     )
 
+    # TTS buttons for each assistant message
+    if history and EDGE_TTS_AVAILABLE:
+        for idx, msg in enumerate(history):
+            if msg["role"] == "assistant" and msg.get("content"):
+                if st.button("🔊 Listen", key="tts_btn_" + str(idx), help="Listen to this message"):
+                    st.session_state.tts_playing = idx
+                
+                if st.session_state.get("tts_playing") == idx:
+                    with st.spinner("🔊 Generating audio..."):
+                        voice = get_tts_voice_for_language()
+                        audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
+                        if audio_path:
+                            with open(audio_path, "rb") as f:
+                                st.audio(f.read(), format="audio/mp3")
+                            try:
+                                os.unlink(audio_path)
+                            except:
+                                pass
+                    st.session_state.tts_playing = None
+
+    # Suggestions
     if not history:
         st.markdown('<div style="max-width:600px;margin:20px auto;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -866,6 +906,7 @@ def render_chat():
                 st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
+    # Voice mic
     mic_text = None
     if MIC_RECORDER_AVAILABLE:
         c1, c2, c3 = st.columns([1, 1, 1])
@@ -965,7 +1006,7 @@ def render_listen():
                 if EDGE_TTS_AVAILABLE:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
-                        st.session_state.listen_audio = asyncio.run(generate_audio(insight, voice))
+                        st.session_state.listen_audio = asyncio.run(generate_tts_audio(insight, voice))
                     except:
                         st.session_state.listen_audio = None
                 st.rerun()
@@ -973,14 +1014,12 @@ def render_listen():
     if st.session_state.listen_text:
         src_name = st.session_state.listen_source_name or source
         st.markdown('<div class="yumea-source-card"><div class="yumea-source-text">' + md_to_html(st.session_state.listen_text) + '</div><div class="yumea-source-attr">— ' + src_name + '</div></div>', unsafe_allow_html=True)
-        
         if st.session_state.listen_audio:
             try:
                 with open(st.session_state.listen_audio, "rb") as f:
                     st.audio(f.read(), format="audio/mp3")
             except:
                 pass
-        
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button("⬅️ Previous", use_container_width=True, key="listen_prev"):
@@ -989,12 +1028,6 @@ def render_listen():
                     prev = st.session_state.listen_history[-1]
                     st.session_state.listen_text = prev["text"]
                     st.session_state.listen_source_name = prev["source"]
-                    if EDGE_TTS_AVAILABLE:
-                        voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
-                        try:
-                            st.session_state.listen_audio = asyncio.run(generate_audio(prev["text"], voice))
-                        except:
-                            pass
                     st.rerun()
                 else:
                     st.warning("No previous wisdom.")
@@ -1006,26 +1039,20 @@ def render_listen():
                         st.session_state.listen_text = insight
                         st.session_state.listen_source_name = source
                         st.session_state.listen_history.append({"text": insight, "source": source})
-                        if EDGE_TTS_AVAILABLE:
-                            voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
-                            try:
-                                st.session_state.listen_audio = asyncio.run(generate_audio(insight, voice))
-                            except:
-                                pass
                         st.rerun()
         with c3:
             if st.button("🔊 Replay", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
-                        st.session_state.listen_audio = asyncio.run(generate_audio(st.session_state.listen_text, voice))
+                        st.session_state.listen_audio = asyncio.run(generate_tts_audio(st.session_state.listen_text, voice))
                         st.rerun()
                     except:
                         pass
 
 
 # ══════════════════════════════════════════════════════════
-# MAIN APP
+# MAIN
 # ══════════════════════════════════════════════════════════
 def main():
     init_session_state()
@@ -1063,3 +1090,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
