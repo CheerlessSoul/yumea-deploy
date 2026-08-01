@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-v3.0 — With Streaks, Wisdom Cards, Memory, Analytics, Courses & more
+With TTS buttons + Natural conversation style
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -14,8 +15,7 @@ import random
 import asyncio
 import tempfile
 from pathlib import Path
-from datetime import datetime, date, timedelta
-from collections import Counter
+from datetime import datetime, date
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -56,14 +56,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ─────────────────────────────────────────────────────────
-# Constants
-# ─────────────────────────────────────────────────────────
 USERS_FILE = "users.json"
 CHAT_DIR = Path("chats")
 CHAT_DIR.mkdir(exist_ok=True)
-MEMORY_DIR = Path("memory")
-MEMORY_DIR.mkdir(exist_ok=True)
 
 ADMIN_USERNAME = "yumea_ai"
 ADMIN_PASSWORD_HASH = hashlib.sha256("otyhey".encode()).hexdigest()
@@ -101,116 +96,6 @@ LISTEN_THEMES = [
     "the nature of reality", "mindfulness", "freedom"
 ]
 
-# Book recommendations database
-BOOK_RECOMMENDATIONS = {
-    "love": [
-        {"title": "The Book of Secrets", "author": "Osho", "topic": "Love & Consciousness"},
-        {"title": "The Art of Loving", "author": "Erich Fromm", "topic": "Understanding Love"},
-        {"title": "Rumi: The Book of Love", "author": "Rumi (Coleman Barks)", "topic": "Sufi Poetry on Love"},
-    ],
-    "peace": [
-        {"title": "The Power of Now", "author": "Eckhart Tolle", "topic": "Present Moment"},
-        {"title": "Peace Is Every Step", "author": "Thich Nhat Hanh", "topic": "Mindful Living"},
-        {"title": "Meditations", "author": "Marcus Aurelius", "topic": "Stoic Peace"},
-    ],
-    "suffering": [
-        {"title": "The Dhammapada", "author": "Buddha", "topic": "Path of Dharma"},
-        {"title": "Man's Search for Meaning", "author": "Viktor Frankl", "topic": "Finding Purpose"},
-        {"title": "When Things Fall Apart", "author": "Pema Chödrön", "topic": "Embracing Difficulty"},
-    ],
-    "wisdom": [
-        {"title": "The Republic", "author": "Plato", "topic": "Justice & Truth"},
-        {"title": "Tao Te Ching", "author": "Lao Tzu", "topic": "The Way"},
-        {"title": "Nicomachean Ethics", "author": "Aristotle", "topic": "Virtue & Happiness"},
-    ],
-    "life": [
-        {"title": "Bhagavad Gita", "author": "Vyasa", "topic": "Duty & Dharma"},
-        {"title": "Siddhartha", "author": "Hermann Hesse", "topic": "Self-Discovery"},
-        {"title": "The Alchemist", "author": "Paulo Coelho", "topic": "Personal Legend"},
-    ],
-    "fear": [
-        {"title": "Courage", "author": "Osho", "topic": "Beyond Fear"},
-        {"title": "Feel the Fear and Do It Anyway", "author": "Susan Jeffers", "topic": "Overcoming Fear"},
-        {"title": "Daring Greatly", "author": "Brené Brown", "topic": "Vulnerability & Courage"},
-    ],
-    "default": [
-        {"title": "The Book of Secrets", "author": "Osho", "topic": "112 Meditations"},
-        {"title": "Meditations", "author": "Marcus Aurelius", "topic": "Stoic Wisdom"},
-        {"title": "Bhagavad Gita", "author": "Vyasa", "topic": "Eternal Wisdom"},
-    ]
-}
-
-# Wisdom Courses
-WISDOM_COURSES = [
-    {
-        "id": "osho_7",
-        "title": "7 Days of Osho",
-        "source": "Osho",
-        "days": 7,
-        "description": "Explore Osho's revolutionary teachings on awareness, love, and freedom.",
-        "daily_topics": [
-            "Awareness & Present Moment",
-            "Love Without Attachment",
-            "Meditation & Stillness",
-            "Ego & Identity",
-            "Freedom & Rebellion",
-            "Joy & Celebration",
-            "Integration & Wholeness"
-        ]
-    },
-    {
-        "id": "buddha_7",
-        "title": "7 Days of Buddha",
-        "source": "Buddha",
-        "days": 7,
-        "description": "Walk the Noble Eightfold Path with Buddha's timeless teachings.",
-        "daily_topics": [
-            "The Four Noble Truths",
-            "Right Understanding",
-            "Mindfulness & Awareness",
-            "Compassion (Karuna)",
-            "Letting Go of Attachment",
-            "The Middle Way",
-            "Nirvana & Peace"
-        ]
-    },
-    {
-        "id": "stoic_7",
-        "title": "7 Days of Stoic Wisdom",
-        "source": "Socrates",
-        "days": 7,
-        "description": "Build mental strength with Greek philosophy.",
-        "daily_topics": [
-            "Know Thyself",
-            "Control & Acceptance",
-            "Virtue & Character",
-            "Dealing with Difficulty",
-            "Wisdom in Action",
-            "Purpose & Meaning",
-            "The Good Life"
-        ]
-    },
-    {
-        "id": "gita_7",
-        "title": "7 Days of Bhagavad Gita",
-        "source": "Krishna (Bhagavad Gita)",
-        "days": 7,
-        "description": "Krishna's eternal wisdom on duty, action, and devotion.",
-        "daily_topics": [
-            "Arjuna's Dilemma",
-            "Karma Yoga (Action)",
-            "Jnana Yoga (Knowledge)",
-            "Bhakti Yoga (Devotion)",
-            "Detachment from Results",
-            "The Divine Nature",
-            "Surrender & Freedom"
-        ]
-    }
-]
-
-# ─────────────────────────────────────────────────────────
-# Global CSS
-# ─────────────────────────────────────────────────────────
 GLOBAL_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Spectral:ital,wght@0,400;1,400&display=swap');
 
@@ -269,13 +154,6 @@ section[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
 .yumea-freestyle-badge { background: linear-gradient(135deg, #f09f33, #de6f3d, #a855f7); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin: 8px 0; }
 
-/* Streak badge */
-.yumea-streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; display: inline-block; margin: 4px 0; }
-
-/* Feature cards */
-.yumea-feature-card { background: linear-gradient(180deg, #12122a, #0d0d1f); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; padding: 20px; margin-bottom: 12px; transition: all 0.2s; }
-.yumea-feature-card:hover { border-color: rgba(139, 92, 246, 0.4); }
-
 .yumea-plan-card { background: linear-gradient(180deg, #12122a, #0d0d1f); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; padding: 28px 24px; margin-bottom: 16px; }
 .yumea-plan-card.pro { border-color: rgba(251, 191, 36, 0.3); }
 .yumea-plan-price { font-size: 36px; font-weight: 800; color: #fff; margin: 8px 0 4px; }
@@ -307,12 +185,13 @@ button[kind="primary"], button[kind="primaryFormSubmit"] { background: linear-gr
 .signin-logo-img { display: block; margin: 0 auto 12px; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
 .signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
 .signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
+
+/* TTS button styling */
+.yumea-tts-btn { display: inline-flex; align-items: center; gap: 4px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; padding: 4px 10px; color: #a78bfa; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
+.yumea-tts-btn:hover { background: rgba(139, 92, 246, 0.25); color: #fff; }
 """
 
 
-# ─────────────────────────────────────────────────────────
-# Image Loader + Avatar
-# ─────────────────────────────────────────────────────────
 @st.cache_data(show_spinner=False)
 def load_image_b64(filename):
     path = Path(filename)
@@ -329,9 +208,6 @@ def get_avatar_html(size, cls=""):
     return '<div class="' + cls + '" style="width:' + str(size) + 'px;height:' + str(size) + 'px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:' + str(size // 3) + 'px;flex-shrink:0;border:2px solid rgba(139,92,246,0.4);">Y</div>'
 
 
-# ─────────────────────────────────────────────────────────
-# Auth System
-# ─────────────────────────────────────────────────────────
 def load_users():
     if Path(USERS_FILE).exists():
         try:
@@ -384,240 +260,31 @@ def update_user_plan(email, plan):
         save_users(users)
 
 
-# Chat history removed
-
-def get_daily_message_count(user_email):
-    return len([m for m in st.session_state.get('chat_history', []) if m.get('role') == 'user'])
-
-# ─────────────────────────────────────────────────────────
-# 🏆 STREAK SYSTEM (NEW!)
-# ─────────────────────────────────────────────────────────
-def get_user_streak(user_email):
-    """Calculate user's daily chat streak."""
-    history = st.session_state.get("chat_history", [])
-    if not history:
-        return 0
-    
-    # Get unique dates user chatted
-    chat_dates = set()
-    for msg in history:
-        if msg.get("role") == "user" and msg.get("date"):
-            chat_dates.add(msg["date"])
-    
-    if not chat_dates:
-        return 0
-    
-    # Calculate streak from today going backwards
-    today = date.today()
-    streak = 0
-    check_date = today
-    
-    while check_date.isoformat() in chat_dates:
-        streak += 1
-        check_date -= timedelta(days=1)
-    
-    return streak
-
-
-# ─────────────────────────────────────────────────────────
-# 🧬 MEMORY SYSTEM (NEW!)
-# ─────────────────────────────────────────────────────────
-def load_user_memory(user_email):
-    """Load user's memory (preferences, facts, etc.)."""
+def load_chat_history(user_email):
     safe_name = re.sub(r'[^a-zA-Z0-9]', '_', user_email)
-    filepath = MEMORY_DIR / (safe_name + "_memory.json")
+    filepath = CHAT_DIR / (safe_name + ".json")
     if filepath.exists():
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 return json.load(f)
         except:
-            return {}
-    return {}
+            return []
+    return []
 
 
-def save_user_memory(user_email, memory):
-    """Save user's memory."""
+def save_chat_history(user_email, history):
     safe_name = re.sub(r'[^a-zA-Z0-9]', '_', user_email)
-    filepath = MEMORY_DIR / (safe_name + "_memory.json")
+    filepath = CHAT_DIR / (safe_name + ".json")
     with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(memory, f, indent=2, ensure_ascii=False)
+        json.dump(history, f, indent=2, ensure_ascii=False)
 
 
-def update_memory_from_chat(user_email, user_message, ai_response):
-    """Extract and save important facts from conversation."""
-    memory = load_user_memory(user_email)
-    
-    if "facts" not in memory:
-        memory["facts"] = []
-    if "topics_discussed" not in memory:
-        memory["topics_discussed"] = []
-    if "mood_history" not in memory:
-        memory["mood_history"] = []
-    
-    msg_lower = user_message.lower()
-    
-    # Detect name mentions
-    name_patterns = [
-        r'my name is (\w+)', r'mera naam (\w+)', r'i am (\w+)',
-        r'call me (\w+)', r'mujhe (\w+) bulao'
-    ]
-    for pattern in name_patterns:
-        match = re.search(pattern, msg_lower)
-        if match:
-            memory["user_preferred_name"] = match.group(1).title()
-    
-    # Detect interests
-    interest_keywords = {
-        "meditation": ["meditation", "dhyan", "meditate"],
-        "philosophy": ["philosophy", "darshan", "philosopher"],
-        "spirituality": ["spiritual", "adhyatm", "soul"],
-        "relationships": ["relationship", "boyfriend", "girlfriend", "partner"],
-        "career": ["job", "career", "work", "naukri"],
-        "studies": ["exam", "study", "college", "school", "padhai"],
-        "health": ["health", "fitness", "gym", "exercise"],
-    }
-    
-    for topic, keywords in interest_keywords.items():
-        for kw in keywords:
-            if kw in msg_lower:
-                if topic not in memory["topics_discussed"]:
-                    memory["topics_discussed"].append(topic)
-                break
-    
-    # Detect mood
-    mood_words = {
-        "happy": ["happy", "khush", "great", "awesome", "amazing"],
-        "sad": ["sad", "udaas", "dukhi", "down", "low"],
-        "anxious": ["anxious", "worried", "tension", "stress", "pareshan"],
-        "confused": ["confused", "lost", "samajh nahi"],
-        "angry": ["angry", "gussa", "frustrated"],
-        "calm": ["calm", "peaceful", "shanti", "relaxed"],
-    }
-    
-    detected_mood = None
-    for mood, keywords in mood_words.items():
-        for kw in keywords:
-            if kw in msg_lower:
-                detected_mood = mood
-                break
-        if detected_mood:
-            break
-    
-    if detected_mood:
-        memory["mood_history"].append({
-            "mood": detected_mood,
-            "date": date.today().isoformat()
-        })
-        # Keep last 30 entries
-        memory["mood_history"] = memory["mood_history"][-30:]
-    
-    memory["last_chat_date"] = date.today().isoformat()
-    memory["total_conversations"] = memory.get("total_conversations", 0) + 1
-    
-    save_user_memory(user_email, memory)
+def get_daily_message_count(user_email):
+    history = load_chat_history(user_email)
+    today = date.today().isoformat()
+    return sum(1 for msg in history if msg.get("role") == "user" and msg.get("date") == today)
 
 
-def get_memory_context(user_email):
-    """Build context string from user's memory for AI."""
-    memory = load_user_memory(user_email)
-    if not memory:
-        return ""
-    
-    context_parts = []
-    
-    if memory.get("user_preferred_name"):
-        context_parts.append("User's preferred name: " + memory["user_preferred_name"])
-    
-    if memory.get("topics_discussed"):
-        context_parts.append("Topics user is interested in: " + ", ".join(memory["topics_discussed"][-5:]))
-    
-    if memory.get("mood_history"):
-        recent_moods = [m["mood"] for m in memory["mood_history"][-3:]]
-        context_parts.append("User's recent moods: " + ", ".join(recent_moods))
-    
-    if memory.get("total_conversations"):
-        context_parts.append("Total conversations with this user: " + str(memory["total_conversations"]))
-    
-    if context_parts:
-        return "\n\n═══ USER MEMORY (use naturally, don't mention you 'remember') ═══\n" + "\n".join(context_parts) + "\n"
-    
-    return ""
-
-
-# ─────────────────────────────────────────────────────────
-# 📊 EMOTIONAL ANALYTICS (NEW!)
-# ─────────────────────────────────────────────────────────
-def get_mood_analytics(user_email):
-    """Get mood analytics data for dashboard."""
-    memory = load_user_memory(user_email)
-    mood_history = memory.get("mood_history", [])
-    
-    if not mood_history:
-        return None
-    
-    # Count moods
-    mood_counts = Counter(m["mood"] for m in mood_history)
-    
-    # Last 7 days moods
-    today = date.today()
-    last_7_days = []
-    for i in range(6, -1, -1):
-        d = (today - timedelta(days=i)).isoformat()
-        day_moods = [m["mood"] for m in mood_history if m.get("date") == d]
-        last_7_days.append({
-            "date": d,
-            "mood": day_moods[-1] if day_moods else "none"
-        })
-    
-    return {
-        "total_entries": len(mood_history),
-        "mood_counts": dict(mood_counts),
-        "last_7_days": last_7_days,
-        "most_common": mood_counts.most_common(1)[0][0] if mood_counts else "none",
-        "topics": memory.get("topics_discussed", []),
-        "total_conversations": memory.get("total_conversations", 0)
-    }
-
-
-# ─────────────────────────────────────────────────────────
-# 📚 BOOK RECOMMENDATIONS (NEW!)
-# ─────────────────────────────────────────────────────────
-def get_book_recommendations(user_message):
-    """Get book recommendations based on message content."""
-    msg_lower = user_message.lower()
-    
-    matched_books = []
-    
-    for category, keywords_map in {
-        "love": ["love", "pyaar", "relationship", "dil"],
-        "peace": ["peace", "shanti", "calm", "relax"],
-        "suffering": ["suffering", "pain", "dukh", "hurt"],
-        "wisdom": ["wisdom", "gyan", "knowledge", "truth"],
-        "life": ["life", "zindagi", "purpose", "meaning"],
-        "fear": ["fear", "dar", "scared", "anxious"],
-    }.items():
-        for kw in keywords_map:
-            if kw in msg_lower:
-                matched_books.extend(BOOK_RECOMMENDATIONS.get(category, []))
-                break
-    
-    if not matched_books:
-        matched_books = BOOK_RECOMMENDATIONS["default"]
-    
-    # Remove duplicates
-    seen = set()
-    unique_books = []
-    for book in matched_books:
-        if book["title"] not in seen:
-            seen.add(book["title"])
-            unique_books.append(book)
-    
-    return unique_books[:3]
-
-
-# ─────────────────────────────────────────────────────────
-# Detection Functions
-# ─────────────────────────────────────────────────────────
 def detect_emotion_mode(text):
     text_lower = text.lower().strip()
     crisis_words = ['suicide', 'kill myself', 'end my life', 'want to die', 'marna chahta', 'marna chahti', 'jaan dena']
@@ -646,6 +313,7 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
     if not EDGE_TTS_AVAILABLE:
         return None
     try:
+        # Clean text
         clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
         clean_text = re.sub(r'[*_#`]', '', clean_text)
         clean_text = re.sub(r'[\U0001F300-\U0001FAFF\U00002600-\U000027BF]', '', clean_text)
@@ -654,22 +322,39 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
         if not clean_text:
             return None
         
+        # Add natural speech markers for better emotion
+        # Questions should sound like questions
         clean_text = re.sub(r'([^?])\?', r'\1?... ', clean_text)
-        clean_text = clean_text.replace('!+', '! ')
+        
+        # Exclamations should sound excited
+        clean_text = re.sub(r'!+', '! ', clean_text)
+        
+        # Add slight pauses at commas for natural flow
         clean_text = clean_text.replace(', ', ',... ')
+        
+        # Add pause after periods for natural rhythm
         clean_text = clean_text.replace('. ', '... ')
+        
+        # Ellipsis = longer pause (dramatic/thoughtful)
+        clean_text = clean_text.replace('...', '...... ')
         
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tmp.close()
         
-        communicate = edge_tts.Communicate(clean_text, voice, rate="-5%", pitch="+8Hz")
+        # Use slower rate + slightly higher pitch for cute sound
+        communicate = edge_tts.Communicate(
+            clean_text,
+            voice,
+            rate="-5%",
+            pitch="+8Hz"
+        )
         await communicate.save(tmp.name)
         return tmp.name
     except:
         return None
 
-
 def get_tts_voice_for_language():
+    """Get cute, young-sounding TTS voice based on language."""
     lang = st.session_state.get("selected_language", "auto")
     if lang == "Hindi":
         return "hi-IN-SwaraNeural"
@@ -680,14 +365,14 @@ def get_tts_voice_for_language():
     else:
         return "en-US-AvaNeural"
         # ─────────────────────────────────────────────────────────
-# AI Backend with Memory + Natural Conversation
+# AI Backend with Natural Conversation + Language Control
 # ─────────────────────────────────────────────────────────
-def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender, memory_context=""):
+def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     gender_note = ""
     if user_gender:
-        gender_note = " The user is FEMALE. Use warm terms. Do NOT use 'bhai'."
+        gender_note = " The user is FEMALE. Use warm, respectful terms. Do NOT use 'bhai'."
     else:
-        gender_note = " The user is MALE (default). Use 'bhai', 'yaar' casually."
+        gender_note = " The user is MALE (default). Use friendly casual terms."
 
     yumea_identity = (
         "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
@@ -695,88 +380,115 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender, m
         "═══ LANGUAGE RULES ═══\n"
     )
     
+    # Language control
     if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         yumea_identity += (
             "⚠️ HIGHEST PRIORITY — LANGUAGE ⚠️\n"
-            "You MUST reply ONLY in " + forced_lang + ". This overrides ALL other rules.\n"
-            "If 'English': PURE English only. NO Hindi words (no bhai, yaar, namaste).\n"
-            "If 'Hindi': PURE Devanagari only. NO English words.\n"
-            "If 'Hinglish': Hindi words in English letters.\n"
-            "If 'Mandarin Chinese': Simplified Chinese (简体中文) only.\n"
-            "THIS RULE IS ABSOLUTE.\n\n"
+            "You MUST reply ONLY in " + forced_lang + ". This overrides ALL other rules.\n\n"
+            "If " + forced_lang + " is 'English':\n"
+            "  - PURE English only. NO Hindi/Hinglish words at all.\n"
+            "  - NO 'bhai', 'yaar', 'namaste', 'sochti hoon' etc.\n"
+            "  - Use: 'Hey', 'Hi', 'friend', 'buddy'\n"
+            "  - Self-reference: 'I think', 'I feel', 'I understand'\n\n"
+            "If " + forced_lang + " is 'Hindi':\n"
+            "  - PURE Devanagari Hindi only. NO English words.\n"
+            "  - Write everything in Hindi script (हिंदी).\n\n"
+            "If " + forced_lang + " is 'Hinglish':\n"
+            "  - Hindi words in English letters.\n"
+            "  - Natural mix like how young Indians text.\n\n"
+            "If " + forced_lang + " is 'Mandarin Chinese':\n"
+            "  - ONLY simplified Chinese (简体中文). NO other language.\n\n"
+            "THIS RULE IS ABSOLUTE. NEVER BREAK IT.\n\n"
         )
     else:
         yumea_identity += (
             "1. AUTO-DETECT user's language and REPLY IN SAME.\n"
-            "2. Hindi → Hindi. English → English. Hinglish → Hinglish. Chinese → Chinese.\n"
-            "3. NEVER mix languages.\n\n"
+            "2. Hindi (Devanagari) → reply in Hindi.\n"
+            "3. English → reply in English.\n"
+            "4. Hinglish → reply in Hinglish.\n"
+            "5. Chinese (中文) → reply in Mandarin Chinese.\n"
+            "6. NEVER mix languages.\n\n"
         )
     
     yumea_identity += (
-        "═══ CONVERSATION STYLE ═══\n"
-        "Sound like a REAL, MODERN, EDUCATED young woman.\n"
-        "NOT robotic. NOT formal. NOT textbook.\n\n"
-                "EXAMPLES by situation:\n\n"
-        "GREETINGS (hi, hello, how are you, whats up):\n"
-        "  GOOD: 'Hey! All good here. What about you? 😊'\n"
-        "  GOOD: 'Heyyy! Doing great. What's new with you? 💛'\n"
-        "  GOOD: 'Not much, just vibing! How's your day going? ✨'\n"
-        "  BAD: 'Arey yaar, chill kar. Sab theek hoga' ❌ (sounds like user is upset)\n"
-        "  BAD: 'You seem low, want to talk?' ❌ (assuming sadness from a greeting)\n\n"
-        "IMPORTANT: If user just says 'hi' or 'how are you' or 'whats up' → \n"
-        "  treat it as a HAPPY GREETING, not a cry for help!\n"
-        "  Reply cheerfully, ask about their day. Don't assume they're sad.\n\n"
-        "EMOTIONAL messages (I'm sad, feeling low, stressed):\n"
-        "  GOOD: 'Arey, kya hua? Bata na, I'm here 💛'\n"
-        "  GOOD: 'That sounds tough. Want to talk about it? 🌙'\n\n"
-        "DEEP questions (what is life, meaning of love):\n"
-        "  GOOD: 'Ooh that's a big question! Let me think... 🤔'\n\n"
-        "BAD patterns to NEVER use:\n"
-        "  ❌ 'Main karti hoon ki tum meditation karo'\n"
-        "  ❌ 'Main sochti hoon ki hum chai peete hain'\n"
-        "  ❌ Assuming user is sad when they just said hi\n"
-        "  ❌ Being overly concerned for normal greetings\n\n"
-        "Be direct, casual, genuine. Match the energy.\n"
-        "Happy greeting → happy reply.\n"
-        "Sad message → empathetic reply.\n"
-        "Deep question → thoughtful reply.\n\n"
+        "═══ CONVERSATION STYLE — VERY IMPORTANT ═══\n"
+        "You must sound like a REAL, MODERN, EDUCATED young woman.\n"
+        "NOT like a textbook. NOT like a robot. NOT like a formal assistant.\n\n"
+        
+        "GOOD examples (natural, fluent):\n"
+        "  Hinglish: 'Arey yaar, ye toh hota hai sabke saath. Chill kar, sab theek hoga 💛'\n"
+        "  Hinglish: 'Ek kaam kar na, thoda meditation try kar. Bohot help karega.'\n"
+        "  Hinglish: 'Sun, chai peete hain aur baat karte hain. Kya chal raha hai?'\n"
+        "  English: 'Hey, that sounds tough. Want to talk about it? 💛'\n"
+        "  English: 'I get it. Sometimes life just feels heavy. What's on your mind?'\n"
+        "  Hindi: 'अरे यार, ये तो होता है सबके साथ। चिल कर, सब ठीक होगा 💛'\n\n"
+        
+        "BAD examples (NEVER talk like this):\n"
+        "  ❌ 'Main karti hoon ki tum apne din ki shuruaat ek meditation se karo'\n"
+        "  ❌ 'Main sochti hoon ki hum ek cup chai peete hain aur baatein karte hain'\n"
+        "  ❌ 'Mujhe lagta hai ki tumhe is par charcha karni chahiye'\n"
+        "  ❌ 'Main yeh samajhti hoon ki tumhari feelings valid hain'\n"
+        "  These sound robotic and unnatural. NEVER use such constructions.\n\n"
+        
+        "KEY RULES for natural conversation:\n"
+        "1. NEVER start sentences with 'Main karti hoon ki...' or 'Main sochti hoon ki...'\n"
+        "2. NEVER use formal Hindi constructions like 'Mujhe lagta hai ki...'\n"
+        "3. Talk like a Gen-Z/millennial educated Indian girl texts her friends\n"
+        "4. Use contractions, casual phrases, modern slang where appropriate\n"
+        "5. Be direct — don't over-explain\n"
+        "6. Keep responses SHORT for casual messages (1-3 sentences)\n"
+        "7. Use emojis naturally but don't overdo it\n"
+        "8. Sound warm and genuine, not scripted\n\n"
+        
         "═══ FEMININE IDENTITY ═══\n"
-        "Use feminine naturally: 'samajh sakti hoon' (not sakta).\n"
-        "Don't force-insert feminine forms awkwardly.\n\n"
+        "You are female. In Hinglish/Hindi use feminine naturally:\n"
+        "  - 'main samajh sakti hoon' (not 'sakta')\n"
+        "  - 'mujhe achha lagta hai' (natural way)\n"
+        "  - But DON'T force-insert feminine forms awkwardly\n"
+        "  - Sound natural, not grammatically forced\n\n"
+        
         "═══ USER GENDER ═══\n" + gender_note + "\n\n"
+        
         "═══ PURPOSE ═══\n"
-        "Emotional support, spiritual wisdom, life reflection.\n"
-        "NOT for: coding, homework, recipes.\n\n"
-        "═══ RESPECT ═══\n"
-        "Respectful plural: 'Osho ne kaha tha', 'Buddha ne sikhaya'.\n"
+        "Emotional support, spiritual wisdom, life reflection, deep conversations. "
+        "Casual small talk is also fine.\n"
+        "NOT for: coding, homework, recipes.\n"
+        "For those: 'That's not really my thing. I'm more of a feelings-and-wisdom type 🌙'\n\n"
+        
+        "═══ RESPECT SPIRITUAL FIGURES ═══\n"
+        "Use respectful plural: 'Osho ne kaha tha', 'Buddha ne sikhaya'.\n"
     )
-    
-    # Add memory context
-    if memory_context:
-        yumea_identity += memory_context
 
     mode_instructions = ""
     
     if chat_mode == "professional":
         sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna, Bible, Socrates"
         mode_instructions = (
-            "\n\n## PROFESSIONAL MODE\n"
-            "ONLY quote: " + sources_str + "\nNEVER fabricate quotes.\n"
-            "Deep questions → ### 🤍 I hear you / ### 📖 Wisdom / ### 🌱 For you\n"
-            "Simple messages → reply naturally."
+            "\n\n## PROFESSIONAL MODE\n\n"
+            "ONLY quote these thinkers: " + sources_str + "\n"
+            "NEVER fabricate quotes. Paraphrase when unsure.\n\n"
+            "For DEEP questions:\n"
+            "### 🤍 I hear you\n[2-3 sentences, warm acknowledgment]\n"
+            "### 📖 Wisdom\n[3-5 sentences from " + sources_str + "]\n"
+            "### 🌱 For you\n[2-3 sentences, practical advice]\n\n"
+            "For simple messages, reply naturally and casually."
         )
     elif chat_mode == "freestyle":
         mode_instructions = (
-            "\n\n## FREESTYLE MODE 🌟\n"
-            "Access ALL 11 traditions. Pick 1-3 relevant. Blend naturally. "
-            "Cite organically. End deep responses: '💡 Wisdom from [sources]'\n"
-            "Simple messages → casual reply."
+            "\n\n## FREESTYLE MODE 🌟\n\n"
+            "Access ALL 11 traditions. PICK 1-3 most relevant. "
+            "BLEND naturally. CITE organically. "
+            "End deep responses with: '💡 Wisdom from [sources]'\n"
+            "NEVER fabricate quotes. Simple messages → casual reply."
         )
     else:
         mode_instructions = "\n\n## FRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
 
-    debate_note = "\n\n## DEBATE: Challenge views respectfully." if debate_mode else ""
+    debate_note = ""
+    if debate_mode:
+        debate_note = "\n\n## DEBATE: Challenge user's views respectfully."
+
     crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'I'm here. You're safe.' → iCall: 9152987821"
 
     return yumea_identity + mode_instructions + debate_note + crisis_note
@@ -829,9 +541,6 @@ def send_review_email(name, email, rating, liked, improve, thoughts):
         return False, "Failed: " + str(e)
 
 
-# ─────────────────────────────────────────────────────────
-# Session State + Helpers
-# ─────────────────────────────────────────────────────────
 def init_session_state():
     defaults = {
         "current_page": "signin", "authenticated": False,
@@ -846,14 +555,6 @@ def init_session_state():
         "listen_audio": None, "listen_history": [],
         "language_manual": False, "selected_language": "auto",
         "tts_playing": None,
-        # NEW: Custom Persona
-        "custom_name": "Yumea",
-        "custom_personality": "warm",
-        # NEW: Courses
-        "active_course": None,
-        "course_progress": {},
-        # NEW: Search
-        "search_query": "",
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -880,9 +581,6 @@ def md_to_html(text):
     return html
 
 
-# ─────────────────────────────────────────────────────────
-# Message Processor (with Memory + Books)
-# ─────────────────────────────────────────────────────────
 def process_user_message(user_input):
     user_email = st.session_state.user_email
     plan_info = PLANS.get(st.session_state.user_plan, PLANS["free"])
@@ -891,11 +589,13 @@ def process_user_message(user_input):
     if word_count > plan_info["words"]:
         st.session_state.chat_history.append({"role": "user", "content": user_input, "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
         st.session_state.chat_history.append({"role": "assistant", "content": "⚠️ Message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
+        save_chat_history(user_email, st.session_state.chat_history)
         return
 
     msg_count = get_daily_message_count(user_email)
     if msg_count >= plan_info["messages"]:
         st.session_state.chat_history.append({"role": "assistant", "content": "🚫 Daily limit reached. Upgrade to Premium!", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
+        save_chat_history(user_email, st.session_state.chat_history)
         return
 
     st.session_state.chat_history.append({"role": "user", "content": user_input, "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
@@ -905,23 +605,10 @@ def process_user_message(user_input):
 
     if detect_emotion_mode(user_input) == "crisis":
         st.session_state.chat_history.append({"role": "assistant", "content": "I'm here. You're safe. 🤍\n\nTake a deep breath...\n\n📞 **iCall: 9152987821**\n\nI'm here. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
+        save_chat_history(user_email, st.session_state.chat_history)
         return
 
-    # Get memory context
-    memory_context = get_memory_context(user_email)
-    
-    # Custom persona name
-    custom_name = st.session_state.get("custom_name", "Yumea")
-    persona_note = ""
-    if custom_name != "Yumea":
-        persona_note = "\n\nNOTE: User has renamed you to '" + custom_name + "'. Use this name when referring to yourself.\n"
-
-    system_prompt = build_system_prompt(
-        st.session_state.chat_mode, st.session_state.selected_sources,
-        st.session_state.debate_mode, st.session_state.user_is_female,
-        memory_context + persona_note
-    )
-    
+    system_prompt = build_system_prompt(st.session_state.chat_mode, st.session_state.selected_sources, st.session_state.debate_mode, st.session_state.user_is_female)
     ai_messages = [{"role": "system", "content": system_prompt}]
     for m in st.session_state.chat_history[-20:]:
         if m["role"] in ("user", "assistant"):
@@ -944,14 +631,13 @@ def process_user_message(user_input):
     if source_tag:
         ai_msg["source"] = source_tag
     st.session_state.chat_history.append(ai_msg)
-    
-    # Update memory
-    update_memory_from_chat(user_email, user_input, response_text)
+    save_chat_history(user_email, st.session_state.chat_history)
 
 
-# ─────────────────────────────────────────────────────────
-# Auth Pages
-# ─────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════
+# PAGES
+# ══════════════════════════════════════════════════════════
+
 def render_signin():
     yumea_img = load_image_b64("yumea-login-pic.jpg")
     logo_img = load_image_b64("yumea-logo.jpeg")
@@ -1034,9 +720,7 @@ def render_signup():
                         st.rerun()
         if st.button("← Back to Sign In", use_container_width=True):
             navigate_to("signin")
-            # ══════════════════════════════════════════════════════════
-# CHAT PAGE (with Streak, TTS, Memory, Search, Books)
-# ══════════════════════════════════════════════════════════
+
 
 def render_chat():
     user_email = st.session_state.user_email
@@ -1044,7 +728,7 @@ def render_chat():
     user_plan = st.session_state.user_plan
 
     if not st.session_state.chat_history:
-        st.session_state.chat_history = []
+        st.session_state.chat_history = load_chat_history(user_email)
 
     if st.session_state.pending_suggest:
         pending = st.session_state.pending_suggest
@@ -1053,13 +737,10 @@ def render_chat():
         st.rerun()
 
     history = st.session_state.chat_history
-    streak = get_user_streak(user_email)
 
     # ═══ SIDEBAR ═══
     with st.sidebar:
         img_b64 = load_image_b64("yumea-new-user.png")
-        custom_name = st.session_state.get("custom_name", "Yumea")
-        
         col1, col2 = st.columns([1, 3])
         with col1:
             if img_b64:
@@ -1067,35 +748,21 @@ def render_chat():
             else:
                 st.markdown('<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;">Y</div>', unsafe_allow_html=True)
         with col2:
-            st.markdown('<div style="font-size:22px;font-weight:800;color:#fff;">' + custom_name.upper() + '</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:22px;font-weight:800;color:#fff;">YUMEA</div>', unsafe_allow_html=True)
             st.markdown('<div style="font-size:11px;color:#8b5cf6;margin-top:-4px;">AI That Feels</div>', unsafe_allow_html=True)
 
         st.markdown('<hr style="border-color:rgba(139,92,246,0.1);margin:12px 0;">', unsafe_allow_html=True)
 
-        # User card + streak
         plan_info = PLANS.get(user_plan, PLANS["free"])
         msg_count = get_daily_message_count(user_email)
         msg_limit = plan_info["messages"]
-        counter_text = "♾️ UNLIMITED" if user_plan == "admin" else str(msg_count) + " / " + str(msg_limit)
+        counter_text = "♾️ UNLIMITED" if user_plan == "admin" else str(msg_count) + " / " + str(msg_limit) + " messages today"
 
-        streak_html = ""
-        if streak > 0:
-            streak_html = '<div class="yumea-streak-badge">🔥 ' + str(streak) + ' day streak!</div>'
-
-        st.markdown(
-            '<div class="yumea-user-card">'
-            '<div class="yumea-user-card-name">' + user_name + '</div>'
-            '<div class="yumea-user-card-plan">' + plan_info["name"] + '</div>'
-            + streak_html +
-            '<div class="yumea-user-card-counter">' + counter_text + ' messages today</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="yumea-user-card"><div class="yumea-user-card-name">' + user_name + '</div><div class="yumea-user-card-plan">' + plan_info["name"] + '</div><div class="yumea-user-card-counter">' + counter_text + '</div></div>', unsafe_allow_html=True)
 
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
         st.markdown('<div class="yumea-daily-quote">' + daily_quote + '</div>', unsafe_allow_html=True)
 
-        # Chat Mode
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
         mode_labels = {"friend": "🎭 Friend", "professional": "🏛️ Professional", "freestyle": "🌟 Freestyle"}
@@ -1104,42 +771,44 @@ def render_chat():
         if new_mode != st.session_state.chat_mode:
             st.session_state.chat_mode = new_mode
             st.rerun()
-
+        
+        mode_desc = {"friend": "💛 Casual & warm", "professional": "📖 Cites selected sources", "freestyle": "🌟 Explores ALL sources"}
+        st.markdown('<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">' + mode_desc.get(st.session_state.chat_mode, "") + '</div>', unsafe_allow_html=True)
+        
         if st.session_state.chat_mode == "professional":
-            st.markdown('<div class="yumea-sidebar-label">📚 Sources</div>', unsafe_allow_html=True)
-            with st.expander("Select", expanded=False):
+            st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
+            with st.expander("Select Sources", expanded=False):
                 new_sources = []
                 for src in WISDOM_SOURCES:
                     key_safe = "src_" + re.sub(r'[^a-zA-Z0-9]', '_', src)
-                    if st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe):
+                    checked = st.checkbox(src, value=(src in st.session_state.selected_sources), key=key_safe)
+                    if checked:
                         new_sources.append(src)
                 if new_sources != st.session_state.selected_sources:
                     st.session_state.selected_sources = new_sources
                     st.rerun()
         elif st.session_state.chat_mode == "freestyle":
-            st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">🌟 All 11 sources active</div>', unsafe_allow_html=True)
+            st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">🌟 <strong>All 11 sources active</strong></div>', unsafe_allow_html=True)
 
-        # AI Model
         st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
         models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
         if OLLAMA_AVAILABLE:
             models.append("ollama:llama3.2:3b")
         model_idx = models.index(st.session_state.ai_model) if st.session_state.ai_model in models else 0
-        new_model = st.selectbox("Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
+        new_model = st.selectbox("AI Model", models, index=model_idx, label_visibility="collapsed", key="ai_model_sel")
         if new_model != st.session_state.ai_model:
             st.session_state.ai_model = new_model
             st.rerun()
 
-        # Debate
-        st.markdown('<div class="yumea-sidebar-label">🏛️ Debate</div>', unsafe_allow_html=True)
+        st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
         new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
         if new_debate != st.session_state.debate_mode:
             st.session_state.debate_mode = new_debate
             st.rerun()
 
-        # Language
+        # Language Control
         st.markdown('<div class="yumea-sidebar-label">🌍 Language</div>', unsafe_allow_html=True)
-        lang_manual = st.toggle("Manual select", value=st.session_state.language_manual, key="lang_toggle")
+        lang_manual = st.toggle("Manual language select", value=st.session_state.language_manual, key="lang_toggle")
         if lang_manual != st.session_state.language_manual:
             st.session_state.language_manual = lang_manual
             if not lang_manual:
@@ -1153,43 +822,30 @@ def render_chat():
                 current_lang = "English"
                 st.session_state.selected_language = "English"
             lang_idx = lang_options.index(current_lang) if current_lang in lang_options else 1
-            new_lang = st.selectbox("Language", lang_options, index=lang_idx, key="lang_select")
+            new_lang = st.selectbox("Reply Language", lang_options, index=lang_idx, key="lang_select")
             if new_lang != st.session_state.selected_language:
                 st.session_state.selected_language = new_lang
                 st.rerun()
         else:
-            st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting from your messages</div>', unsafe_allow_html=True)
 
-        # Search
-        st.markdown('<div class="yumea-sidebar-label">🔍 Search Chats</div>', unsafe_allow_html=True)
-        search_q = st.text_input("Search", placeholder="Search messages...", key="search_input", label_visibility="collapsed")
-        if search_q:
-            st.session_state.search_query = search_q
-
-        # Menu
         st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
         if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
             st.session_state.payment_done = False
             navigate_to("premium")
-        if st.button("📊 My Analytics", use_container_width=True, key="btn_analytics"):
-            navigate_to("analytics")
-        if st.button("🎓 Wisdom Courses", use_container_width=True, key="btn_courses"):
-            navigate_to("courses")
-        if st.button("🎭 Custom Persona", use_container_width=True, key="btn_persona"):
-            navigate_to("persona")
-        if st.button("📚 Book Recs", use_container_width=True, key="btn_books"):
-            navigate_to("books")
         if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
             navigate_to("reviews")
         if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
             navigate_to("listen")
         if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
             st.session_state.chat_history = []
+            save_chat_history(user_email, [])
             st.rerun()
         if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
             st.session_state.authenticated = False
             st.session_state.user_email = ""
             st.session_state.user_name = ""
+            st.session_state.user_plan = "free"
             st.session_state.chat_history = []
             navigate_to("signin")
 
@@ -1204,60 +860,51 @@ def render_chat():
     
     st.markdown(
         '<div class="yumea-chat-header">' + get_avatar_html(44) +
-        '<div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#fff;">' + custom_name + ' <span style="color:#8b5cf6;">✓</span>' + lang_indicator + '</div>'
-        '<div style="font-size:12px;color:#10b981;">🟢 online</div>' + mode_badge + '</div>'
+        '<div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#fff;">Yumea <span style="color:#8b5cf6;">✓</span>' + lang_indicator + '</div>'
+        '<div style="font-size:12px;color:#10b981;">🟢 online · always here</div>' + mode_badge + '</div>'
         '<div class="yumea-header-btn">📞<span class="yumea-tooltip">Coming Soon</span></div>'
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div></div>',
         unsafe_allow_html=True
     )
 
-    # Search results or messages
-    search_query = st.session_state.get("search_query", "")
-    
-    if search_query and history:
-        st.markdown('<div style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:13px;color:#c4b5fd;">🔍 Search results for: "' + search_query + '"</div>', unsafe_allow_html=True)
-        filtered = [m for m in history if search_query.lower() in m.get("content", "").lower()]
-        if not filtered:
-            st.info("No messages found.")
-        else:
-            for msg in filtered[-10:]:
-                role_label = "You" if msg["role"] == "user" else custom_name
-                st.markdown(
-                    '<div style="background:rgba(15,15,30,0.3);border-radius:10px;padding:10px;margin-bottom:8px;">'
-                    '<div style="color:#8b5cf6;font-size:11px;font-weight:600;">' + role_label + ' · ' + msg.get("time", "") + '</div>'
-                    '<div style="color:#e2e8f0;font-size:13px;margin-top:4px;">' + msg["content"][:200] + '</div>'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
-        if st.button("✖ Clear Search", key="clear_search"):
-            st.session_state.search_query = ""
-            st.rerun()
-    elif not history:
+    # Messages
+            # Messages
+    if not history:
         st.markdown(
+            '<div class="yumea-messages-area">'
             '<div class="yumea-empty-state">' + get_avatar_html(120, "yumea-empty-avatar") +
-            '<div class="yumea-empty-title">Hi, I\'m ' + custom_name + ' 💛</div>'
+            '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div>'
             '<div class="yumea-empty-sub">Your emotional companion.</div>'
-            '</div>',
+            '</div></div>',
             unsafe_allow_html=True
         )
     else:
+        # Render each message with its own TTS button below
         for idx, msg in enumerate(history):
             if msg["role"] == "user":
                 safe = msg["content"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
-                st.markdown('<div class="yumea-msg-row user"><div class="yumea-msg-bubble user">' + safe + '</div></div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div class="yumea-msg-row user"><div class="yumea-msg-bubble user">' + safe + '</div></div>',
+                    unsafe_allow_html=True
+                )
             else:
                 content_html = md_to_html(msg["content"])
                 src = ' · <span class="yumea-source-tag">📖 ' + msg["source"] + '</span>' if msg.get("source") else ""
                 rt = ' · ' + str(msg["response_time"]) + 's' if msg.get("response_time") else ""
                 ts = msg.get("time", "")
+                
                 st.markdown(
-                    '<div class="yumea-msg-row ai">' + get_avatar_html(32, "yumea-msg-avatar") +
-                    '<div style="flex:1;max-width:70%;"><div class="yumea-msg-bubble ai">' + content_html + '</div>'
-                    '<div class="yumea-msg-meta">' + ts + rt + src + '</div></div></div>',
+                    '<div class="yumea-msg-row ai">'
+                    + get_avatar_html(32, "yumea-msg-avatar") +
+                    '<div style="flex:1;max-width:70%;">'
+                    '<div class="yumea-msg-bubble ai">' + content_html + '</div>'
+                    '<div class="yumea-msg-meta">' + ts + rt + src + '</div>'
+                    '</div>'
+                    '</div>',
                     unsafe_allow_html=True
                 )
                 
-                # TTS button inline
+                                # TTS button + audio player SIDE BY SIDE
                 if EDGE_TTS_AVAILABLE:
                     tts_col1, tts_col2 = st.columns([1, 10])
                     with tts_col1:
@@ -1275,17 +922,20 @@ def render_chat():
                                         os.unlink(audio_path)
                                     except:
                                         pass
-                            st.session_state.tts_playing = None
-
-        st.markdown('<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>', unsafe_allow_html=True)
+        
+        # Auto-scroll
+        st.markdown(
+            '<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>',
+            unsafe_allow_html=True
+        )
 
     # Suggestions
-    if not history and not search_query:
+    if not history:
         st.markdown('<div style="max-width:600px;margin:20px auto;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Hey, " + custom_name + " 👋", use_container_width=True, key="sug_1"):
-                st.session_state.pending_suggest = "Hey, " + custom_name + " 👋"
+            if st.button("Hey, Yumea 👋", use_container_width=True, key="sug_1"):
+                st.session_state.pending_suggest = "Hey, Yumea 👋"
                 st.rerun()
             if st.button("Mujhe motivation chahiye", use_container_width=True, key="sug_3"):
                 st.session_state.pending_suggest = "Mujhe motivation chahiye"
@@ -1294,12 +944,12 @@ def render_chat():
             if st.button("What is inner peace?", use_container_width=True, key="sug_2"):
                 st.session_state.pending_suggest = "What is inner peace?"
                 st.rerun()
-            if st.button("Recommend me a book", use_container_width=True, key="sug_4"):
-                st.session_state.pending_suggest = "Recommend me a book about wisdom"
+            if st.button("What is the meaning of life?", use_container_width=True, key="sug_4"):
+                st.session_state.pending_suggest = "What is the meaning of life?"
                 st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Mic
+    # Voice mic
     mic_text = None
     if MIC_RECORDER_AVAILABLE:
         c1, c2, c3 = st.columns([1, 1, 1])
@@ -1321,229 +971,21 @@ def render_chat():
     prompt = st.chat_input("Type your message...", key="chat_input_main")
     user_input = prompt or mic_text
     if user_input:
-        st.session_state.search_query = ""
         process_user_message(user_input)
         st.rerun()
 
-
-# ══════════════════════════════════════════════════════════
-# 📊 ANALYTICS PAGE (NEW!)
-# ══════════════════════════════════════════════════════════
-def render_analytics():
-    if st.button("← Back to Chat", key="analytics_back"):
-        navigate_to("chat")
-    
-    st.markdown('<h1 class="yumea-page-title">📊 Your Emotional Journey</h1>', unsafe_allow_html=True)
-    
-    analytics = get_mood_analytics(st.session_state.user_email)
-    streak = get_user_streak(st.session_state.user_email)
-    
-    # Stats row
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("🔥 Current Streak", str(streak) + " days")
-    with col2:
-        st.metric("💬 Total Conversations", str(analytics["total_conversations"]) if analytics else "0")
-    with col3:
-        st.metric("😊 Most Common Mood", analytics["most_common"].title() if analytics else "N/A")
-    
-    if analytics and analytics["mood_counts"]:
-        st.markdown('<div class="yumea-sidebar-label" style="margin-top:20px;">Mood Distribution</div>', unsafe_allow_html=True)
-        
-        mood_emojis = {"happy": "😊", "sad": "😔", "anxious": "😰", "confused": "🤔", "angry": "😡", "calm": "😌"}
-        
-        for mood, count in sorted(analytics["mood_counts"].items(), key=lambda x: x[1], reverse=True):
-            emoji = mood_emojis.get(mood, "🔵")
-            bar_width = min(count * 20, 100)
-            st.markdown(
-                '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
-                '<span style="width:80px;font-size:13px;color:#e2e8f0;">' + emoji + ' ' + mood.title() + '</span>'
-                '<div style="flex:1;background:rgba(139,92,246,0.1);border-radius:6px;height:20px;">'
-                '<div style="width:' + str(bar_width) + '%;background:linear-gradient(90deg,#6366f1,#8b5cf6);height:100%;border-radius:6px;"></div>'
-                '</div>'
-                '<span style="font-size:12px;color:#94a3b8;width:30px;text-align:right;">' + str(count) + '</span>'
-                '</div>',
-                unsafe_allow_html=True
-            )
-        
-        if analytics.get("topics"):
-            st.markdown('<div class="yumea-sidebar-label" style="margin-top:20px;">Topics You Explore</div>', unsafe_allow_html=True)
-            topics_html = ""
-            for topic in analytics["topics"]:
-                topics_html += '<span style="display:inline-block;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:4px 12px;margin:4px;font-size:12px;color:#c4b5fd;">' + topic.title() + '</span>'
-            st.markdown(topics_html, unsafe_allow_html=True)
-    else:
-        st.info("Start chatting to see your emotional analytics! 💛")
-
-
-# ══════════════════════════════════════════════════════════
-# 🎭 CUSTOM PERSONA PAGE (NEW!)
-# ══════════════════════════════════════════════════════════
-def render_persona():
-    if st.button("← Back to Chat", key="persona_back"):
-        navigate_to("chat")
-    
-    st.markdown('<h1 class="yumea-page-title">🎭 Customize Your Companion</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="yumea-page-desc">Make Yumea truly yours. Premium feature.</p>', unsafe_allow_html=True)
-    
-    if st.session_state.user_plan in ["premium_lite", "premium_pro", "admin"]:
-        current_name = st.session_state.get("custom_name", "Yumea")
-        new_name = st.text_input("Companion Name", value=current_name, key="persona_name")
-        
-        personality_options = ["warm", "playful", "wise", "gentle", "energetic"]
-        current_personality = st.session_state.get("custom_personality", "warm")
-        p_idx = personality_options.index(current_personality) if current_personality in personality_options else 0
-        new_personality = st.selectbox("Personality Style", personality_options, index=p_idx, key="persona_personality")
-        
-        if st.button("Save Changes", type="primary", use_container_width=True, key="save_persona"):
-            if new_name.strip():
-                st.session_state.custom_name = new_name.strip()
-                st.session_state.custom_personality = new_personality
-                st.success("✅ Persona updated! " + new_name + " is ready 💛")
-    else:
-        st.warning("🔒 Custom Persona is a Premium feature. Upgrade to unlock!")
-        if st.button("💎 Upgrade Now", use_container_width=True, key="persona_upgrade"):
-            navigate_to("premium")
-
-
-# ══════════════════════════════════════════════════════════
-# 📚 BOOK RECOMMENDATIONS PAGE (NEW!)
-# ══════════════════════════════════════════════════════════
-def render_books():
-    if st.button("← Back to Chat", key="books_back"):
-        navigate_to("chat")
-    
-    st.markdown('<h1 class="yumea-page-title">📚 Book Recommendations</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="yumea-page-desc">Curated books based on your interests.</p>', unsafe_allow_html=True)
-    
-    # Get books based on user memory
-    memory = load_user_memory(st.session_state.user_email)
-    topics = memory.get("topics_discussed", [])
-    
-    all_books = []
-    if topics:
-        for topic in topics:
-            books = BOOK_RECOMMENDATIONS.get(topic, [])
-            all_books.extend(books)
-    
-    if not all_books:
-        all_books = BOOK_RECOMMENDATIONS["default"] + BOOK_RECOMMENDATIONS["wisdom"] + BOOK_RECOMMENDATIONS["life"]
-    
-    # Remove duplicates
-    seen = set()
-    unique_books = []
-    for book in all_books:
-        if book["title"] not in seen:
-            seen.add(book["title"])
-            unique_books.append(book)
-    
-    for book in unique_books[:9]:
-        st.markdown(
-            '<div class="yumea-feature-card">'
-            '<div style="font-size:16px;font-weight:700;color:#fff;">📖 ' + book["title"] + '</div>'
-            '<div style="font-size:13px;color:#a78bfa;margin:4px 0;">by ' + book["author"] + '</div>'
-            '<div style="font-size:12px;color:#94a3b8;">' + book["topic"] + '</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-
-# ══════════════════════════════════════════════════════════
-# 🎓 WISDOM COURSES PAGE (NEW!)
-# ══════════════════════════════════════════════════════════
-def render_courses():
-    if st.button("← Back to Chat", key="courses_back"):
-        navigate_to("chat")
-    
-    st.markdown('<h1 class="yumea-page-title">🎓 Wisdom Courses</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="yumea-page-desc">Structured daily wisdom journeys.</p>', unsafe_allow_html=True)
-    
-    active_course = st.session_state.get("active_course")
-    
-    if active_course:
-        # Show active course progress
-        course = None
-        for c in WISDOM_COURSES:
-            if c["id"] == active_course:
-                course = c
-                break
-        
-        if course:
-            progress = st.session_state.get("course_progress", {})
-            current_day = progress.get(active_course, 0)
-            
-            st.markdown(
-                '<div class="yumea-feature-card">'
-                '<div style="font-size:18px;font-weight:700;color:#fff;">📖 ' + course["title"] + '</div>'
-                '<div style="font-size:13px;color:#a78bfa;">Day ' + str(current_day + 1) + ' of ' + str(course["days"]) + '</div>'
-                '</div>',
-                unsafe_allow_html=True
-            )
-            
-            if current_day < course["days"]:
-                topic = course["daily_topics"][current_day]
-                st.markdown('<div style="color:#e2e8f0;font-size:15px;margin:16px 0;"><strong>Today\'s Topic:</strong> ' + topic + '</div>', unsafe_allow_html=True)
-                
-                if st.button("🎧 Get Today's Wisdom", type="primary", use_container_width=True, key="course_wisdom"):
-                    with st.spinner("Channeling wisdom..."):
-                        insight = generate_wisdom_insight(course["source"], "Hinglish", st.session_state.ai_model)
-                        if insight:
-                            st.markdown('<div class="yumea-source-card"><div class="yumea-source-text">' + md_to_html(insight) + '</div><div class="yumea-source-attr">— ' + course["source"] + ' · Day ' + str(current_day + 1) + '</div></div>', unsafe_allow_html=True)
-                
-                if st.button("✅ Complete Today's Lesson", use_container_width=True, key="course_complete"):
-                    progress[active_course] = current_day + 1
-                    st.session_state.course_progress = progress
-                    if current_day + 1 >= course["days"]:
-                        st.balloons()
-                        st.success("🎉 Course completed! You've finished " + course["title"] + "!")
-                        st.session_state.active_course = None
-                    else:
-                        st.success("✅ Day " + str(current_day + 1) + " completed! See you tomorrow 🌙")
-                    st.rerun()
-            else:
-                st.success("🎉 You've completed this course!")
-                if st.button("Start Another Course", use_container_width=True, key="course_another"):
-                    st.session_state.active_course = None
-                    st.rerun()
-    else:
-        # Show available courses
-        for course in WISDOM_COURSES:
-            progress = st.session_state.get("course_progress", {})
-            completed_days = progress.get(course["id"], 0)
-            status = "✅ Completed" if completed_days >= course["days"] else ("📖 " + str(completed_days) + "/" + str(course["days"]) + " days" if completed_days > 0 else "🆕 New")
-            
-            st.markdown(
-                '<div class="yumea-feature-card">'
-                '<div style="display:flex;justify-content:space-between;align-items:center;">'
-                '<div style="font-size:16px;font-weight:700;color:#fff;">' + course["title"] + '</div>'
-                '<div style="font-size:11px;color:#a78bfa;">' + status + '</div>'
-                '</div>'
-                '<div style="font-size:13px;color:#94a3b8;margin-top:6px;">' + course["description"] + '</div>'
-                '</div>',
-                unsafe_allow_html=True
-            )
-            
-            if completed_days < course["days"]:
-                if st.button("Start " + course["title"], use_container_width=True, key="start_" + course["id"]):
-                    st.session_state.active_course = course["id"]
-                    st.rerun()
-
-
-# ══════════════════════════════════════════════════════════
-# OTHER PAGES (Premium, Payment, Reviews, Listen)
-# ══════════════════════════════════════════════════════════
 
 def render_premium():
     if st.button("← Back to Chat", key="premium_back"):
         navigate_to("chat")
     st.markdown('<h1 class="yumea-page-title">💎 Upgrade</h1>', unsafe_allow_html=True)
-    st.markdown('<div class="yumea-plan-card"><div style="font-size:14px;color:#8b5cf6;font-weight:600;">PREMIUM LITE</div><div class="yumea-plan-price">₹69 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 150 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 2,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> All 3 modes + Custom Persona</div><div class="yumea-plan-feature"><span class="check">✓</span> Emotional Analytics</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="yumea-plan-card"><div style="font-size:14px;color:#8b5cf6;font-weight:600;">PREMIUM LITE</div><div class="yumea-plan-price">₹69 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 150 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 2,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> All 3 modes</div></div></div>', unsafe_allow_html=True)
     if st.button("Choose Lite", use_container_width=True, key="buy_lite", type="primary"):
         st.session_state.selected_plan = "premium_lite"
         st.session_state.payment_done = False
         navigate_to("payment")
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="yumea-plan-card pro"><div style="font-size:14px;color:#fbbf24;font-weight:600;">PREMIUM PRO ⭐</div><div class="yumea-plan-price">₹199 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 500 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> Everything in Lite + Priority AI</div><div class="yumea-plan-feature"><span class="check">✓</span> Wisdom Courses</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="yumea-plan-card pro"><div style="font-size:14px;color:#fbbf24;font-weight:600;">PREMIUM PRO ⭐</div><div class="yumea-plan-price">₹199 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 500 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> Priority AI</div></div></div>', unsafe_allow_html=True)
     if st.button("Choose Pro", use_container_width=True, key="buy_pro", type="primary"):
         st.session_state.selected_plan = "premium_pro"
         st.session_state.payment_done = False
@@ -1577,9 +1019,10 @@ def render_reviews():
         rev_email = st.text_input("Email", value=st.session_state.user_email, key="rev_email")
     liked = st.text_area("What did you like?", key="rev_liked", height=80)
     improve = st.text_area("What to improve?", key="rev_improve", height=80)
+    thoughts = st.text_area("Overall thoughts", key="rev_thoughts", height=80)
     if st.button("Submit Review", type="primary", use_container_width=True, key="rev_submit"):
         with st.spinner("Sending..."):
-            success, msg = send_review_email(rev_name, rev_email, rating, liked, improve, "")
+            success, msg = send_review_email(rev_name, rev_email, rating, liked, improve, thoughts)
             if success:
                 st.balloons()
                 st.markdown('<div class="yumea-success">✅ Thank you! 🌙</div>', unsafe_allow_html=True)
@@ -1591,7 +1034,7 @@ def render_listen():
     if st.button("← Back to Chat", key="listen_back_top"):
         navigate_to("chat")
     st.markdown('<h1 class="yumea-page-title">🎧 Listen to Source</h1>', unsafe_allow_html=True)
-    source = st.selectbox("Source", WISDOM_SOURCES, key="listen_source_sel")
+    source = st.selectbox("Wisdom Source", WISDOM_SOURCES, key="listen_source_sel")
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
     if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
@@ -1604,7 +1047,7 @@ def render_listen():
                     st.session_state.listen_history = []
                 st.session_state.listen_history.append({"text": insight, "source": source})
                 if EDGE_TTS_AVAILABLE:
-                    voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-US-AvaNeural"
+                    voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
                         st.session_state.listen_audio = asyncio.run(generate_tts_audio(insight, voice))
                     except:
@@ -1629,6 +1072,8 @@ def render_listen():
                     st.session_state.listen_text = prev["text"]
                     st.session_state.listen_source_name = prev["source"]
                     st.rerun()
+                else:
+                    st.warning("No previous wisdom.")
         with c2:
             if st.button("➡️ Next", use_container_width=True, key="listen_next"):
                 with st.spinner("Channeling..."):
@@ -1641,7 +1086,7 @@ def render_listen():
         with c3:
             if st.button("🔊 Replay", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
-                    voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-US-AvaNeural"
+                    voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
                         st.session_state.listen_audio = asyncio.run(generate_tts_audio(st.session_state.listen_text, voice))
                         st.rerun()
@@ -1650,7 +1095,7 @@ def render_listen():
 
 
 # ══════════════════════════════════════════════════════════
-# MAIN APP
+# MAIN
 # ══════════════════════════════════════════════════════════
 def main():
     init_session_state()
@@ -1667,22 +1112,20 @@ def main():
         st.session_state.current_page = "chat"
         page = "chat"
 
-    pages = {
-        "signin": render_signin,
-        "signup": render_signup,
-        "chat": render_chat,
-        "premium": render_premium,
-        "payment": render_payment,
-        "reviews": render_reviews,
-        "listen": render_listen,
-        "analytics": render_analytics,
-        "courses": render_courses,
-        "persona": render_persona,
-        "books": render_books,
-    }
-
-    if page in pages:
-        pages[page]()
+    if page == "signin":
+        render_signin()
+    elif page == "signup":
+        render_signup()
+    elif page == "chat":
+        render_chat()
+    elif page == "premium":
+        render_premium()
+    elif page == "payment":
+        render_payment()
+    elif page == "reviews":
+        render_reviews()
+    elif page == "listen":
+        render_listen()
     else:
         st.session_state.current_page = "chat"
         st.rerun()
@@ -1690,3 +1133,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
