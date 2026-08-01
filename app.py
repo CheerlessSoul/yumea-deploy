@@ -1237,9 +1237,6 @@ def render_chat():
         unsafe_allow_html=True
     )
 
-    # Search results or messages
-        if not history:
-        
                 # TTS button inline
                 if EDGE_TTS_AVAILABLE:
                     tts_col1, tts_col2 = st.columns([1, 10])
