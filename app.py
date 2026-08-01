@@ -703,7 +703,8 @@ def get_tts_voice_for_language():
         return "hi-IN-SwaraNeural"
     else:
         return "en-US-AvaNeural"
-        # ─────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────
 # AI Backend with Memory + Natural Conversation
 # ─────────────────────────────────────────────────────────
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender, memory_context=""):
@@ -1061,7 +1062,8 @@ def render_signup():
                         st.session_state.auth_error = msg
                         st.rerun()
         if st.button("← Back to Sign In", use_container_width=True):
-            navigate_to("signin")# ══════════════════════════════════════════════════════════
+            navigate_to("signin")
+            # ══════════════════════════════════════════════════════════
 # CHAT PAGE (with Streak, TTS, Memory, Search, Books)
 # ══════════════════════════════════════════════════════════
 
@@ -1187,6 +1189,8 @@ def render_chat():
         else:
             st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting</div>', unsafe_allow_html=True)
 
+        
+
         # Menu
         st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
         if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
@@ -1232,7 +1236,9 @@ def render_chat():
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div></div>',
         unsafe_allow_html=True
     )
-                    if not history:
+
+    # Search results or messages
+        if not history:
         st.markdown(
             '<div class="yumea-empty-state">' + get_avatar_html(120, "yumea-empty-avatar") +
             '<div class="yumea-empty-title">Hi, I\'m ' + custom_name + ' 💛</div>'
@@ -1257,6 +1263,7 @@ def render_chat():
                     unsafe_allow_html=True
                 )
                 
+                # TTS button inline
                 if EDGE_TTS_AVAILABLE:
                     tts_col1, tts_col2 = st.columns([1, 10])
                     with tts_col1:
@@ -1277,7 +1284,6 @@ def render_chat():
                             st.session_state.tts_playing = None
 
         st.markdown('<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>', unsafe_allow_html=True)
-                
 
     # Suggestions
     if not history and not search_query:
