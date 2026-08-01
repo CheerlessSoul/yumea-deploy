@@ -1234,7 +1234,7 @@ def render_chat():
     )
                 
                 # TTS button inline
-                if EDGE_TTS_AVAILABLE:
+                    if EDGE_TTS_AVAILABLE:
                     tts_col1, tts_col2 = st.columns([1, 10])
                     with tts_col1:
                         if st.button("🔊", key="tts_" + str(idx)):
