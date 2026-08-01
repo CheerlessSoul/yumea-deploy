@@ -1187,12 +1187,6 @@ def render_chat():
         else:
             st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting</div>', unsafe_allow_html=True)
 
-        # Search
-        st.markdown('<div class="yumea-sidebar-label">🔍 Search Chats</div>', unsafe_allow_html=True)
-        search_q = st.text_input("Search", placeholder="Search messages...", key="search_input", label_visibility="collapsed")
-        if search_q:
-            st.session_state.search_query = search_q
-
         # Menu
         st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
         if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
@@ -1239,51 +1233,7 @@ def render_chat():
         unsafe_allow_html=True
     )
 
-    # Search results or messages
-    search_query = st.session_state.get("search_query", "")
-    
-    if search_query and history:
-        st.markdown('<div style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:13px;color:#c4b5fd;">🔍 Search results for: "' + search_query + '"</div>', unsafe_allow_html=True)
-        filtered = [m for m in history if search_query.lower() in m.get("content", "").lower()]
-        if not filtered:
-            st.info("No messages found.")
-        else:
-            for msg in filtered[-10:]:
-                role_label = "You" if msg["role"] == "user" else custom_name
-                st.markdown(
-                    '<div style="background:rgba(15,15,30,0.3);border-radius:10px;padding:10px;margin-bottom:8px;">'
-                    '<div style="color:#8b5cf6;font-size:11px;font-weight:600;">' + role_label + ' · ' + msg.get("time", "") + '</div>'
-                    '<div style="color:#e2e8f0;font-size:13px;margin-top:4px;">' + msg["content"][:200] + '</div>'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
-        if st.button("✖ Clear Search", key="clear_search"):
-            st.session_state.search_query = ""
-            st.rerun()
-    elif not history:
-        st.markdown(
-            '<div class="yumea-empty-state">' + get_avatar_html(120, "yumea-empty-avatar") +
-            '<div class="yumea-empty-title">Hi, I\'m ' + custom_name + ' 💛</div>'
-            '<div class="yumea-empty-sub">Your emotional companion.</div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
-    else:
-        for idx, msg in enumerate(history):
-            if msg["role"] == "user":
-                safe = msg["content"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
-                st.markdown('<div class="yumea-msg-row user"><div class="yumea-msg-bubble user">' + safe + '</div></div>', unsafe_allow_html=True)
-            else:
-                content_html = md_to_html(msg["content"])
-                src = ' · <span class="yumea-source-tag">📖 ' + msg["source"] + '</span>' if msg.get("source") else ""
-                rt = ' · ' + str(msg["response_time"]) + 's' if msg.get("response_time") else ""
-                ts = msg.get("time", "")
-                st.markdown(
-                    '<div class="yumea-msg-row ai">' + get_avatar_html(32, "yumea-msg-avatar") +
-                    '<div style="flex:1;max-width:70%;"><div class="yumea-msg-bubble ai">' + content_html + '</div>'
-                    '<div class="yumea-msg-meta">' + ts + rt + src + '</div></div></div>',
-                    unsafe_allow_html=True
-                )
+        if not history:
                 
                 # TTS button inline
                 if EDGE_TTS_AVAILABLE:
@@ -1349,7 +1299,6 @@ def render_chat():
     prompt = st.chat_input("Type your message...", key="chat_input_main")
     user_input = prompt or mic_text
     if user_input:
-        st.session_state.search_query = ""
         process_user_message(user_input)
         st.rerun()
 
