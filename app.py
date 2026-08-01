@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
 v3.0 — With Streaks, Wisdom Cards, Memory, Analytics, Courses & more
@@ -385,33 +384,10 @@ def update_user_plan(email, plan):
         save_users(users)
 
 
-# ─────────────────────────────────────────────────────────
-# Chat Persistence
-# ─────────────────────────────────────────────────────────
-def load_chat_history(user_email):
-    safe_name = re.sub(r'[^a-zA-Z0-9]', '_', user_email)
-    filepath = CHAT_DIR / (safe_name + ".json")
-    if filepath.exists():
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-
-def save_chat_history(user_email, history):
-    safe_name = re.sub(r'[^a-zA-Z0-9]', '_', user_email)
-    filepath = CHAT_DIR / (safe_name + ".json")
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(history, f, indent=2, ensure_ascii=False)
-
+# Chat history removed
 
 def get_daily_message_count(user_email):
-    history = load_chat_history(user_email)
-    today = date.today().isoformat()
-    return sum(1 for msg in history if msg.get("role") == "user" and msg.get("date") == today)
-
+    return len([m for m in st.session_state.get('chat_history', []) if m.get('role') == 'user'])
 
 # ─────────────────────────────────────────────────────────
 # 🏆 STREAK SYSTEM (NEW!)
@@ -915,13 +891,11 @@ def process_user_message(user_input):
     if word_count > plan_info["words"]:
         st.session_state.chat_history.append({"role": "user", "content": user_input, "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
         st.session_state.chat_history.append({"role": "assistant", "content": "⚠️ Message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
-        save_chat_history(user_email, st.session_state.chat_history)
         return
 
     msg_count = get_daily_message_count(user_email)
     if msg_count >= plan_info["messages"]:
         st.session_state.chat_history.append({"role": "assistant", "content": "🚫 Daily limit reached. Upgrade to Premium!", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
-        save_chat_history(user_email, st.session_state.chat_history)
         return
 
     st.session_state.chat_history.append({"role": "user", "content": user_input, "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
@@ -931,7 +905,6 @@ def process_user_message(user_input):
 
     if detect_emotion_mode(user_input) == "crisis":
         st.session_state.chat_history.append({"role": "assistant", "content": "I'm here. You're safe. 🤍\n\nTake a deep breath...\n\n📞 **iCall: 9152987821**\n\nI'm here. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
-        save_chat_history(user_email, st.session_state.chat_history)
         return
 
     # Get memory context
@@ -971,7 +944,6 @@ def process_user_message(user_input):
     if source_tag:
         ai_msg["source"] = source_tag
     st.session_state.chat_history.append(ai_msg)
-    save_chat_history(user_email, st.session_state.chat_history)
     
     # Update memory
     update_memory_from_chat(user_email, user_input, response_text)
@@ -1072,7 +1044,7 @@ def render_chat():
     user_plan = st.session_state.user_plan
 
     if not st.session_state.chat_history:
-        st.session_state.chat_history = load_chat_history(user_email)
+        st.session_state.chat_history = []
 
     if st.session_state.pending_suggest:
         pending = st.session_state.pending_suggest
@@ -1213,7 +1185,6 @@ def render_chat():
             navigate_to("listen")
         if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
             st.session_state.chat_history = []
-            save_chat_history(user_email, [])
             st.rerun()
         if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
             st.session_state.authenticated = False
