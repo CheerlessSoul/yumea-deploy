@@ -1232,8 +1232,6 @@ def render_chat():
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div></div>',
         unsafe_allow_html=True
     )
-
-        if not history:
                 
                 # TTS button inline
                 if EDGE_TTS_AVAILABLE:
