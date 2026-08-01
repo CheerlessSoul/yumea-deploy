@@ -1277,27 +1277,7 @@ def render_chat():
                             st.session_state.tts_playing = None
 
         st.markdown('<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>', unsafe_allow_html=True)
-                # TTS button inline
-                    if EDGE_TTS_AVAILABLE:
-                    tts_col1, tts_col2 = st.columns([1, 10])
-                    with tts_col1:
-                        if st.button("🔊", key="tts_" + str(idx)):
-                            st.session_state.tts_playing = idx
-                    with tts_col2:
-                        if st.session_state.get("tts_playing") == idx:
-                            with st.spinner("🔊"):
-                                voice = get_tts_voice_for_language()
-                                audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
-                                if audio_path:
-                                    with open(audio_path, "rb") as f:
-                                        st.audio(f.read(), format="audio/mp3")
-                                    try:
-                                        os.unlink(audio_path)
-                                    except:
-                                        pass
-                            st.session_state.tts_playing = None
-
-        st.markdown('<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>', unsafe_allow_html=True)
+                
 
     # Suggestions
     if not history and not search_query:
