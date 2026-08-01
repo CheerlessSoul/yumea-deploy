@@ -394,7 +394,7 @@ def get_daily_message_count(user_email):
 # ─────────────────────────────────────────────────────────
 def get_user_streak(user_email):
     """Calculate user's daily chat streak."""
-    history = load_chat_history(user_email)
+    history = st.session_state.get("chat_history", [])
     if not history:
         return 0
     
