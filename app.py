@@ -609,12 +609,11 @@ def process_user_message(user_input):
 
     system_prompt = build_system_prompt(st.session_state.chat_mode, st.session_state.selected_sources, st.session_state.debate_mode, st.session_state.user_is_female)
     ai_messages = [{"role": "system", "content": system_prompt}]
-    
+
     for m in st.session_state.chat_history[-20:]:
         if m["role"] in ("user", "assistant"):
             ai_messages.append({"role": m["role"], "content": m["content"]})
 
-    # LANGUAGE ENFORCEMENT - inject reminder before AI generates response
     if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         reminder = {
