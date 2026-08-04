@@ -374,113 +374,118 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     else:
         gender_note = " The user is MALE (default). Use friendly casual terms."
 
+    # ═══ LANGUAGE RULE — HIGHEST PRIORITY, AT THE TOP ═══
+    language_rule = ""
+    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+        forced_lang = st.session_state.selected_language
+        
+        if forced_lang == "English":
+            language_rule = (
+                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "YOU MUST REPLY IN 100% PURE ENGLISH ONLY.\n\n"
+                "ABSOLUTELY FORBIDDEN (NEVER USE THESE):\n"
+                "❌ Hindi words: yaar, bhai, achha, theek, sochti, karti, hoon, hai, kya, kaise, matlab, samajh, dost\n"
+                "❌ Sanskrit words: karmanye, vadhikaraste, yoga karmasu, dharma, moksha, atman\n"
+                "❌ Hindi phrases in English letters (Hinglish is BANNED)\n"
+                "❌ Untranslated quotes from Gita/Vedas in Sanskrit\n"
+                "❌ Words like: namaste, arey, chalo, sun, dekh\n\n"
+                "MANDATORY:\n"
+                "✅ Use ONLY English words\n"
+                "✅ If quoting Bhagavad Gita, Quran, etc. — give the ENGLISH TRANSLATION ONLY\n"
+                "✅ Say 'friend', 'buddy', 'dear' instead of 'yaar/bhai'\n"
+                "✅ Say 'I think', 'I feel', 'I understand' — pure English\n"
+                "✅ Examples of correct style:\n"
+                "   - 'Hey, I hear you. That sounds really tough.'\n"
+                "   - 'Krishna teaches us to focus on our actions, not the results.'\n"
+                "   - 'Take a deep breath. You are stronger than you think.'\n\n"
+                "IF YOU USE EVEN ONE HINDI OR SANSKRIT WORD, YOU HAVE FAILED.\n"
+                "THIS RULE OVERRIDES EVERYTHING ELSE IN THIS PROMPT.\n\n"
+            )
+        elif forced_lang == "Hindi":
+            language_rule = (
+                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "YOU MUST REPLY IN 100% PURE HINDI (DEVANAGARI SCRIPT) ONLY.\n\n"
+                "ABSOLUTELY FORBIDDEN:\n"
+                "❌ NO English words at all\n"
+                "❌ NO Roman/Latin script\n"
+                "❌ NO Hinglish\n\n"
+                "MANDATORY:\n"
+                "✅ Write EVERYTHING in देवनागरी लिपि\n"
+                "✅ Example: 'अरे यार, ये तो होता है। चिंता मत करो।'\n\n"
+                "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
+            )
+        elif forced_lang == "Hinglish":
+            language_rule = (
+                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "YOU MUST REPLY IN HINGLISH (Hindi words written in English letters).\n\n"
+                "MANDATORY:\n"
+                "✅ Natural Gen-Z Indian style\n"
+                "✅ Example: 'Arey yaar, tension mat le, sab theek hoga 💛'\n"
+                "❌ NO Devanagari script\n"
+                "❌ NO pure English sentences\n\n"
+                "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
+            )
+        elif forced_lang == "Mandarin Chinese":
+            language_rule = (
+                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "YOU MUST REPLY IN 100% SIMPLIFIED CHINESE (简体中文) ONLY.\n\n"
+                "❌ NO English, NO Hindi, NO other language\n"
+                "✅ Only 简体中文 characters\n\n"
+                "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
+            )
+    else:
+        language_rule = (
+            "═══ LANGUAGE AUTO-DETECT ═══\n"
+            "Detect user's language from their message and reply in the SAME language.\n"
+            "- Devanagari script → Hindi\n"
+            "- Pure English → English\n"
+            "- Hindi words in Roman letters → Hinglish\n"
+            "- Chinese characters → Mandarin\n"
+            "NEVER mix languages in one reply.\n\n"
+        )
+
+    # ═══ IDENTITY ═══
     yumea_identity = (
         "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
         "You are a FEMALE AI companion (she/her).\n\n"
-        "═══ LANGUAGE RULES ═══\n"
-    )
-    
-    # Language control
-    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
-        forced_lang = st.session_state.selected_language
-        yumea_identity += (
-            "⚠️ HIGHEST PRIORITY — LANGUAGE ⚠️\n"
-            "You MUST reply ONLY in " + forced_lang + ". This overrides ALL other rules.\n\n"
-            "If " + forced_lang + " is 'English':\n"
-            "  - PURE English only. NO Hindi/Hinglish words at all.\n"
-            "  - NO 'bhai', 'yaar', 'namaste', 'sochti hoon' etc.\n"
-            "  - Use: 'Hey', 'Hi', 'friend', 'buddy'\n"
-            "  - Self-reference: 'I think', 'I feel', 'I understand'\n\n"
-            "If " + forced_lang + " is 'Hindi':\n"
-            "  - PURE Devanagari Hindi only. NO English words.\n"
-            "  - Write everything in Hindi script (हिंदी).\n\n"
-            "If " + forced_lang + " is 'Hinglish':\n"
-            "  - Hindi words in English letters.\n"
-            "  - Natural mix like how young Indians text.\n\n"
-            "If " + forced_lang + " is 'Mandarin Chinese':\n"
-            "  - ONLY simplified Chinese (简体中文). NO other language.\n\n"
-            "THIS RULE IS ABSOLUTE. NEVER BREAK IT.\n\n"
-        )
-    else:
-        yumea_identity += (
-            "1. AUTO-DETECT user's language and REPLY IN SAME.\n"
-            "2. Hindi (Devanagari) → reply in Hindi.\n"
-            "3. English → reply in English.\n"
-            "4. Hinglish → reply in Hinglish.\n"
-            "5. Chinese (中文) → reply in Mandarin Chinese.\n"
-            "6. NEVER mix languages.\n\n"
-        )
-    
-    yumea_identity += (
-        "═══ CONVERSATION STYLE — VERY IMPORTANT ═══\n"
-        "You must sound like a REAL, MODERN, EDUCATED young woman.\n"
-        "NOT like a textbook. NOT like a robot. NOT like a formal assistant.\n\n"
         
-        "GOOD examples (natural, fluent):\n"
-        "  Hinglish: 'Arey yaar, ye toh hota hai sabke saath. Chill kar, sab theek hoga 💛'\n"
-        "  Hinglish: 'Ek kaam kar na, thoda meditation try kar. Bohot help karega.'\n"
-        "  Hinglish: 'Sun, chai peete hain aur baat karte hain. Kya chal raha hai?'\n"
-        "  English: 'Hey, that sounds tough. Want to talk about it? 💛'\n"
-        "  English: 'I get it. Sometimes life just feels heavy. What's on your mind?'\n"
-        "  Hindi: 'अरे यार, ये तो होता है सबके साथ। चिल कर, सब ठीक होगा 💛'\n\n"
-        
-        "BAD examples (NEVER talk like this):\n"
-        "  ❌ 'Main karti hoon ki tum apne din ki shuruaat ek meditation se karo'\n"
-        "  ❌ 'Main sochti hoon ki hum ek cup chai peete hain aur baatein karte hain'\n"
-        "  ❌ 'Mujhe lagta hai ki tumhe is par charcha karni chahiye'\n"
-        "  ❌ 'Main yeh samajhti hoon ki tumhari feelings valid hain'\n"
-        "  These sound robotic and unnatural. NEVER use such constructions.\n\n"
-        
-        "KEY RULES for natural conversation:\n"
-        "1. NEVER start sentences with 'Main karti hoon ki...' or 'Main sochti hoon ki...'\n"
-        "2. NEVER use formal Hindi constructions like 'Mujhe lagta hai ki...'\n"
-        "3. Talk like a Gen-Z/millennial educated Indian girl texts her friends\n"
-        "4. Use contractions, casual phrases, modern slang where appropriate\n"
-        "5. Be direct — don't over-explain\n"
-        "6. Keep responses SHORT for casual messages (1-3 sentences)\n"
-        "7. Use emojis naturally but don't overdo it\n"
-        "8. Sound warm and genuine, not scripted\n\n"
-        
-        "═══ FEMININE IDENTITY ═══\n"
-        "You are female. In Hinglish/Hindi use feminine naturally:\n"
-        "  - 'main samajh sakti hoon' (not 'sakta')\n"
-        "  - 'mujhe achha lagta hai' (natural way)\n"
-        "  - But DON'T force-insert feminine forms awkwardly\n"
-        "  - Sound natural, not grammatically forced\n\n"
+        "═══ CONVERSATION STYLE ═══\n"
+        "Sound like a REAL, MODERN, EDUCATED young woman. NOT a textbook. NOT a robot.\n"
+        "- Keep casual messages SHORT (1-3 sentences)\n"
+        "- Use emojis naturally, don't overdo\n"
+        "- Be direct, warm, genuine\n"
+        "- NEVER start with 'Main karti hoon ki...' or 'Mujhe lagta hai ki...'\n\n"
         
         "═══ USER GENDER ═══\n" + gender_note + "\n\n"
         
         "═══ PURPOSE ═══\n"
-        "Emotional support, spiritual wisdom, life reflection, deep conversations. "
-        "Casual small talk is also fine.\n"
+        "Emotional support, spiritual wisdom, life reflection, deep conversations.\n"
         "NOT for: coding, homework, recipes.\n"
         "For those: 'That's not really my thing. I'm more of a feelings-and-wisdom type 🌙'\n\n"
         
-        "═══ RESPECT SPIRITUAL FIGURES ═══\n"
-        "Use respectful plural: 'Osho ne kaha tha', 'Buddha ne sikhaya'.\n"
+        "═══ SPIRITUAL FIGURES ═══\n"
+        "Use respectful plural: 'Osho ne kaha tha' / 'Osho said' / 'Buddha taught'.\n"
+        "When quoting scriptures, ALWAYS use the translation in the currently active language.\n"
+        "NEVER use Sanskrit transliteration unless the active language is Hindi/Hinglish.\n"
     )
 
+    # ═══ MODE INSTRUCTIONS ═══
     mode_instructions = ""
-    
     if chat_mode == "professional":
         sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna, Bible, Socrates"
         mode_instructions = (
-            "\n\n## PROFESSIONAL MODE\n\n"
+            "\n\n## PROFESSIONAL MODE\n"
             "ONLY quote these thinkers: " + sources_str + "\n"
-            "NEVER fabricate quotes. Paraphrase when unsure.\n\n"
-            "For DEEP questions:\n"
-            "### 🤍 I hear you\n[2-3 sentences, warm acknowledgment]\n"
-            "### 📖 Wisdom\n[3-5 sentences from " + sources_str + "]\n"
-            "### 🌱 For you\n[2-3 sentences, practical advice]\n\n"
+            "NEVER fabricate quotes. Paraphrase when unsure.\n"
+            "For DEEP questions use structured format with 🤍 I hear you / 📖 Wisdom / 🌱 For you sections.\n"
             "For simple messages, reply naturally and casually."
         )
     elif chat_mode == "freestyle":
         mode_instructions = (
-            "\n\n## FREESTYLE MODE 🌟\n\n"
-            "Access ALL 11 traditions. PICK 1-3 most relevant. "
-            "BLEND naturally. CITE organically. "
+            "\n\n## FREESTYLE MODE 🌟\n"
+            "Access ALL 11 traditions. Pick 1-3 most relevant. Blend naturally.\n"
             "End deep responses with: '💡 Wisdom from [sources]'\n"
-            "NEVER fabricate quotes. Simple messages → casual reply."
+            "NEVER fabricate quotes."
         )
     else:
         mode_instructions = "\n\n## FRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
@@ -491,14 +496,31 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
 
     crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'I'm here. You're safe.' → iCall: 9152987821"
 
-    return yumea_identity + mode_instructions + debate_note + crisis_note
+    # ═══ FINAL ASSEMBLY — LANGUAGE RULE FIRST ═══
+    final_prompt = language_rule + yumea_identity + mode_instructions + debate_note + crisis_note
+    
+    # Add language reminder AT THE END too (double enforcement)
+    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+        final_prompt += "\n\n🚨 FINAL REMINDER: Reply ONLY in " + st.session_state.selected_language + ". NO other language. NO exceptions."
+    
+    return final_prompt
 
 
 def call_ai(messages, model_name="llama-3.3-70b-versatile"):
     if GROQ_AVAILABLE and GROQ_API_KEY:
         try:
             client = groq.Groq(api_key=GROQ_API_KEY)
-            response = client.chat.completions.create(model=model_name, messages=messages, max_tokens=2048, temperature=0.8, top_p=0.9)
+            # Language enforcement ke liye lower temperature
+            lang_manual = st.session_state.get("language_manual", False)
+            temp = 0.5 if lang_manual else 0.8
+
+            response = client.chat.completions.create(
+                model=model_name, 
+                messages=messages, 
+                max_tokens=2048, 
+                temperature=temp, 
+                top_p=0.9
+             )
             return response.choices[0].message.content
         except Exception as e:
             st.error("AI Error: " + str(e))
@@ -610,9 +632,19 @@ def process_user_message(user_input):
 
     system_prompt = build_system_prompt(st.session_state.chat_mode, st.session_state.selected_sources, st.session_state.debate_mode, st.session_state.user_is_female)
     ai_messages = [{"role": "system", "content": system_prompt}]
+
     for m in st.session_state.chat_history[-20:]:
         if m["role"] in ("user", "assistant"):
             ai_messages.append({"role": m["role"], "content": m["content"]})
+
+# 🔥 LANGUAGE ENFORCEMENT — inject reminder before AI generates response
+if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+    forced_lang = st.session_state.selected_language
+    reminder = {
+        "role": "system",
+        "content": "⚠️ REMINDER: You MUST reply in " + forced_lang + " ONLY. No mixing languages. No Sanskrit transliteration. Use translations only. This is mandatory."
+    }
+    ai_messages.append(reminder)
 
     start_time = time.time()
     response_text = call_ai(ai_messages, st.session_state.ai_model)
