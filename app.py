@@ -299,6 +299,17 @@ def get_tts_voice_for_language():
     else:
         return "en-US-AvaNeural"
 
+def get_tts_voice_for_language():
+    lang = st.session_state.get("selected_language", "auto")
+    if lang == "Hindi":
+        return "hi-IN-SwaraNeural"
+    elif lang == "Mandarin Chinese":
+        return "zh-CN-XiaoyiNeural"
+    elif lang == "Hinglish":
+        return "hi-IN-SwaraNeural"
+    else:
+        return "en-US-AvaNeural"
+
 
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if user_gender:
