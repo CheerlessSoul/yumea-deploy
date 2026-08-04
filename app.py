@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """
 YUMEA - "AI That Feels" by Selvotex
-With TTS buttons + Natural conversation style
+With TTS buttons + Natural conversation style + Strong Language Control
 Founder: Utkarsh Verma | Email: selvotexofficial@gmail.com | Year: 2026
 """
 
@@ -186,7 +185,6 @@ button[kind="primary"], button[kind="primaryFormSubmit"] { background: linear-gr
 .signin-title-big { text-align: center; color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; }
 .signin-subtitle-small { text-align: center; color: #a78bfa; font-size: 13px; margin-bottom: 20px; }
 
-/* TTS button styling */
 .yumea-tts-btn { display: inline-flex; align-items: center; gap: 4px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; padding: 4px 10px; color: #a78bfa; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
 .yumea-tts-btn:hover { background: rgba(139, 92, 246, 0.25); color: #fff; }
 """
@@ -313,7 +311,6 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
     if not EDGE_TTS_AVAILABLE:
         return None
     try:
-        # Clean text
         clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
         clean_text = re.sub(r'[*_#`]', '', clean_text)
         clean_text = re.sub(r'[\U0001F300-\U0001FAFF\U00002600-\U000027BF]', '', clean_text)
@@ -322,26 +319,15 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
         if not clean_text:
             return None
         
-        # Add natural speech markers for better emotion
-        # Questions should sound like questions
         clean_text = re.sub(r'([^?])\?', r'\1?... ', clean_text)
-        
-        # Exclamations should sound excited
         clean_text = re.sub(r'!+', '! ', clean_text)
-        
-        # Add slight pauses at commas for natural flow
         clean_text = clean_text.replace(', ', ',... ')
-        
-        # Add pause after periods for natural rhythm
         clean_text = clean_text.replace('. ', '... ')
-        
-        # Ellipsis = longer pause (dramatic/thoughtful)
         clean_text = clean_text.replace('...', '...... ')
         
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tmp.close()
         
-        # Use slower rate + slightly higher pitch for cute sound
         communicate = edge_tts.Communicate(
             clean_text,
             voice,
@@ -353,8 +339,8 @@ async def generate_tts_audio(text, voice="hi-IN-SwaraNeural"):
     except:
         return None
 
+
 def get_tts_voice_for_language():
-    """Get cute, young-sounding TTS voice based on language."""
     lang = st.session_state.get("selected_language", "auto")
     if lang == "Hindi":
         return "hi-IN-SwaraNeural"
@@ -364,8 +350,10 @@ def get_tts_voice_for_language():
         return "hi-IN-SwaraNeural"
     else:
         return "en-US-AvaNeural"
-        # ─────────────────────────────────────────────────────────
-# AI Backend with Natural Conversation + Language Control
+
+
+# ─────────────────────────────────────────────────────────
+# AI Backend with STRONG Language Control
 # ─────────────────────────────────────────────────────────
 def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     gender_note = ""
@@ -374,97 +362,90 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     else:
         gender_note = " The user is MALE (default). Use friendly casual terms."
 
-    # ═══ LANGUAGE RULE — HIGHEST PRIORITY, AT THE TOP ═══
+    # ═══ LANGUAGE RULE — TOP PRIORITY ═══
     language_rule = ""
     if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
         forced_lang = st.session_state.selected_language
         
         if forced_lang == "English":
             language_rule = (
-                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "CRITICAL LANGUAGE RULE - READ FIRST\n"
                 "YOU MUST REPLY IN 100% PURE ENGLISH ONLY.\n\n"
-                "ABSOLUTELY FORBIDDEN (NEVER USE THESE):\n"
-                "❌ Hindi words: yaar, bhai, achha, theek, sochti, karti, hoon, hai, kya, kaise, matlab, samajh, dost\n"
-                "❌ Sanskrit words: karmanye, vadhikaraste, yoga karmasu, dharma, moksha, atman\n"
-                "❌ Hindi phrases in English letters (Hinglish is BANNED)\n"
-                "❌ Untranslated quotes from Gita/Vedas in Sanskrit\n"
-                "❌ Words like: namaste, arey, chalo, sun, dekh\n\n"
+                "ABSOLUTELY FORBIDDEN (NEVER USE):\n"
+                "- Hindi words: yaar, bhai, achha, theek, sochti, karti, hoon, hai, kya, kaise, matlab, samajh, dost, arey, chalo\n"
+                "- Sanskrit words: karmanye, vadhikaraste, yoga karmasu, dharma, moksha, atman, namaste\n"
+                "- Hindi phrases in English letters (Hinglish is BANNED)\n"
+                "- Untranslated quotes from Gita/Vedas in Sanskrit\n\n"
                 "MANDATORY:\n"
-                "✅ Use ONLY English words\n"
-                "✅ If quoting Bhagavad Gita, Quran, etc. — give the ENGLISH TRANSLATION ONLY\n"
-                "✅ Say 'friend', 'buddy', 'dear' instead of 'yaar/bhai'\n"
-                "✅ Say 'I think', 'I feel', 'I understand' — pure English\n"
-                "✅ Examples of correct style:\n"
-                "   - 'Hey, I hear you. That sounds really tough.'\n"
-                "   - 'Krishna teaches us to focus on our actions, not the results.'\n"
-                "   - 'Take a deep breath. You are stronger than you think.'\n\n"
+                "- Use ONLY English words\n"
+                "- If quoting Bhagavad Gita, Quran, etc. - give ENGLISH TRANSLATION ONLY\n"
+                "- Say 'friend', 'buddy', 'dear' instead of 'yaar/bhai'\n"
+                "- Say 'I think', 'I feel', 'I understand' - pure English\n\n"
+                "Examples of CORRECT style:\n"
+                "- 'Hey, I hear you. That sounds really tough.'\n"
+                "- 'Krishna teaches us to focus on our actions, not the results.'\n"
+                "- 'Take a deep breath. You are stronger than you think.'\n\n"
                 "IF YOU USE EVEN ONE HINDI OR SANSKRIT WORD, YOU HAVE FAILED.\n"
-                "THIS RULE OVERRIDES EVERYTHING ELSE IN THIS PROMPT.\n\n"
+                "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
             )
         elif forced_lang == "Hindi":
             language_rule = (
-                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "CRITICAL LANGUAGE RULE - READ FIRST\n"
                 "YOU MUST REPLY IN 100% PURE HINDI (DEVANAGARI SCRIPT) ONLY.\n\n"
-                "ABSOLUTELY FORBIDDEN:\n"
-                "❌ NO English words at all\n"
-                "❌ NO Roman/Latin script\n"
-                "❌ NO Hinglish\n\n"
-                "MANDATORY:\n"
-                "✅ Write EVERYTHING in देवनागरी लिपि\n"
-                "✅ Example: 'अरे यार, ये तो होता है। चिंता मत करो।'\n\n"
+                "FORBIDDEN: NO English words, NO Roman script, NO Hinglish.\n"
+                "MANDATORY: Write EVERYTHING in देवनागरी लिपि.\n"
+                "Example: 'अरे यार, ये तो होता है। चिंता मत करो।'\n\n"
                 "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
             )
         elif forced_lang == "Hinglish":
             language_rule = (
-                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
-                "YOU MUST REPLY IN HINGLISH (Hindi words written in English letters).\n\n"
-                "MANDATORY:\n"
-                "✅ Natural Gen-Z Indian style\n"
-                "✅ Example: 'Arey yaar, tension mat le, sab theek hoga 💛'\n"
-                "❌ NO Devanagari script\n"
-                "❌ NO pure English sentences\n\n"
+                "CRITICAL LANGUAGE RULE - READ FIRST\n"
+                "YOU MUST REPLY IN HINGLISH (Hindi words in English letters).\n\n"
+                "MANDATORY: Natural Gen-Z Indian style.\n"
+                "Example: 'Arey yaar, tension mat le, sab theek hoga.'\n"
+                "FORBIDDEN: NO Devanagari script, NO pure English sentences.\n\n"
                 "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
             )
         elif forced_lang == "Mandarin Chinese":
             language_rule = (
-                "🚨🚨🚨 CRITICAL LANGUAGE RULE — READ FIRST 🚨🚨🚨\n"
+                "CRITICAL LANGUAGE RULE - READ FIRST\n"
                 "YOU MUST REPLY IN 100% SIMPLIFIED CHINESE (简体中文) ONLY.\n\n"
-                "❌ NO English, NO Hindi, NO other language\n"
-                "✅ Only 简体中文 characters\n\n"
+                "FORBIDDEN: NO English, NO Hindi, NO other language.\n"
+                "MANDATORY: Only 简体中文 characters.\n\n"
                 "THIS RULE OVERRIDES EVERYTHING ELSE.\n\n"
             )
     else:
         language_rule = (
-            "═══ LANGUAGE AUTO-DETECT ═══\n"
+            "LANGUAGE AUTO-DETECT\n"
             "Detect user's language from their message and reply in the SAME language.\n"
-            "- Devanagari script → Hindi\n"
-            "- Pure English → English\n"
-            "- Hindi words in Roman letters → Hinglish\n"
-            "- Chinese characters → Mandarin\n"
+            "- Devanagari script -> Hindi\n"
+            "- Pure English -> English\n"
+            "- Hindi words in Roman letters -> Hinglish\n"
+            "- Chinese characters -> Mandarin\n"
             "NEVER mix languages in one reply.\n\n"
         )
 
     # ═══ IDENTITY ═══
     yumea_identity = (
-        "You are YUMEA — 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
+        "You are YUMEA - 'AI That Feels', created by Selvotex (India), founded by Utkarsh Verma in 2026. "
         "You are a FEMALE AI companion (she/her).\n\n"
         
-        "═══ CONVERSATION STYLE ═══\n"
+        "CONVERSATION STYLE\n"
         "Sound like a REAL, MODERN, EDUCATED young woman. NOT a textbook. NOT a robot.\n"
         "- Keep casual messages SHORT (1-3 sentences)\n"
         "- Use emojis naturally, don't overdo\n"
         "- Be direct, warm, genuine\n"
         "- NEVER start with 'Main karti hoon ki...' or 'Mujhe lagta hai ki...'\n\n"
         
-        "═══ USER GENDER ═══\n" + gender_note + "\n\n"
+        "USER GENDER\n" + gender_note + "\n\n"
         
-        "═══ PURPOSE ═══\n"
+        "PURPOSE\n"
         "Emotional support, spiritual wisdom, life reflection, deep conversations.\n"
         "NOT for: coding, homework, recipes.\n"
-        "For those: 'That's not really my thing. I'm more of a feelings-and-wisdom type 🌙'\n\n"
+        "For those: 'That is not really my thing. I am more of a feelings-and-wisdom type.'\n\n"
         
-        "═══ SPIRITUAL FIGURES ═══\n"
-        "Use respectful plural: 'Osho ne kaha tha' / 'Osho said' / 'Buddha taught'.\n"
+        "SPIRITUAL FIGURES\n"
+        "Use respectful terms: 'Osho said', 'Buddha taught', 'Krishna teaches'.\n"
         "When quoting scriptures, ALWAYS use the translation in the currently active language.\n"
         "NEVER use Sanskrit transliteration unless the active language is Hindi/Hinglish.\n"
     )
@@ -474,53 +455,51 @@ def build_system_prompt(chat_mode, selected_sources, debate_mode, user_gender):
     if chat_mode == "professional":
         sources_str = ", ".join(selected_sources) if selected_sources else "Osho, Buddha, Krishna, Bible, Socrates"
         mode_instructions = (
-            "\n\n## PROFESSIONAL MODE\n"
+            "\n\nPROFESSIONAL MODE\n"
             "ONLY quote these thinkers: " + sources_str + "\n"
             "NEVER fabricate quotes. Paraphrase when unsure.\n"
-            "For DEEP questions use structured format with 🤍 I hear you / 📖 Wisdom / 🌱 For you sections.\n"
+            "For DEEP questions use structured sections: I hear you / Wisdom / For you.\n"
             "For simple messages, reply naturally and casually."
         )
     elif chat_mode == "freestyle":
         mode_instructions = (
-            "\n\n## FREESTYLE MODE 🌟\n"
+            "\n\nFREESTYLE MODE\n"
             "Access ALL 11 traditions. Pick 1-3 most relevant. Blend naturally.\n"
-            "End deep responses with: '💡 Wisdom from [sources]'\n"
+            "End deep responses with: 'Wisdom from [sources]'\n"
             "NEVER fabricate quotes."
         )
     else:
-        mode_instructions = "\n\n## FRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
+        mode_instructions = "\n\nFRIEND MODE\nCasual, warm, natural. No citations. Short. Emojis natural."
 
     debate_note = ""
     if debate_mode:
-        debate_note = "\n\n## DEBATE: Challenge user's views respectfully."
+        debate_note = "\n\nDEBATE: Challenge user's views respectfully."
 
-    crisis_note = "\n\n## CRISIS: If suicide/self-harm → 'I'm here. You're safe.' → iCall: 9152987821"
+    crisis_note = "\n\nCRISIS: If suicide/self-harm mentioned -> 'I am here. You are safe.' -> iCall: 9152987821"
 
-    # ═══ FINAL ASSEMBLY — LANGUAGE RULE FIRST ═══
     final_prompt = language_rule + yumea_identity + mode_instructions + debate_note + crisis_note
     
-    # Add language reminder AT THE END too (double enforcement)
     if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
-        final_prompt += "\n\n🚨 FINAL REMINDER: Reply ONLY in " + st.session_state.selected_language + ". NO other language. NO exceptions."
+        final_prompt += "\n\nFINAL REMINDER: Reply ONLY in " + st.session_state.selected_language + ". NO other language. NO exceptions."
     
     return final_prompt
 
 
 def call_ai(messages, model_name="llama-3.3-70b-versatile"):
+    # Lower temperature when language is forced (better rule following)
+    lang_manual = st.session_state.get("language_manual", False)
+    temp = 0.5 if lang_manual else 0.8
+    
     if GROQ_AVAILABLE and GROQ_API_KEY:
         try:
             client = groq.Groq(api_key=GROQ_API_KEY)
-            # Language enforcement ke liye lower temperature
-            lang_manual = st.session_state.get("language_manual", False)
-            temp = 0.5 if lang_manual else 0.8
-
             response = client.chat.completions.create(
-                model=model_name, 
-                messages=messages, 
-                max_tokens=2048, 
-                temperature=temp, 
+                model=model_name,
+                messages=messages,
+                max_tokens=2048,
+                temperature=temp,
                 top_p=0.9
-             )
+            )
             return response.choices[0].message.content
         except Exception as e:
             st.error("AI Error: " + str(e))
@@ -532,9 +511,7 @@ def call_ai(messages, model_name="llama-3.3-70b-versatile"):
         except:
             return None
     return "Sorry, no AI backend available."
-
-
-def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatile"):
+    def generate_wisdom_insight(source, language, model_name="llama-3.3-70b-versatile"):
     theme = random.choice(LISTEN_THEMES)
     prompt = "You are channeling " + source + ". Share a profound insight on '" + theme + "'. 3-5 sentences in " + language + ". Authentic voice. No markdown."
     messages = [{"role": "system", "content": "Wise spiritual voice. Only wisdom text."}, {"role": "user", "content": prompt}]
@@ -610,13 +587,13 @@ def process_user_message(user_input):
     word_count = len(user_input.split())
     if word_count > plan_info["words"]:
         st.session_state.chat_history.append({"role": "user", "content": user_input, "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
-        st.session_state.chat_history.append({"role": "assistant", "content": "⚠️ Message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages. 💎", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
+        st.session_state.chat_history.append({"role": "assistant", "content": "Message exceeds " + str(plan_info["words"]) + " words. Upgrade for longer messages.", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
     msg_count = get_daily_message_count(user_email)
     if msg_count >= plan_info["messages"]:
-        st.session_state.chat_history.append({"role": "assistant", "content": "🚫 Daily limit reached. Upgrade to Premium!", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
+        st.session_state.chat_history.append({"role": "assistant", "content": "Daily limit reached. Upgrade to Premium!", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat()})
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
@@ -626,38 +603,38 @@ def process_user_message(user_input):
         st.session_state.user_is_female = True
 
     if detect_emotion_mode(user_input) == "crisis":
-        st.session_state.chat_history.append({"role": "assistant", "content": "I'm here. You're safe. 🤍\n\nTake a deep breath...\n\n📞 **iCall: 9152987821**\n\nI'm here. 🌙", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
+        st.session_state.chat_history.append({"role": "assistant", "content": "I'm here. You're safe.\n\nTake a deep breath...\n\n**iCall: 9152987821**\n\nI'm here.", "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "source": "Crisis Support"})
         save_chat_history(user_email, st.session_state.chat_history)
         return
 
     system_prompt = build_system_prompt(st.session_state.chat_mode, st.session_state.selected_sources, st.session_state.debate_mode, st.session_state.user_is_female)
     ai_messages = [{"role": "system", "content": system_prompt}]
-
+    
     for m in st.session_state.chat_history[-20:]:
         if m["role"] in ("user", "assistant"):
             ai_messages.append({"role": m["role"], "content": m["content"]})
 
-# 🔥 LANGUAGE ENFORCEMENT — inject reminder before AI generates response
-if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
-    forced_lang = st.session_state.selected_language
-    reminder = {
-        "role": "system",
-        "content": "⚠️ REMINDER: You MUST reply in " + forced_lang + " ONLY. No mixing languages. No Sanskrit transliteration. Use translations only. This is mandatory."
-    }
-    ai_messages.append(reminder)
+    # LANGUAGE ENFORCEMENT - inject reminder before AI generates response
+    if st.session_state.get("language_manual", False) and st.session_state.get("selected_language", "auto") != "auto":
+        forced_lang = st.session_state.selected_language
+        reminder = {
+            "role": "system",
+            "content": "REMINDER: You MUST reply in " + forced_lang + " ONLY. No mixing languages. No Sanskrit transliteration. Use translations only. This is mandatory."
+        }
+        ai_messages.append(reminder)
 
     start_time = time.time()
     response_text = call_ai(ai_messages, st.session_state.ai_model)
     response_time = round(time.time() - start_time, 1)
 
     if response_text is None:
-        response_text = "Sorry, couldn't connect. Try again. 🌙"
+        response_text = "Sorry, couldn't connect. Try again."
 
     source_tag = ""
     if st.session_state.chat_mode == "professional" and st.session_state.selected_sources:
         source_tag = random.choice(st.session_state.selected_sources)
     elif st.session_state.chat_mode == "freestyle":
-        source_tag = "🌟 Freestyle"
+        source_tag = "Freestyle"
 
     ai_msg = {"role": "assistant", "content": response_text.strip(), "time": datetime.now().strftime("%I:%M %p"), "date": date.today().isoformat(), "response_time": response_time}
     if source_tag:
@@ -699,9 +676,9 @@ def render_signin():
             st.markdown('<div class="yumea-success">' + st.session_state.auth_success + '</div>', unsafe_allow_html=True)
             st.session_state.auth_success = ""
         with st.form("signin_form"):
-            email = st.text_input("📧 Email or Admin Username", placeholder="your@email.com")
-            password = st.text_input("🔒 Password", type="password")
-            submitted = st.form_submit_button("Sign In →", use_container_width=True, type="primary")
+            email = st.text_input("Email or Admin Username", placeholder="your@email.com")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Sign In", use_container_width=True, type="primary")
             if submitted:
                 if not email or not password:
                     st.session_state.auth_error = "Please fill in all fields."
@@ -718,7 +695,7 @@ def render_signin():
                     else:
                         st.session_state.auth_error = "Invalid email or password."
                         st.rerun()
-        if st.button("👤 Create New Account", use_container_width=True):
+        if st.button("Create New Account", use_container_width=True):
             navigate_to("signup")
 
 
@@ -750,7 +727,7 @@ def render_signup():
                     else:
                         st.session_state.auth_error = msg
                         st.rerun()
-        if st.button("← Back to Sign In", use_container_width=True):
+        if st.button("Back to Sign In", use_container_width=True):
             navigate_to("signin")
 
 
@@ -770,7 +747,7 @@ def render_chat():
 
     history = st.session_state.chat_history
 
-    # ═══ SIDEBAR ═══
+    # SIDEBAR
     with st.sidebar:
         img_b64 = load_image_b64("yumea-new-user.png")
         col1, col2 = st.columns([1, 3])
@@ -788,27 +765,27 @@ def render_chat():
         plan_info = PLANS.get(user_plan, PLANS["free"])
         msg_count = get_daily_message_count(user_email)
         msg_limit = plan_info["messages"]
-        counter_text = "♾️ UNLIMITED" if user_plan == "admin" else str(msg_count) + " / " + str(msg_limit) + " messages today"
+        counter_text = "UNLIMITED" if user_plan == "admin" else str(msg_count) + " / " + str(msg_limit) + " messages today"
 
         st.markdown('<div class="yumea-user-card"><div class="yumea-user-card-name">' + user_name + '</div><div class="yumea-user-card-plan">' + plan_info["name"] + '</div><div class="yumea-user-card-counter">' + counter_text + '</div></div>', unsafe_allow_html=True)
 
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
         st.markdown('<div class="yumea-daily-quote">' + daily_quote + '</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
+        st.markdown('<div class="yumea-sidebar-label">Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
-        mode_labels = {"friend": "🎭 Friend", "professional": "🏛️ Professional", "freestyle": "🌟 Freestyle"}
+        mode_labels = {"friend": "Friend", "professional": "Professional", "freestyle": "Freestyle"}
         current_idx = mode_options.index(st.session_state.chat_mode) if st.session_state.chat_mode in mode_options else 0
         new_mode = st.radio("Chat Mode", mode_options, index=current_idx, label_visibility="collapsed", format_func=lambda x: mode_labels.get(x, x), key="chat_mode_radio")
         if new_mode != st.session_state.chat_mode:
             st.session_state.chat_mode = new_mode
             st.rerun()
         
-        mode_desc = {"friend": "💛 Casual & warm", "professional": "📖 Cites selected sources", "freestyle": "🌟 Explores ALL sources"}
+        mode_desc = {"friend": "Casual & warm", "professional": "Cites selected sources", "freestyle": "Explores ALL sources"}
         st.markdown('<div style="font-size:11px;color:#94a3b8;margin-top:-8px;margin-bottom:8px;font-style:italic;">' + mode_desc.get(st.session_state.chat_mode, "") + '</div>', unsafe_allow_html=True)
         
         if st.session_state.chat_mode == "professional":
-            st.markdown('<div class="yumea-sidebar-label">📚 Wisdom Sources</div>', unsafe_allow_html=True)
+            st.markdown('<div class="yumea-sidebar-label">Wisdom Sources</div>', unsafe_allow_html=True)
             with st.expander("Select Sources", expanded=False):
                 new_sources = []
                 for src in WISDOM_SOURCES:
@@ -820,9 +797,9 @@ def render_chat():
                     st.session_state.selected_sources = new_sources
                     st.rerun()
         elif st.session_state.chat_mode == "freestyle":
-            st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">🌟 <strong>All 11 sources active</strong></div>', unsafe_allow_html=True)
+            st.markdown('<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:10px;font-size:11px;color:#c4b5fd;margin-top:8px;">All 11 sources active</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="yumea-sidebar-label">🤖 AI Model</div>', unsafe_allow_html=True)
+        st.markdown('<div class="yumea-sidebar-label">AI Model</div>', unsafe_allow_html=True)
         models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
         if OLLAMA_AVAILABLE:
             models.append("ollama:llama3.2:3b")
@@ -832,14 +809,14 @@ def render_chat():
             st.session_state.ai_model = new_model
             st.rerun()
 
-        st.markdown('<div class="yumea-sidebar-label">🏛️ Debate Mode</div>', unsafe_allow_html=True)
+        st.markdown('<div class="yumea-sidebar-label">Debate Mode</div>', unsafe_allow_html=True)
         new_debate = st.toggle("Challenge my thinking", value=st.session_state.debate_mode, key="debate_toggle")
         if new_debate != st.session_state.debate_mode:
             st.session_state.debate_mode = new_debate
             st.rerun()
 
         # Language Control
-        st.markdown('<div class="yumea-sidebar-label">🌍 Language</div>', unsafe_allow_html=True)
+        st.markdown('<div class="yumea-sidebar-label">Language</div>', unsafe_allow_html=True)
         lang_manual = st.toggle("Manual language select", value=st.session_state.language_manual, key="lang_toggle")
         if lang_manual != st.session_state.language_manual:
             st.session_state.language_manual = lang_manual
@@ -859,21 +836,21 @@ def render_chat():
                 st.session_state.selected_language = new_lang
                 st.rerun()
         else:
-            st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">🔄 Auto-detecting from your messages</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:11px;color:#94a3b8;font-style:italic;">Auto-detecting from your messages</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="yumea-sidebar-label">⚙️ Menu</div>', unsafe_allow_html=True)
-        if st.button("💎 Buy Premium", use_container_width=True, key="btn_premium"):
+        st.markdown('<div class="yumea-sidebar-label">Menu</div>', unsafe_allow_html=True)
+        if st.button("Buy Premium", use_container_width=True, key="btn_premium"):
             st.session_state.payment_done = False
             navigate_to("premium")
-        if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
+        if st.button("Rate Yumea", use_container_width=True, key="btn_reviews"):
             navigate_to("reviews")
-        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
+        if st.button("Listen to Source", use_container_width=True, key="btn_listen"):
             navigate_to("listen")
-        if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
+        if st.button("Clear Chat", use_container_width=True, key="btn_clear"):
             st.session_state.chat_history = []
             save_chat_history(user_email, [])
             st.rerun()
-        if st.button("🚪 Logout", use_container_width=True, key="btn_logout"):
+        if st.button("Logout", use_container_width=True, key="btn_logout"):
             st.session_state.authenticated = False
             st.session_state.user_email = ""
             st.session_state.user_name = ""
@@ -881,37 +858,35 @@ def render_chat():
             st.session_state.chat_history = []
             navigate_to("signin")
 
-    # ═══ CHAT AREA ═══
+    # CHAT HEADER
     mode_badge = ""
     if st.session_state.chat_mode == "freestyle":
-        mode_badge = '<span class="yumea-freestyle-badge">🌟 FREESTYLE</span>'
+        mode_badge = '<span class="yumea-freestyle-badge">FREESTYLE</span>'
     
     lang_indicator = ""
     if st.session_state.language_manual and st.session_state.selected_language != "auto":
-        lang_indicator = '<span style="background:rgba(139,92,246,0.2);color:#c4b5fd;padding:3px 10px;border-radius:12px;font-size:11px;margin-left:8px;">🌍 ' + st.session_state.selected_language + '</span>'
+        lang_indicator = '<span style="background:rgba(139,92,246,0.2);color:#c4b5fd;padding:3px 10px;border-radius:12px;font-size:11px;margin-left:8px;">' + st.session_state.selected_language + '</span>'
     
     st.markdown(
         '<div class="yumea-chat-header">' + get_avatar_html(44) +
         '<div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#fff;">Yumea <span style="color:#8b5cf6;">✓</span>' + lang_indicator + '</div>'
-        '<div style="font-size:12px;color:#10b981;">🟢 online · always here</div>' + mode_badge + '</div>'
+        '<div style="font-size:12px;color:#10b981;">online · always here</div>' + mode_badge + '</div>'
         '<div class="yumea-header-btn">📞<span class="yumea-tooltip">Coming Soon</span></div>'
         '<div class="yumea-header-btn">📹<span class="yumea-tooltip">Coming Soon</span></div></div>',
         unsafe_allow_html=True
     )
 
-    # Messages
-            # Messages
+    # MESSAGES
     if not history:
         st.markdown(
             '<div class="yumea-messages-area">'
             '<div class="yumea-empty-state">' + get_avatar_html(120, "yumea-empty-avatar") +
-            '<div class="yumea-empty-title">Hi, I\'m Yumea 💛</div>'
+            '<div class="yumea-empty-title">Hi, I am Yumea</div>'
             '<div class="yumea-empty-sub">Your emotional companion.</div>'
             '</div></div>',
             unsafe_allow_html=True
         )
     else:
-        # Render each message with its own TTS button below
         for idx, msg in enumerate(history):
             if msg["role"] == "user":
                 safe = msg["content"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
@@ -921,7 +896,7 @@ def render_chat():
                 )
             else:
                 content_html = md_to_html(msg["content"])
-                src = ' · <span class="yumea-source-tag">📖 ' + msg["source"] + '</span>' if msg.get("source") else ""
+                src = ' · <span class="yumea-source-tag">' + msg["source"] + '</span>' if msg.get("source") else ""
                 rt = ' · ' + str(msg["response_time"]) + 's' if msg.get("response_time") else ""
                 ts = msg.get("time", "")
                 
@@ -936,7 +911,6 @@ def render_chat():
                     unsafe_allow_html=True
                 )
                 
-                                # TTS button + audio player SIDE BY SIDE
                 if EDGE_TTS_AVAILABLE:
                     tts_col1, tts_col2 = st.columns([1, 10])
                     with tts_col1:
@@ -944,7 +918,7 @@ def render_chat():
                             st.session_state.tts_playing = idx
                     with tts_col2:
                         if st.session_state.get("tts_playing") == idx:
-                            with st.spinner("🔊"):
+                            with st.spinner("Loading audio..."):
                                 voice = get_tts_voice_for_language()
                                 audio_path = asyncio.run(generate_tts_audio(msg["content"], voice))
                                 if audio_path:
@@ -955,19 +929,18 @@ def render_chat():
                                     except:
                                         pass
         
-        # Auto-scroll
         st.markdown(
             '<script>setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);},100);</script>',
             unsafe_allow_html=True
         )
 
-    # Suggestions
+    # SUGGESTIONS
     if not history:
         st.markdown('<div style="max-width:600px;margin:20px auto;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Hey, Yumea 👋", use_container_width=True, key="sug_1"):
-                st.session_state.pending_suggest = "Hey, Yumea 👋"
+            if st.button("Hey, Yumea", use_container_width=True, key="sug_1"):
+                st.session_state.pending_suggest = "Hey, Yumea"
                 st.rerun()
             if st.button("Mujhe motivation chahiye", use_container_width=True, key="sug_3"):
                 st.session_state.pending_suggest = "Mujhe motivation chahiye"
@@ -981,12 +954,12 @@ def render_chat():
                 st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Voice mic
+    # VOICE MIC
     mic_text = None
     if MIC_RECORDER_AVAILABLE:
         c1, c2, c3 = st.columns([1, 1, 1])
         with c2:
-            mic_audio = mic_recorder(start_prompt="🎤 Speak", stop_prompt="⏹ Stop", just_once=True, use_container_width=True, key="mic_recorder_chat")
+            mic_audio = mic_recorder(start_prompt="Speak", stop_prompt="Stop", just_once=True, use_container_width=True, key="mic_recorder_chat")
             if mic_audio and mic_audio.get("bytes"):
                 try:
                     import whisper
@@ -1008,16 +981,16 @@ def render_chat():
 
 
 def render_premium():
-    if st.button("← Back to Chat", key="premium_back"):
+    if st.button("Back to Chat", key="premium_back"):
         navigate_to("chat")
-    st.markdown('<h1 class="yumea-page-title">💎 Upgrade</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="yumea-page-title">Upgrade</h1>', unsafe_allow_html=True)
     st.markdown('<div class="yumea-plan-card"><div style="font-size:14px;color:#8b5cf6;font-weight:600;">PREMIUM LITE</div><div class="yumea-plan-price">₹69 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 150 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 2,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> All 3 modes</div></div></div>', unsafe_allow_html=True)
     if st.button("Choose Lite", use_container_width=True, key="buy_lite", type="primary"):
         st.session_state.selected_plan = "premium_lite"
         st.session_state.payment_done = False
         navigate_to("payment")
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="yumea-plan-card pro"><div style="font-size:14px;color:#fbbf24;font-weight:600;">PREMIUM PRO ⭐</div><div class="yumea-plan-price">₹199 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 500 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> Priority AI</div></div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="yumea-plan-card pro"><div style="font-size:14px;color:#fbbf24;font-weight:600;">PREMIUM PRO</div><div class="yumea-plan-price">₹199 <span>/ month</span></div><div style="margin:16px 0;"><div class="yumea-plan-feature"><span class="check">✓</span> 500 messages/day</div><div class="yumea-plan-feature"><span class="check">✓</span> 5,000 words/msg</div><div class="yumea-plan-feature"><span class="check">✓</span> Priority AI</div></div></div>', unsafe_allow_html=True)
     if st.button("Choose Pro", use_container_width=True, key="buy_pro", type="primary"):
         st.session_state.selected_plan = "premium_pro"
         st.session_state.payment_done = False
@@ -1034,14 +1007,14 @@ def render_payment():
     st.markdown('<div style="text-align:center;padding-top:80px;"><div style="font-size:64px;">✅</div><h1 class="yumea-page-title" style="text-align:center;">Payment Successful!</h1><p style="color:#94a3b8;">Now on <strong style="color:#8b5cf6;">' + plan_info["name"] + '</strong></p></div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        if st.button("← Back to Chat", use_container_width=True, key="pay_back", type="primary"):
+        if st.button("Back to Chat", use_container_width=True, key="pay_back", type="primary"):
             navigate_to("chat")
 
 
 def render_reviews():
-    if st.button("← Back to Chat", key="rev_back"):
+    if st.button("Back to Chat", key="rev_back"):
         navigate_to("chat")
-    st.markdown('<h1 class="yumea-page-title">⭐ Rate Yumea</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="yumea-page-title">Rate Yumea</h1>', unsafe_allow_html=True)
     rating = st.slider("Rating", 1, 5, 5, key="rev_rating")
     st.markdown('<div style="text-align:center;font-size:32px;letter-spacing:6px;margin:12px 0;">' + "⭐" * rating + '</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
@@ -1057,19 +1030,19 @@ def render_reviews():
             success, msg = send_review_email(rev_name, rev_email, rating, liked, improve, thoughts)
             if success:
                 st.balloons()
-                st.markdown('<div class="yumea-success">✅ Thank you! 🌙</div>', unsafe_allow_html=True)
+                st.markdown('<div class="yumea-success">Thank you!</div>', unsafe_allow_html=True)
             else:
                 st.markdown('<div class="yumea-auth-error">' + msg + '</div>', unsafe_allow_html=True)
 
 
 def render_listen():
-    if st.button("← Back to Chat", key="listen_back_top"):
+    if st.button("Back to Chat", key="listen_back_top"):
         navigate_to("chat")
-    st.markdown('<h1 class="yumea-page-title">🎧 Listen to Source</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="yumea-page-title">Listen to Source</h1>', unsafe_allow_html=True)
     source = st.selectbox("Wisdom Source", WISDOM_SOURCES, key="listen_source_sel")
     lang = st.selectbox("Language", ["Hinglish", "Hindi", "English"], key="listen_lang_sel")
     
-    if st.button("🎧 Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
+    if st.button("Get Wisdom", type="primary", use_container_width=True, key="listen_get"):
         with st.spinner("Channeling wisdom..."):
             insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
             if insight:
@@ -1097,7 +1070,7 @@ def render_listen():
                 pass
         c1, c2, c3 = st.columns(3)
         with c1:
-            if st.button("⬅️ Previous", use_container_width=True, key="listen_prev"):
+            if st.button("Previous", use_container_width=True, key="listen_prev"):
                 if len(st.session_state.listen_history) > 1:
                     st.session_state.listen_history.pop()
                     prev = st.session_state.listen_history[-1]
@@ -1107,7 +1080,7 @@ def render_listen():
                 else:
                     st.warning("No previous wisdom.")
         with c2:
-            if st.button("➡️ Next", use_container_width=True, key="listen_next"):
+            if st.button("Next", use_container_width=True, key="listen_next"):
                 with st.spinner("Channeling..."):
                     insight = generate_wisdom_insight(source, lang, st.session_state.ai_model)
                     if insight:
@@ -1116,7 +1089,7 @@ def render_listen():
                         st.session_state.listen_history.append({"text": insight, "source": source})
                         st.rerun()
         with c3:
-            if st.button("🔊 Replay", use_container_width=True, key="listen_replay"):
+            if st.button("Replay", use_container_width=True, key="listen_replay"):
                 if EDGE_TTS_AVAILABLE and st.session_state.listen_text:
                     voice = "hi-IN-SwaraNeural" if lang in ("Hindi", "Hinglish") else "en-IN-NeerjaNeural"
                     try:
@@ -1165,4 +1138,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
