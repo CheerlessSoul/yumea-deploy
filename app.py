@@ -240,7 +240,6 @@ def register_user(name, email, password):
 
 
 def authenticate_user(email_or_username, password):
-    st.write("DEBUG HASH:", ADMIN_PASSWORD_HASH)
     users = load_users()
     key = email_or_username.lower().strip()
     if key == ADMIN_USERNAME:
