@@ -24,7 +24,6 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "")
 EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD", "")
-ADMIN_PASSWORD_HASH = st.secrets.get("ADMIN_PASSWORD_HASH", "")
 
 try:
     import groq
@@ -62,6 +61,7 @@ CHAT_DIR = Path("chats")
 CHAT_DIR.mkdir(exist_ok=True)
 
 ADMIN_USERNAME = "yumea_ai"
+ADMIN_PASSWORD_HASH = hashlib.sha256("otyhey".encode()).hexdigest()
 
 PLANS = {
     "free": {"name": "Free", "messages": 30, "words": 1000, "price": "₹0"},
@@ -951,7 +951,7 @@ def render_chat():
 
     # Voice mic
     mic_text = None
-    if False:
+    if MIC_RECORDER_AVAILABLE:
         c1, c2, c3 = st.columns([1, 1, 1])
         with c2:
             mic_audio = mic_recorder(start_prompt="🎤 Speak", stop_prompt="⏹ Stop", just_once=True, use_container_width=True, key="mic_recorder_chat")
