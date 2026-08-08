@@ -762,6 +762,15 @@ def render_chat():
 
         daily_quote = DAILY_QUOTES[date.today().toordinal() % len(DAILY_QUOTES)]
         st.markdown('<div class="yumea-daily-quote">' + daily_quote + '</div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin:10px 0;"></div>', unsafe_allow_html=True)
+
+        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen_top"):
+            navigate_to("listen")
+
+        st.markdown('<div class="yumea-sidebar-label">🎧 Wisdom</div>', unsafe_allow_html=True)
+
+        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen_top"):
+            navigate_to("listen")
 
         st.markdown('<div class="yumea-sidebar-label">🎭 Chat Mode</div>', unsafe_allow_html=True)
         mode_options = ["friend", "professional", "freestyle"]
@@ -835,8 +844,6 @@ def render_chat():
             navigate_to("premium")
         if st.button("⭐ Rate Yumea", use_container_width=True, key="btn_reviews"):
             navigate_to("reviews")
-        if st.button("🎧 Listen to Source", use_container_width=True, key="btn_listen"):
-            navigate_to("listen")
         if st.button("🗑️ Clear Chat", use_container_width=True, key="btn_clear"):
             st.session_state.chat_history = []
             save_chat_history(user_email, [])
