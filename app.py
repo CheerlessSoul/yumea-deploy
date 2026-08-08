@@ -294,6 +294,9 @@ def nav(page):
 
 def call_ai(messages,model="llama-3.3-70b-versatile"):
 
+    st.write(f"[DEBUG] Key length: {len(GROQ_API_KEY) if GROQ_API_KEY else 0}")
+    st.write(f"[DEBUG] Available: {GROQ_AVAILABLE}")
+
     if GROQ_AVAILABLE and GROQ_API_KEY:
         try:
             client=groq.Groq(api_key=GROQ_API_KEY)
